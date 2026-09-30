@@ -17,8 +17,8 @@ pnpm dev
 - Website: http://localhost:3001
 - API: http://localhost:3002/health
 - Storybook: `pnpm storybook`, http://localhost:6006
-- Temporal UI: http://localhost:8233
-- Mailpit: http://localhost:8025
+- Temporal UI: http://localhost:18233
+- Mailpit: http://localhost:18025
 
 ```sh
 pnpm lint
