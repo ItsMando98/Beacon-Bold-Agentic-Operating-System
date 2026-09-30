@@ -1,0 +1,7 @@
+-- Synthetic development credentials only. Do not reuse in staging/production.
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE ROLE beacon_app LOGIN PASSWORD 'local-development-only' NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+GRANT CONNECT ON DATABASE beacon TO beacon_app;
+GRANT USAGE ON SCHEMA public TO beacon_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE beacon_owner IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO beacon_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE beacon_owner IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO beacon_app;

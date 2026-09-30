@@ -1,0 +1,53 @@
+name: beacon-bold-foundation
+services:
+  postgres:
+    image: pgvector/pgvector@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f
+    environment:
+      POSTGRES_USER: beacon_owner
+      POSTGRES_PASSWORD: local-owner-only
+      POSTGRES_DB: beacon
+    ports: ["127.0.0.1:${BEACON_POSTGRES_PORT:-15432}:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/010-init.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U beacon_owner -d beacon"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+    ports: ["127.0.0.1:${BEACON_REDIS_PORT:-16379}:6379"]
+    command: [redis-server, --appendonly, "yes"]
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  temporal:
+    image: temporalio/temporal@sha256:9844298258519ebece82b3253f1ee1fc4eb8d87b7abcc264cfb676be342c74a5
+    command: [server, start-dev, --ip, 0.0.0.0, --ui-ip, 0.0.0.0, --db-filename, /home/temporal/temporal.db]
+    ports:
+      - "127.0.0.1:${BEACON_TEMPORAL_PORT:-17233}:7233"
+      - "127.0.0.1:${BEACON_TEMPORAL_UI_PORT:-18233}:8233"
+    volumes: ["temporal-data:/home/temporal"]
+    healthcheck:
+      test: [CMD, temporal, operator, cluster, health, --address, 127.0.0.1:7233]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  mailpit:
+    image: axllent/mailpit@sha256:ed9b00c609e77e99c79b93f1178255ebc271868920f2c69a8d166bd5634ed10d
+    ports:
+      - "127.0.0.1:${BEACON_SMTP_PORT:-11025}:1025"
+      - "127.0.0.1:${BEACON_MAILPIT_PORT:-18025}:8025"
+    healthcheck:
+      test: [CMD, /mailpit, readyz]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+volumes:
+  postgres-data:
+  redis-data:
+  temporal-data:
