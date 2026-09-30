@@ -1,3 +1,5 @@
+import "@beacon/ui/fonts";
+import "@beacon/ui/styles.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 export const metadata: Metadata = {

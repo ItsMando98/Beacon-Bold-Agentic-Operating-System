@@ -26,7 +26,7 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm test:integration
-pnpm exec playwright install chromium
+pnpm browser:install
 pnpm test:e2e
 pnpm build:storybook
 ```
