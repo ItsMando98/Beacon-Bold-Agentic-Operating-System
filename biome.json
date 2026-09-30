@@ -4,10 +4,14 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!**/.next",
-      "!**/dist",
-      "!**/.cache",
-      "!**/storybook-static",
+      "!!**/.next",
+      "!!**/dist",
+      "!!**/.cache",
+      "!!**/.turbo",
+      "!!**/storybook-static",
+      "!!**/node_modules",
+      "!!**/playwright-report",
+      "!!**/test-results",
       "!**/next-env.d.ts",
       "!**/pnpm-lock.yaml"
     ]

@@ -11,7 +11,28 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
-    "typecheck": { "dependsOn": ["^build"], "outputs": [] },
-    "dev": { "cache": false, "persistent": true }
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "REDIS_URL",
+        "PUBLIC_API_URL",
+        "PORT",
+        "TEMPORAL_ADDRESS",
+        "TEMPORAL_NAMESPACE",
+        "TEMPORAL_API_KEY",
+        "CLERK_SECRET_KEY",
+        "OTEL_*",
+        "SENTRY_*",
+        "LANGFUSE_*",
+        "OPENAI_API_KEY",
+        "XAI_API_KEY"
+      ]
+    }
   }
 }
