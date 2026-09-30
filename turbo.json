@@ -34,5 +34,6 @@
         "XAI_API_KEY"
       ]
     }
-  }
+  },
+  "globalPassThroughEnv": ["MAILPIT_URL", "CI"]
 }
