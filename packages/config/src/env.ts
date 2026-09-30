@@ -1,33 +1,67 @@
 import { z } from "zod";
 export type Service = "web" | "app" | "api" | "worker";
+export const baseEnvironment = z.object({
+  APP_ENV: z.enum(["development", "staging", "production"]),
+  SERVICE_MODE: z.enum(["mock", "live"]),
+  PORT: z.coerce.number().int().min(1).max(65535).optional(),
+});
+const postgresUrl = z
+  .url()
+  .refine((value) => /^postgres(ql)?:/.test(value), "PostgreSQL URL required");
+const redisUrl = z
+  .url()
+  .refine((value) => /^rediss?:/.test(value), "Redis URL required");
+const httpsUrl = z
+  .url()
+  .refine(
+    (value) => value.startsWith("https://"),
+    "HTTPS URL required outside development",
+  );
+const serviceEnvironment = {
+  web: z.object({ PUBLIC_API_URL: z.url() }),
+  app: z.object({
+    PUBLIC_API_URL: z.url(),
+    CLERK_SECRET_KEY: z.string().min(1),
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+  }),
+  api: z.object({
+    DATABASE_URL: postgresUrl,
+    REDIS_URL: redisUrl,
+    PUBLIC_API_URL: z.url(),
+  }),
+  worker: z.object({
+    TEMPORAL_ADDRESS: z.string().min(1),
+    TEMPORAL_NAMESPACE: z.string().min(1),
+    TEMPORAL_API_KEY: z.string().min(1),
+  }),
+};
+function parseConfig<T extends z.ZodType>(
+  service: Service,
+  schema: T,
+  input: Record<string, string | undefined>,
+): z.output<T> {
+  const parsed = schema.safeParse(input);
+  if (!parsed.success)
+    throw new Error(
+      `Invalid ${service} configuration: ${parsed.error.issues.map((issue) => issue.path.join(".")).join(", ")}`,
+    );
+  return parsed.data;
+}
 export function loadEnvironment(
   service: Service,
   input: Record<string, string | undefined>,
 ) {
-  const schema = z.object({
-    APP_ENV: z.enum(["development", "staging", "production"]),
-    SERVICE_MODE: z.enum(["mock", "live"]),
-  });
-  const result = schema.safeParse(input);
-  if (!result.success)
-    throw new Error(
-      `Invalid ${service} configuration: ${result.error.issues.map((issue) => issue.path.join(".")).join(", ")}`,
-    );
-  if (
-    result.data.APP_ENV !== "development" &&
-    result.data.SERVICE_MODE === "mock"
-  )
+  const base = parseConfig(service, baseEnvironment, input);
+  if (base.APP_ENV !== "development" && base.SERVICE_MODE !== "live")
     throw new Error(`${service}: mock mode is only allowed in development`);
+  if (base.SERVICE_MODE === "live") {
+    parseConfig(service, serviceEnvironment[service], input);
+    if (base.APP_ENV !== "development" && service !== "worker")
+      parseConfig(service, z.object({ PUBLIC_API_URL: httpsUrl }), input);
+  }
   return {
-    ...result.data,
-    port: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(65535)
-      .parse(
-        input.PORT ??
-          (service === "api" ? "3002" : service === "web" ? "3001" : "3000"),
-      ),
+    ...base,
+    port:
+      base.PORT ?? (service === "api" ? 3002 : service === "web" ? 3001 : 3000),
   };
 }

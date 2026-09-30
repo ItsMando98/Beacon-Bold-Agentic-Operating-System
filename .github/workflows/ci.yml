@@ -27,6 +27,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm ${{ matrix.command }}
+      - if: matrix.command == 'build'
+        run: pnpm test:startup
   secret-scan:
     name: secret-scan
     runs-on: ubuntu-latest
