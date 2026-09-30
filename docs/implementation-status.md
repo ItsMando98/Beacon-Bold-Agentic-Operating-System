@@ -2,6 +2,8 @@
 
 Stand: 30. September 2026. Code, lokale Abnahme und externe Abnahme werden getrennt bewertet.
 
+Aktuelle P0-7-Steuerung: Der Gründer möchte den vorhandenen VPS für zusätzliches Staging nutzen; bestehende Dienste müssen erhalten bleiben. SSH-Port 22 ist erreichbar, die Anmeldung als `root` mit dem zur Laufzeit aus `.env` geladenen Passwort wurde abgewiesen. Es wurden keine Serveränderungen durchgeführt. [VPS-Vorbereitung und offene Abnahmen](vps-staging.md) dokumentieren den Wechsel; die unten aufgeführten AWS-Nachweise bleiben Nachweise der vorbereiteten Alternative, nicht des VPS. Die tatsächliche VPS-Konfiguration und das Deployment sind noch offen. Keine AWS-Provisionierung und keine neue Serverbestellung.
+
 | Aufgabe | Nachweis / offene Punkte |
 |---|---|
 | P0-1 | Vier Apps und sechs Pakete, eingefrorene Abhängigkeiten. PR #1 gemergt. |
