@@ -1,0 +1,39 @@
+{
+  "name": "beacon-bold",
+  "private": true,
+  "packageManager": "pnpm@10.29.1",
+  "engines": {
+    "node": ">=22.21.0 <23"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "dev:infra": "docker compose -f infra/local/compose.yaml up -d --wait --wait-timeout 180",
+    "dev:infra:stop": "docker compose -f infra/local/compose.yaml stop",
+    "dev:infra:status": "docker compose -f infra/local/compose.yaml ps",
+    "lint": "node node_modules/@biomejs/biome/bin/biome check .",
+    "typecheck": "turbo typecheck",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:e2e": "playwright test",
+    "build": "turbo build",
+    "storybook": "pnpm --filter @beacon/ui storybook",
+    "build:storybook": "pnpm --filter @beacon/ui build:storybook"
+  },
+  "devDependencies": {
+    "turbo": "2.11.5",
+    "tsx": "4.23.15",
+    "tsup": "8.5.1",
+    "vitest": "5.0.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@biomejs/biome": "2.5.14",
+    "@playwright/test": "1.63.0",
+    "pg": "8.23.0",
+    "@types/pg": "8.23.1",
+    "redis": "6.3.0",
+    "@temporalio/client": "1.24.0",
+    "typescript": "5.9.3",
+    "@types/node": "22.19.13"
+  },
+  "type": "module"
+}
