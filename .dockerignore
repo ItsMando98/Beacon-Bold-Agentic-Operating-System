@@ -3,6 +3,7 @@
 **/node_modules
 **/.next
 **/dist
+**/migration-dist
 **/.turbo
 **/storybook-static
 **/.env

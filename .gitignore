@@ -1,6 +1,7 @@
 node_modules/
 .next/
 dist/
+migration-dist/
 .turbo/
 .cache/
 coverage/
@@ -17,5 +18,4 @@ infra/**/*.tfstate*
 infra/**/*.tfplan
 infra/**/*.tfvars
 !infra/**/*.tfvars.example
-infra/**/.terraform.lock.hcl
 

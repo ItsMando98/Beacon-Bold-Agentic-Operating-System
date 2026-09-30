@@ -10,11 +10,21 @@ Stand: 30. September 2026. Code, lokale Abnahme und externe Abnahme werden getre
 | P0-4 | PostgreSQL/pgvector, eingeschränkte Datenbankrolle, Redis, persistenter Temporal-Entwicklungsserver und Mailpit. Vier echte Diensttests lokal und in CI bestanden. PR #5 gemergt. |
 | P0-5 | Vorläufige Tokens, lokale Schriften, shadcn-Komponenten und Storybook. Drei Browsertests einschließlich Tastatur, Axe und Mobilansicht bestanden. PR #7 gemergt; alle sieben GitHub-Prüfungen erfolgreich. |
 | P0-6 | Getrennte App-Konfigurationen, Mock nur lokal, Pflichtwerte für Live-Betrieb. 23 Unit-Tests und vier Startprüfungen erfolgreich. PR #6 gemergt. |
-| P0-7 | In Arbeit auf eigenem Branch. AWS-Konto laut Gründer erstellt; CLI installiert, Browser-Anmeldung, Zugriff und Agent-Toolkit-Katalog erfolgreich geprüft. Drei Containerimages lokal gebaut und auf erfolgreichen Start sowie Abbruch bei fehlenden Pflichtwerten geprüft. Terraform und Cloud-Deployment noch offen. |
+| P0-7 | Entwurfs-PR #8 auf feat/p0-7-staging fortgeführt. AWS-MCP-Proxy 1.7.0 mit beacon-bold einschließlich echtem STS-Aufruf bestätigt. Terraform für Bootstrap und Frankfurt-Staging validiert; zwei simulierte Sicherheitstests grün. Begrenzte OIDC-Rolle verwendet tatsächliche unveränderliche Repository-IDs und nur main. Vorwärtsmigration mit Checksummen/Sperre, echte lokale Historien- und RLS-Abnahme; insgesamt sechs Integrationstests und 27 Unit-Tests grün. Deployment-Pipeline vorbereitet, noch nicht aktiviert. Kostenantrag: 118,94 USD Monatsplanung, 150 USD beantragt. Gründerfreigabe, DNS, Clerk, Cloud-Provisionierung und echter Merge-Deploy bleiben offen. |
 | Phase 1 | Noch nicht begonnen; Gate 0 ist Voraussetzung. Keine Kunden-, MCP-, Freigabe- oder Modellfunktionen implementiert. |
 
 Gate 0 bleibt offen bis ein echter Merge nach Staging deployt und GitHub fehlerhafte Änderungen verbindlich blockiert. Ziel ist staging.beaconandbold.com in Frankfurt. Temporal Cloud, Clerk und Anbieterzugänge sowie freigegebene Betriebsbudgets sind noch bereitzustellen. Die vorhandene Komponenten-Vorschau ist eine lokale UI-Abnahme.
 
 ## AWS-Einrichtung
 
-AWS CLI 2.37.6 wurde mit gültiger Amazon-Signatur benutzerspezifisch installiert. Gewähltes Profil: beacon-bold. Standardregion: eu-central-1. Klassisches AWS-Konto. Anmeldedaten liegen ausschließlich in der AWS-eigenen Benutzerkonfiguration, nicht im Repository. STS bestätigt die erfolgreiche Anmeldung. 24 AWS-Skills wurden installiert; der entfernte Katalog wurde erfolgreich abgefragt. AWS-MCP wurde für Codex, Claude Code, Cursor und Gemini eingerichtet und explizit auf beacon-bold eingestellt. Die Projektregeln wurden ergänzt und erhalten. Ein neuer Codex-Chat ist erforderlich, um die neue MCP-Verbindung und Skills zu laden. Infrastruktur wurde noch nicht provisioniert.
+AWS CLI 2.37.6 wurde mit gültiger Amazon-Signatur benutzerspezifisch installiert. Profil beacon-bold, Standardregion eu-central-1. STS bestätigt Konto 212626318809 mit Root-Anmeldung. Zugangswerte liegen ausschließlich in AWS-eigener Benutzerkonfiguration. AWS-MCP ist in diesem Chat nicht als direkt aufrufbares Werkzeug geladen; der vorhandene konfigurierte Proxy wurde deshalb über das MCP-Protokoll gestartet. Initialisierung, Werkzeugliste und entfernter aws___run_script/STS GetCallerIdentity waren erfolgreich. Infrastruktur und OIDC-Rolle sind als Terraform vorbereitet, aber noch nicht provisioniert.
+
+## P0-7 Teilabnahmen
+
+- Bootstrap: S3-State, KMS, OIDC, leere Secret-Hülle, delegierte Staging-Zone als Code; Validierung und simulierte Abnahme bestanden, Apply offen.
+- Frankfurt-Staging: VPC, private RDS/Redis, ECR, ECS, ALB/ACM/DNS, Budgetalarme als Code; Validierung und simulierte Abnahme bestanden. DNS-Schreibzugriff wird auf die delegierte Staging-Zone geprüft.
+- Migrationen: Foundation ohne Phase-1-Fachmodell; reale lokale Vorwärts-/Checksummen- und Mandantentrennungstests bestanden. Cloud-Abnahme offen.
+- CI/Deployment: Migration vor Dienststart, Commit-Images per Digest, ECS-/HTTPS-Abnahme und Wiederherstellung vorheriger Revisionen; vier simulierte Deployment-Fehler-/Erfolgstests bestanden. Echte GitHub-OIDC-Annahme und Merge-Deploy offen.
+- Kosten: [konkreter requestApproval-Antrag](staging-approval.md), Entscheidung offen. DNS-Delegation, Alarmadresse, Clerk und GitHub-Tarifentscheidung bleiben menschliche Voraussetzungen.
+
+Lint, Typprüfung, Build, fehlende Startkonfiguration und drei Browsertests lokal bestanden. Storybook verwendet manuelle Axe-Prüfung, damit die Playwright-Abnahme nicht mit einer zweiten Analyse kollidiert. Externe Abnahmen werden nicht durch diese lokalen Tests ersetzt. Branch-Schutz erneut mit HTTP 403 geprüft; Phase 1 bleibt geschlossen.

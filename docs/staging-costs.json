@@ -1,0 +1,93 @@
+{
+  "as_of": "2026-09-30",
+  "region": "eu-central-1",
+  "currency": "USD",
+  "hours": 730,
+  "approval_status": "pending",
+  "requested_monthly_budget": 150,
+  "actual_alert": 120,
+  "verified_price_list": {
+    "cpu": {
+      "rate": 0.04656,
+      "sku": "CVZB3RCF48N5AH4A",
+      "usage": "EUC1-Fargate-vCPU-Hours:perCPU"
+    },
+    "mem": {
+      "rate": 0.00511,
+      "sku": "X7HM34A7GZK89N7Y",
+      "usage": "EUC1-Fargate-GB-Hours"
+    },
+    "rds": {
+      "rate": 0.019,
+      "sku": "Q2VA4XH2YFYXPGX4",
+      "usage": "EUC1-InstanceUsage:db.t4g.micro"
+    },
+    "redis": {
+      "rate": 0.018,
+      "sku": "HSZWURMZTX87RN43",
+      "usage": "EUC1-NodeUsage:cache.t4g.micro"
+    },
+    "storage": {
+      "rate": 0.137,
+      "sku": "JN8MTUNBMV3GFTFY",
+      "usage": "EUC1-RDS:GP3-Storage"
+    },
+    "alb": {
+      "rate": 0.027,
+      "sku": "UZQQFKE5Z4MCF9D5",
+      "usage": "EUC1-LoadBalancerUsage"
+    },
+    "lcu": {
+      "rate": 0.008,
+      "sku": "9H4URPBEA563JK89",
+      "usage": "EUC1-LCUUsage"
+    }
+  },
+  "rows": [
+    {
+      "item": "3 Fargate tasks, each 0.25 vCPU and 0.5 GiB",
+      "monthly_usd": 31.09
+    },
+    {
+      "item": "RDS db.t4g.micro, 730 hours",
+      "monthly_usd": 13.87
+    },
+    {
+      "item": "RDS gp3, 20 GB",
+      "monthly_usd": 2.74
+    },
+    {
+      "item": "Redis cache.t4g.micro, 730 hours",
+      "monthly_usd": 13.14
+    },
+    {
+      "item": "ALB, 730 hours",
+      "monthly_usd": 19.71
+    },
+    {
+      "item": "ALB allowance, 1 LCU continuously",
+      "monthly_usd": 5.84
+    },
+    {
+      "item": "Public IPv4, 5 addresses",
+      "monthly_usd": 18.25
+    },
+    {
+      "item": "3 KMS keys",
+      "monthly_usd": 3
+    },
+    {
+      "item": "2 Secrets Manager secrets",
+      "monthly_usd": 0.8
+    },
+    {
+      "item": "1 Route53 hosted zone",
+      "monthly_usd": 0.5
+    },
+    {
+      "item": "Logs, ECR, S3, requests, transfer and deployment overlap allowance",
+      "monthly_usd": 10
+    }
+  ],
+  "total_monthly_usd": 118.94
+}

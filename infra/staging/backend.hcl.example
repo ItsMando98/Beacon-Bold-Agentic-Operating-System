@@ -1,0 +1,6 @@
+bucket       = "beacon-bold-staging-state-212626318809"
+key          = "staging/terraform.tfstate"
+region       = "eu-central-1"
+encrypt      = true
+use_lockfile = true
+# Set kms_key_id to the bootstrap state key ARN before init.

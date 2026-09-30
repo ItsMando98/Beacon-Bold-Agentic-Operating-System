@@ -13,7 +13,7 @@ https://raw.githubusercontent.com/aws/agent-toolkit-for-aws/refs/heads/main/setu
 
 Die Toolkit-Steuerung und der MCP-Endpunkt liegen gemäß AWS-Anleitung in us-east-1. Das ändert die geplante Staging-Region Frankfurt nicht.
 
-Die neue MCP-Verbindung und die Skills werden erst in einem neuen Codex-Chat geladen. Der Katalogtest bestätigt das Toolkit; ein MCP-Werkzeugaufruf aus dem neuen Chat steht noch aus. AWS-Zugangsdaten liegen außerhalb des Repositorys. Die Anmeldung gilt laut AWS zwölf Stunden und lässt sich bis zu 90 Tage ohne erneute Browser-Anmeldung erneuern.
+Fortsetzungsprüfung am 30. September: AWS-MCP erschien nicht in der Werkzeugliste dieses Chats. Der exakt konfigurierte uvx-Proxy wurde deshalb direkt über das MCP-Protokoll geprüft: Initialisierung mit Proxy 1.7.0, Werkzeugliste und entfernter aws___run_script-Aufruf von STS GetCallerIdentity erfolgreich. AWS_MCP_PROXY_PROFILES=beacon-bold liefert Konto 212626318809 mit Root-Anmeldung. Ein CLI-Katalogtest allein wurde nicht als MCP-Abnahme gewertet. Keine Secret-Werte wurden gelesen. AWS-Zugangsdaten liegen außerhalb des Repositorys. Die Anmeldung gilt laut AWS zwölf Stunden und lässt sich bis zu 90 Tage ohne erneute Browser-Anmeldung erneuern.
 
 Für ein weiteres Konto: aws login --profile NAME ausführen, NAME zur durch Leerzeichen getrennten AWS_MCP_PROXY_PROFILES-Liste in den MCP-Konfigurationen hinzufügen und das Coding-Werkzeug neu starten.
 
@@ -21,4 +21,4 @@ Für ein weiteres Konto: aws login --profile NAME ausführen, NAME zur durch Lee
 
 Im neuen Chat mit diesem Projekt fortfahren: P0-7 vollständig vorbereiten, Terraform und Container prüfen, eine begrenzte GitHub-OIDC-Rolle einrichten und die Staging-Kosten vor der Bereitstellung konkret zur Freigabe vorlegen. Keine Produktionsänderungen. Gate 0 benötigt zusätzlich wirksamen GitHub-Branch-Schutz. Phase 1 beginnt erst nach bestandenem Gate 0.
 
-Der aktuelle Dockerfile ist eine lokale Vorbereitung mit getrennten API-, App- und Web-Zielen. Er deployt keinen Platzhalter-Worker. Terraform, Cloud-Migrationen und automatisches Deployment sind noch offen.
+Terraform-Bootstrap, Frankfurt-Infrastruktur, begrenzte OIDC-Rolle, Vorwärtsmigration und CI-Deployment sind nun vorbereitet. Zwei Terraform-Sicherheitstests sind simuliert bestanden; sechs echte lokale Integrationstests und vier simulierte Deploymenttests bestanden. Cloud-Provisionierung, OIDC-Annahme durch GitHub und Cloud-Migration stehen nach Kostenfreigabe aus. Der Dockerfile enthält zusätzlich ein kurzlebiges Migrationsziel; kein Platzhalter-Worker. [Kostenfreigabe](staging-approval.md) und [Staging-Runbook](../infra/staging/README.md) dokumentieren den nächsten menschlichen Freigabepunkt.

@@ -8,7 +8,9 @@
       "build",
       "secret-scan",
       "integration",
-      "browser"
+      "browser",
+      "terraform",
+      "containers"
     ]
   },
   "enforce_admins": true,
