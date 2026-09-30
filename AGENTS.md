@@ -30,7 +30,7 @@
 - `pnpm dev:infra:status`: Zustand anzeigen.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`: lokale Pflichtprüfungen.
 - `pnpm test:integration`: laufende Docker-Dienste erforderlich.
-- `pnpm exec playwright install chromium`, `pnpm test:e2e`: Browser-Abnahme nach Build.
+- `pnpm browser:install`, `pnpm test:e2e`: Browser-Abnahme nach Build.
 - `pnpm storybook`, `pnpm build:storybook`: Komponenten lokal / statisch.
 
 ## Reihenfolge und Gates

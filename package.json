@@ -14,27 +14,29 @@
     "typecheck": "turbo typecheck",
     "test": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/playwright.mjs test",
     "build": "turbo build",
     "storybook": "pnpm --filter @beacon/ui storybook",
     "build:storybook": "pnpm --filter @beacon/ui build:storybook",
-    "test:startup": "node scripts/check-startup.mjs"
+    "test:startup": "node scripts/check-startup.mjs",
+    "browser:install": "node scripts/playwright.mjs install chromium"
   },
   "devDependencies": {
-    "turbo": "2.11.5",
-    "tsx": "4.23.15",
-    "tsup": "8.5.1",
-    "vitest": "5.0.3",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
+    "@axe-core/playwright": "4.13.0",
     "@biomejs/biome": "2.5.14",
     "@playwright/test": "1.63.0",
-    "pg": "8.23.0",
-    "@types/pg": "8.23.1",
-    "redis": "6.3.0",
     "@temporalio/client": "1.24.0",
+    "@types/node": "22.19.13",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "pg": "8.23.0",
+    "redis": "6.3.0",
+    "tsup": "8.5.1",
+    "tsx": "4.23.15",
+    "turbo": "2.11.5",
     "typescript": "5.9.3",
-    "@types/node": "22.19.13"
+    "vitest": "5.0.3"
   },
   "type": "module"
 }

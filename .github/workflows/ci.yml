@@ -61,3 +61,20 @@ jobs:
         run: docker compose -f infra/local/compose.yaml logs --tail=100
       - if: always()
         run: pnpm dev:infra:stop
+  browser:
+    name: browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.21.1
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm build:storybook
+      - run: node scripts/playwright.mjs install --with-deps chromium
+      - run: pnpm test:e2e

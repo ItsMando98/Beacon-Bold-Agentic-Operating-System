@@ -35,5 +35,5 @@
       ]
     }
   },
-  "globalPassThroughEnv": ["MAILPIT_URL", "CI"]
+  "globalPassThroughEnv": ["MAILPIT_URL", "CI", "PLAYWRIGHT_BROWSERS_PATH"]
 }
