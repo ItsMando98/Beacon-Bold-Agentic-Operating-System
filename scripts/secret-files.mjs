@@ -4,7 +4,9 @@ export async function hydrateSecrets(env, read = readFile) {
   for (const name of [
     "DATABASE_URL",
     "REDIS_URL",
-    "CLERK_SECRET_KEY",
+    "AUTH0_CLIENT_SECRET",
+    "AUTH0_SECRET",
+    "AUTH0_AUTH_BINDINGS",
     "PGPASSWORD",
     "DB_APP_PASSWORD",
   ]) {

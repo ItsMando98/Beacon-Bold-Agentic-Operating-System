@@ -4,7 +4,7 @@
   "info": {
     "title": "Beacon & Bold contracts",
     "version": "0.0.0",
-    "description": "Schema-derived REST contracts. Authentication and MCP follow in P1-4 and P1-5."
+    "description": "Schema-derived REST contracts. Auth0 bearer authentication; MCP follows in P1-5."
   },
   "paths": {
     "/health": {
@@ -63,7 +63,8 @@
             }
           }
         },
-        "x-beacon-scopes": []
+        "x-beacon-scopes": [],
+        "security": []
       }
     },
     "/customers": {
@@ -142,7 +143,8 @@
             }
           }
         },
-        "x-beacon-scopes": ["customers:write"]
+        "x-beacon-scopes": ["customers:write"],
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/openapi.json": {
@@ -1017,6 +1019,13 @@
       },
       "getDocumentationOutput": { "type": "string" },
       "getDocumentationScriptOutput": { "type": "string" }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     }
   }
 }
