@@ -56,3 +56,5 @@ P1-3 / PR #12 ist regulär gemergt auf e17976044e7aea6e503b91f130bcabef66c13081;
 Echte Auth0-Sandbox-Zugänge und VPS-Aktivierung stehen aus; Live-Schreibzugriffe bleiben bis dahin geschlossen. Kein neuer Dienst, keine Produktionsänderung oder AWS-Provisionierung. P1-8 und der manuelle Geldfreigabeweg bleiben unverändert.
 
 Der Gründer hat am 1. Oktober 2026 ausdrücklich bestätigt: AWS wird nicht mehr verwendet. P1-4 entfernt den AWS-CI-Deploy, sperrt das historische CLI-Deploy-Skript und entfernt den RDS-Zertifikatsdownload. VPS ist der einzige aktive Hosting-/Deploy-Pfad. Historische Terraform-Vorlagen bleiben als Mock-validiertes Archiv erhalten; keine neue AWS-Auth0-Konfiguration.
+
+Auth0-MCP-Onboarding für apps/app durchgeführt: Test-Anwendung und API angelegt, lokale/VPS-Test-Callbacks registriert, Zugangsdaten ausschließlich lokal Git-ignoriert gespeichert. Lokaler Start und Login-Weiterleitung mit echter Providerkonfiguration geprüft. Echter Benutzer-Login/Logout, lokale Fachfreigaben, Agenten-Abnahme und VPS-Aktivierung bleiben offen; Details in p1-4-auth0.md.

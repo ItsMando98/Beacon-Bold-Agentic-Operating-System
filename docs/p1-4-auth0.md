@@ -28,7 +28,7 @@ Bei Organizations zusätzlich organizationId setzen; er muss exakt zum signierte
 
 ## Externe Einrichtung und Abnahme: offen
 
-1. Test-Tenant ist laut Gründer vorhanden; öffentliche Tenant-Domain und Dashboard-Zugang folgen. Region und Datenschutzanforderungen bestätigen; keine Tarifbestellung.
+1. Test-Tenant dev-ufrnq6f2lqr26ehf.eu.auth0.com ist per MCP erreichbar. Anbieter-/Datenschutzabnahme bleibt vor Live-Aktivierung offen; keine Tarifbestellung.
 2. API registrieren: exakt festgelegte Audience, RS256, Auth0-Standardprofil, Berechtigung customers:write. RFC-9068 und Agent-as-Principal zunächst nicht aktivieren.
 3. Regular Web Application: Callback https://app.staging.beaconandbold.com/auth/callback; Logout-/Origin https://app.staging.beaconandbold.com. Lokal entsprechend http://localhost:3000. Nur tatsächlich verwendete Callback-URLs registrieren.
 4. Pro freigegebenem externen Agenten eigene OAuth-Anwendung, Authorization Code mit PKCE S256 und explizite Scope-Zuweisung; keine offenen Client-/Mandantenfreigaben. Eigene M2M-Anwendung je eigenständigem Agenten mit Client Credentials und begrenzten API-Grants.
@@ -51,3 +51,17 @@ Die Betriebsoberfläche verwendet Webpack mit expliziter .js→.ts/.tsx-Auflösu
 ## Ausschließlich VPS
 
 AWS wird nicht mehr verwendet. Der AWS-Deploy-Job ist entfernt und das historische AWS-Deploy-Skript kann nicht mehr direkt ausgeführt werden. Keine neuen Auth0-Anpassungen an den archivierten AWS-Terraform-Vorlagen. Die vorhandene terraform-Pflichtprüfung bleibt als lokale Mock-Prüfung erhalten, um den bestehenden Branch-Schutz nicht zu umgehen. Aktiver Deploy-Pfad ist ausschließlich der VPS mit unveränderter Gründerfreigabe.
+
+## Auth0-MCP-Onboarding am 1. Oktober 2026
+
+Die offiziellen Tools auth0_onboarding und unmittelbar danach auth0_get_quickstart_guide wurden für apps/app mit framework=nextjs ausgeführt. Anwendung: Beacon & Bold VPS Test, client_id nB4Qfv3CrSckc8zKTgoeVqQ6u5jPvB5r, Typ regular_web. Die vorhandene SDK-Integration hinter packages/integrations entspricht dem Quickstart; keine zweite Auth0-Instanz oder zusätzliche Middleware angelegt.
+
+Issuer: https://dev-ufrnq6f2lqr26ehf.eu.auth0.com/. API-Audience: https://staging.beaconandbold.com. API Beacon & Bold VPS Test API ist mit RS256, Standardprofil access_token, customers:write, 900 Sekunden Token-Laufzeit und deaktiviertem Offline-Zugriff registriert. Die 15 Minuten gelten für diese Test-API; Betriebs-/Widerrufspolitik vor Live-Aktivierung bestätigen.
+
+Callbacks: http://localhost:3000/auth/callback und https://app.staging.beaconandbold.com/auth/callback. Logout-URLs und Web-Origins sind auf diese beiden App-Origins begrenzt. Nur authorization_code ist für die Menschen-App freigegeben. Das Quickstart-Tool aktivierte skip_non_verifiable_callback_uri_confirmation_prompt für den lokalen Callback; der registrierte Callback bleibt fest auf localhost begrenzt.
+
+Das Tool speicherte die Zugangsdaten direkt in apps/app/.env.local. Der Client-Schlüssel konnte erst nach zusätzlicher read:client_keys-Freigabe per auth0_save_credentials_to_file gespeichert werden. Keine Zugangsdaten wurden ausgegeben oder committed. Cookie-Schlüssel, Client-Schlüssel, MCP-Schreibprotokoll und MCP-Zustand sind Git-ignoriert. Lokale Fachfreigaben sind zunächst leer (AUTH0_AUTH_BINDINGS=[]); eine erfolgreiche Anmeldung erteilt daher noch keinen Betriebs- oder API-Zugriff.
+
+Mit echter Providerkonfiguration lokal geprüft: Schema vollständig; App startet; Startseite 200; Login 307 zum richtigen Tenant mit korrekter Client-ID, Callback, API-Audience, customers:write, Authorization Code und PKCE S256; Transaktionscookie HttpOnly; unauthentifizierte Betriebsseite 307 zur Anmeldung; öffentlicher Zugriffstoken-Endpunkt 404. Ungültiger Callback ohne passende Transaktion wird vom SDK abgewiesen (aktuell HTTP 500). Kein erfolgreicher Benutzer-Login/Logout und kein OAuth-/M2M-Tokenaustausch als bestanden behauptet.
+
+Noch offen: echter Benutzer-Login/Logout, ausdrückliche lokale Nutzer-/Mandantenfreigabe, separate externe OAuth-/M2M-Anwendungen samt Abnahme und die spätere dauerhafte VPS-Aktivierung. Der laufende lokale Test ersetzt keine Server-Aktivierung. AWS bleibt stillgelegt.
