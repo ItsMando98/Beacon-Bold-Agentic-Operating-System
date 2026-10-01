@@ -154,7 +154,7 @@ Ziel: Beacon & Bold betreibt Vertrieb, Marketing und Onboarding in der eigenen k
 | P2-8 | Klassische Onboarding-Ansicht mit Briefingformular, Checkliste und Status; Agent begleitet denselben Ablauf, bereitet Vertrag und Projekt vor | P2-1, P2-2, P1-8 | Testkunde durchläuft Formulare und Status ohne Chat-Zwang; Agent kann Schritte übernehmen. Signatur und Rechtstexte bleiben menschlich freigegeben |
 | P2-9 | Kampagnen- und Ads-Arbeitsbereich mit Liste, Detailseite, Entwurfsformular, Creatives, Budgets und Status; Meta-Adapter und Ads-Agent | P1-8, P1-10, P2-6, P1-11c | Mensch und Agent erstellen denselben Sandbox-Entwurf; jede kostenwirksame Aktivierung wartet auf Freigabe |
 | P2-10 | Klassisches Reporting mit Kunde/Kampagne/Zeitraum-Filtern, Kennzahlen und täglichen Berichten aus Ads/Analytics | P2-9 | Nutzer filtert einen Bericht ohne Chat; Agent erzeugt denselben Bericht mit nachweisbaren Testkennzahlen |
-| P2-11 | Social-Adapter und Redaktionsplan | P2-7 | Ein Beitrag wird geplant und auf einem Testkonto veröffentlicht |
+| P2-11 | Social-Adapter und klassischer Redaktionsplan mit Beitragseditor, Kalender, Kanalzuordnung und Veröffentlichungsstatus | P2-7 | Nutzer plant einen Beitrag ohne Chat; Agent nutzt dieselbe Planung. Veröffentlichung auf Testkonto erfolgt erst nach QA |
 
 **Gate 2:** Lead, Termin, Onboarding und erste Veröffentlichung sind in klassischen Fachseiten durchgehend bedienbar und können zusätzlich durch Agenten ausgeführt werden. Automatische Läufe benötigen nur die vorgeschriebenen menschlichen Freigaben.
 
