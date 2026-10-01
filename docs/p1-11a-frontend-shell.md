@@ -46,8 +46,8 @@ Der erste Integrationstest-Lauf hatte einen Temporal-Starttimeout; der isolierte
 Neustart-/Retry-/Timeout-Lauf bestand danach mit drei Tests. Ein weiterer
 Standardlauf hatte elf erfolgreiche Tests und eine PostgreSQL-Katalogkollision
 ("tuple concurrently updated") bei gleichzeitigem Migrieren separater
-Testdatenbanken. Die Integration wird deshalb zusätzlich ohne Dateiparallelität
-geprüft; das Ergebnis wird vor der Übergabe eingetragen. Keine Migration oder
+Testdatenbanken. Die Integration bestand anschließend vollständig mit zwölf Tests:
+pnpm test:integration --no-file-parallelism. Keine Migration oder
 Backend-Funktion wird für diese Frontend-Aufgabe geändert.
 
 ## Visueller Vergleich
