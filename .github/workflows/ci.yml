@@ -51,7 +51,6 @@ jobs:
           docker compose -f infra/vps/compose.yaml run --rm --no-deps acceptance
           docker compose -f infra/vps/compose.yaml up -d --wait --wait-timeout 180 api app web
       - name: Archive immutable runtime images
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           docker save beacon-bold-api:$GITHUB_SHA beacon-bold-app:$GITHUB_SHA beacon-bold-web:$GITHUB_SHA beacon-bold-migrate:$GITHUB_SHA | gzip > runtime-images.tar.gz
           python3 -c "import importlib.util, os; s=importlib.util.spec_from_file_location('receiver', 'infra/vps/receiver.py'); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); m.validate_archive('runtime-images.tar.gz', os.environ['GITHUB_SHA'])"
