@@ -4,6 +4,8 @@
   "include": [
     "src",
     "../../tests/unit/data-model.test.ts",
-    "../../tests/integration/data-model.test.ts"
+    "../../tests/integration/data-model.test.ts",
+    "../../tests/unit/access-model.test.ts",
+    "../../tests/integration/access-model.test.ts"
   ]
 }
