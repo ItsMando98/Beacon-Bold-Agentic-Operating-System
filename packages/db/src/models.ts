@@ -29,7 +29,9 @@ type Columns<S extends Record<string, z.ZodType>> = {
   }>;
 };
 
-function columns<S extends Record<string, z.ZodType>>(shape: S): Columns<S> {
+export function columns<S extends Record<string, z.ZodType>>(
+  shape: S,
+): Columns<S> {
   const result: Record<string, unknown> = {};
   for (const [name, contract] of Object.entries(shape)) {
     const storage = contract.meta()?.storage;

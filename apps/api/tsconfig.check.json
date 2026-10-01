@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "allowJs": true },
+  "include": [
+    "src",
+    "tsup.config.ts",
+    "../../tests/unit/api-contracts.test.ts",
+    "../../tests/integration/api-idempotency.test.ts"
+  ]
+}

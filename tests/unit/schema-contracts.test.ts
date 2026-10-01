@@ -30,7 +30,13 @@ it("generates valid OpenAPI 3.1 with all entity components and resolvable refere
   const result = await validate(JSON.stringify(document));
   expect(result.errors).toEqual([]);
   expect(result.valid).toBe(true);
-  expect(Object.keys(document.paths)).toEqual(["/health", "/customers"]);
+  expect(Object.keys(document.paths)).toEqual([
+    "/health",
+    "/customers",
+    "/openapi.json",
+    "/docs",
+    "/docs/scalar.js",
+  ]);
   for (const name of Object.keys(entitySchemas))
     expect(document.components.schemas[`entity_${name}`]).toBeDefined();
   expect(JSON.stringify(document)).not.toContain('"storage"');

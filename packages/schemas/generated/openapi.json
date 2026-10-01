@@ -4,7 +4,7 @@
   "info": {
     "title": "Beacon & Bold contracts",
     "version": "0.0.0",
-    "description": "Generated contracts. Serving REST and MCP operations requires P1-3 through P1-5."
+    "description": "Schema-derived REST contracts. Authentication and MCP follow in P1-4 and P1-5."
   },
   "paths": {
     "/health": {
@@ -79,6 +79,17 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{8,128}$"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Successful operation",
@@ -132,6 +143,79 @@
           }
         },
         "x-beacon-scopes": ["customers:write"]
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "getOpenApi",
+        "responses": {
+          "200": {
+            "description": "API documentation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/getOpenApiOutput" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "operationId": "getDocumentation",
+        "responses": {
+          "200": {
+            "description": "API documentation",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/getDocumentationOutput"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs/scalar.js": {
+      "get": {
+        "operationId": "getDocumentationScript",
+        "responses": {
+          "200": {
+            "description": "API documentation",
+            "content": {
+              "application/javascript": {
+                "schema": {
+                  "$ref": "#/components/schemas/getDocumentationScriptOutput"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -900,7 +984,39 @@
         },
         "required": ["id", "tenantId", "createdAt", "name"],
         "additionalProperties": false
-      }
+      },
+      "getOpenApiOutput": {
+        "type": "object",
+        "propertyNames": { "type": "string" },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/getOpenApiOutput/$defs/__schema0"
+        },
+        "$defs": {
+          "__schema0": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "null" },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/getOpenApiOutput/$defs/__schema0"
+                }
+              },
+              {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/getOpenApiOutput/$defs/__schema0"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "getDocumentationOutput": { "type": "string" },
+      "getDocumentationScriptOutput": { "type": "string" }
     }
   }
 }
