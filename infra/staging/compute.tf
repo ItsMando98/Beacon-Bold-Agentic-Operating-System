@@ -2,7 +2,7 @@ locals {
   services = { web = 3000, app = 3001, api = 3002, migrate = 3003 }
   secret_keys = {
     web     = []
-    app     = ["CLERK_SECRET_KEY", "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"]
+    app     = ["AUTH0_DOMAIN", "AUTH0_ISSUER", "AUTH0_AUDIENCE", "AUTH0_CLIENT_ID", "AUTH0_CLIENT_SECRET", "AUTH0_SECRET", "APP_BASE_URL", "AUTH0_AUTH_BINDINGS"]
     api     = ["DATABASE_URL", "REDIS_URL"]
     migrate = ["DB_APP_PASSWORD"]
   }

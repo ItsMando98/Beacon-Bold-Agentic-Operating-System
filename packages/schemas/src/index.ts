@@ -32,4 +32,5 @@ export const migrationEnvironmentSchema = z
         message: "Verified TLS CA required",
       });
   });
+export * from "./auth.js";
 export * from "./workflow.js";

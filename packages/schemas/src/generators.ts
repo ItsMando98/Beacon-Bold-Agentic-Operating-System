@@ -162,6 +162,7 @@ export function generateOpenApi(
         : { parameters }),
       responses,
       "x-beacon-scopes": contract.scopes,
+      security: contract.scopes.length ? [{ bearerAuth: [] }] : [],
     };
   }
   for (const route of apiSupportRoutes) {
@@ -196,9 +197,14 @@ export function generateOpenApi(
       title: "Beacon & Bold contracts",
       version: "0.0.0",
       description:
-        "Schema-derived REST contracts. Authentication and MCP follow in P1-4 and P1-5.",
+        "Schema-derived REST contracts. Auth0 bearer authentication; MCP follows in P1-5.",
     },
     paths,
-    components: { schemas },
+    components: {
+      schemas,
+      securitySchemes: {
+        bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+      },
+    },
   };
 }

@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.STAGING_CLERK_PUBLISHABLE_KEY || 'synthetic-ci-only' }}
       BEACON_RELEASE: ${{ github.sha }}
       BEACON_SECRETS_DIR: ${{ github.workspace }}/.cache/vps-ci-secrets
     steps:
@@ -24,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           for service in api app web migrate; do
-            docker build --target "$service" --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "beacon-bold-$service:$GITHUB_SHA" .
+            docker build --target "$service" --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "beacon-bold-$service:$GITHUB_SHA" .
             set +e
             timeout 30s docker run --rm "beacon-bold-$service:$GITHUB_SHA"
             code=$?
@@ -40,8 +39,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export CLERK_SECRET_KEY=synthetic-ci-only
-          export NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-synthetic-ci-only}
           node scripts/vps-secrets.mjs "$BEACON_SECRETS_DIR"
           docker network create coolify
           docker compose -f infra/vps/compose.yaml config --quiet
@@ -94,14 +91,14 @@ jobs:
       STAGING_SUBNETS: ${{ vars.STAGING_SUBNETS }}
       STAGING_SECURITY_GROUP: ${{ vars.STAGING_SECURITY_GROUP }}
       APPROVAL_REFERENCE: ${{ vars.STAGING_APPROVAL_REFERENCE }}
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.STAGING_CLERK_PUBLISHABLE_KEY }}
+      AUTH0_CLIENT_ID: ${{ vars.STAGING_AUTH0_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22.21.1
-      - name: Require documented founder approval and Clerk configuration
-        run: test -n "$APPROVAL_REFERENCE" && test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+      - name: Require documented founder approval and Auth0 configuration
+        run: test -n "$APPROVAL_REFERENCE" && test -n "$AUTH0_CLIENT_ID"
       - uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
         with:
           role-to-assume: arn:aws:iam::212626318809:role/beacon-bold-staging-github-deploy
@@ -116,7 +113,7 @@ jobs:
           for service in api app web migrate; do
             repository="beacon-bold-staging-$service"
             if ! aws ecr describe-images --repository-name "$repository" --image-ids "imageTag=$GITHUB_SHA" >/dev/null 2>&1; then
-              docker build --target "$service" --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY -t "$registry/$repository:$GITHUB_SHA" .
+              docker build --target "$service" -t "$registry/$repository:$GITHUB_SHA" .
               docker push "$registry/$repository:$GITHUB_SHA"
             fi
           done

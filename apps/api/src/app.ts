@@ -4,6 +4,10 @@ import {
   IdempotencyConflict,
 } from "@beacon/integrations/api";
 import {
+  AuthenticationError,
+  type Authenticator,
+} from "@beacon/integrations/auth";
+import {
   apiErrorSchema,
   apiSupportRoutes,
   generateOpenApi,
@@ -76,7 +80,8 @@ export const customerRoute = createRoute({
   },
 });
 export type ApiDependencies = {
-  store?: CustomerStore;
+  store?: Pick<CustomerStore, "create" | "close">;
+  authenticate?: Authenticator;
   /** Internal trusted boundary, implemented by P1-4. Never read tenant IDs from public headers. */
   resolveTenant?: (request: Request) => Promise<string | undefined>;
 };
@@ -99,7 +104,18 @@ export function createApp(dependencies: ApiDependencies = {}) {
   });
   app.use(customer.path, async (context, next) => {
     if (context.req.method !== "POST") return next();
-    const tenantId = await dependencies.resolveTenant?.(context.req.raw);
+    const identity = await dependencies.authenticate?.(context.req.raw);
+    if (
+      identity &&
+      !customer.scopes.every((scope) => identity.scopes.includes(scope))
+    ) {
+      throw new AuthenticationError(403);
+    }
+    const tenantId =
+      identity?.tenantId ??
+      (dependencies.authenticate
+        ? undefined
+        : await dependencies.resolveTenant?.(context.req.raw));
     if (!tenantId)
       return errorResponse(
         context,
@@ -145,6 +161,15 @@ export function createApp(dependencies: ApiDependencies = {}) {
     errorResponse(context, "NOT_FOUND", "Route not found", 404),
   );
   app.onError((error, context) => {
+    if (error instanceof AuthenticationError) {
+      if (error.status === 401) context.header("WWW-Authenticate", "Bearer");
+      return errorResponse(
+        context,
+        error.status === 401 ? "UNAUTHORIZED" : "FORBIDDEN",
+        error.message,
+        error.status,
+      );
+    }
     if (error instanceof IdempotencyConflict)
       return errorResponse(context, "CONFLICT", error.message, 409);
     if (error instanceof HTTPException && error.status === 400)

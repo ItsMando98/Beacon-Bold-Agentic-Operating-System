@@ -4,8 +4,6 @@ WORKDIR /workspace
 RUN corepack enable && corepack prepare pnpm@10.29.1 --activate
 COPY . .
 RUN pnpm install --frozen-lockfile
-ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 RUN pnpm build
 RUN pnpm exec tsup --config scripts/tsup-migration.config.ts
 

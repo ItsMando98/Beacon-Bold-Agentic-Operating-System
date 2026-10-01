@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --port 3000",
-    "build": "next build",
+    "dev": "next dev --webpack --port 3000",
+    "build": "next build --webpack",
     "typecheck": "tsc --noEmit",
     "start": "next start --port 3000"
   },
   "dependencies": {
     "@beacon/config": "workspace:*",
+    "@beacon/integrations": "workspace:*",
+    "@beacon/schemas": "workspace:*",
     "@beacon/ui": "workspace:*",
     "next": "16.3.7",
     "react": "19.3.0",

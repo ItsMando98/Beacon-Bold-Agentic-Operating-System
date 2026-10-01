@@ -5,6 +5,8 @@
     "src",
     "tsup.config.ts",
     "../../tests/unit/api-contracts.test.ts",
-    "../../tests/integration/api-idempotency.test.ts"
+    "../../tests/unit/auth.test.ts",
+    "../../tests/integration/api-idempotency.test.ts",
+    "../../tests/integration/auth.test.ts"
   ]
 }

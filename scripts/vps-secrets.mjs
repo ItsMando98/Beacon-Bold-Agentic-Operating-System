@@ -4,8 +4,7 @@ import { access, mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const directory = resolve(process.argv[2] ?? "");
-if (!process.argv[2] || !process.env.CLERK_SECRET_KEY)
-  throw new Error("Secret directory and Clerk configuration required");
+if (!process.argv[2]) throw new Error("Secret directory required");
 await mkdir(directory, { recursive: true, mode: 0o700 });
 try {
   await access(join(directory, "owner_password"));
@@ -26,7 +25,6 @@ await create(
 );
 await create("redis_password", redis);
 await create("redis_url", `rediss://default:${redis}@redis:6379`);
-await create("clerk_secret", process.env.CLERK_SECRET_KEY);
 const certificate = spawnSync(
   "openssl",
   [

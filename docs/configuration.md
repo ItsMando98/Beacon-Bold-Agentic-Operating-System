@@ -11,3 +11,7 @@ Live-Konfiguration wird nach tatsächlich benötigtem Dienst getrennt:
 Außerhalb development verlangt PUBLIC_API_URL HTTPS. Staging- und Produktionsvorlagen enthalten keine echten Zugangsdaten. Die zukünftigen Modell- und Observability-Schlüssel werden erst in den zugehörigen Phase-1-Aufgaben verpflichtend; sie werden nicht vorgetäuscht, um Phase 0 starten zu können.
 
 Turbo reicht Secrets nur für Entwicklungsprozesse durch; sie werden nicht als Build-Artefakte geschrieben. Konfigurationsfehler nennen ausschließlich fehlende/ungültige Variablennamen, niemals eingegebene Werte.
+
+## P1-4: Auth0 ersetzt Clerk
+
+Die Betriebsoberfläche benötigt keine Clerk-Schlüssel mehr. API und App aktivieren Auth0 nur mit AUTH_ENABLED=true und vollständig validierten Laufzeitwerten; Details in [p1-4-auth0.md](p1-4-auth0.md). Bestehendes Staging bleibt bei false geschlossen und erreichbar; Produktionsstarts mit deaktivierter Authentifizierung werden abgewiesen. API-Schlüssel, Client-Secrets und Cookie-Schlüssel werden nicht beim Build benötigt. Historische Clerk-Angaben oben beschreiben den P0-6-Stand und werden durch diesen Abschnitt ersetzt.

@@ -1,0 +1,27 @@
+# Apply only after the Auth0 sandbox acceptance and operator setup in docs/p1-4-auth0.md.
+# This overlay is not enabled by CI or the default restricted receiver.
+services:
+  api:
+    environment:
+      AUTH_ENABLED: "true"
+      AUTH0_ISSUER: ${AUTH0_ISSUER:?}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:?}
+      AUTH0_AUTH_BINDINGS_FILE: /run/secrets/auth0_bindings
+    secrets: [auth0_bindings]
+  app:
+    environment:
+      AUTH_ENABLED: "true"
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:?}
+      AUTH0_ISSUER: ${AUTH0_ISSUER:?}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:?}
+      APP_BASE_URL: https://app.staging.beaconandbold.com
+      AUTH0_CLIENT_SECRET_FILE: /run/secrets/auth0_client_secret
+      AUTH0_SECRET_FILE: /run/secrets/auth0_cookie_secret
+      AUTH0_AUTH_BINDINGS_FILE: /run/secrets/auth0_bindings
+    secrets: [auth0_client_secret, auth0_cookie_secret, auth0_bindings]
+secrets:
+  auth0_client_secret: {file: "${BEACON_SECRETS_DIR:?}/auth0_client_secret"}
+  auth0_cookie_secret: {file: "${BEACON_SECRETS_DIR:?}/auth0_cookie_secret"}
+  auth0_bindings: {file: "${BEACON_SECRETS_DIR:?}/auth0_bindings"}

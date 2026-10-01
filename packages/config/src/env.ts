@@ -1,8 +1,13 @@
+import {
+  auth0ApiEnvironmentSchema,
+  auth0AppEnvironmentSchema,
+} from "@beacon/schemas/auth";
 import { z } from "zod";
 export type Service = "web" | "app" | "api" | "worker";
 export const baseEnvironment = z.object({
   APP_ENV: z.enum(["development", "staging", "production"]),
   SERVICE_MODE: z.enum(["mock", "live"]),
+  AUTH_ENABLED: z.enum(["true", "false"]).default("false"),
   PORT: z.coerce.number().int().min(1).max(65535).optional(),
 });
 const postgresUrl = z
@@ -21,8 +26,6 @@ const serviceEnvironment = {
   web: z.object({ PUBLIC_API_URL: z.url() }),
   app: z.object({
     PUBLIC_API_URL: z.url(),
-    CLERK_SECRET_KEY: z.string().min(1),
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
   }),
   api: z.object({
     DATABASE_URL: postgresUrl,
@@ -59,6 +62,26 @@ export function loadEnvironment(
     if (base.APP_ENV !== "development" && service !== "worker")
       parseConfig(service, z.object({ PUBLIC_API_URL: httpsUrl }), input);
   }
+  if (
+    base.AUTH_ENABLED === "true" &&
+    (service === "app" || service === "api")
+  ) {
+    if (base.SERVICE_MODE !== "live")
+      throw new Error(`${service}: authentication requires live mode`);
+    parseConfig(
+      service,
+      service === "api" ? auth0ApiEnvironmentSchema : auth0AppEnvironmentSchema,
+      input,
+    );
+    if (base.APP_ENV !== "development" && service === "app")
+      parseConfig(service, z.object({ APP_BASE_URL: httpsUrl }), input);
+  }
+  if (
+    base.APP_ENV === "production" &&
+    ["app", "api"].includes(service) &&
+    base.AUTH_ENABLED !== "true"
+  )
+    throw new Error(`${service}: authentication required in production`);
   return {
     ...base,
     port:

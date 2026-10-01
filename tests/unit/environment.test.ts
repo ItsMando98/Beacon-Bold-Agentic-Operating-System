@@ -73,3 +73,45 @@ describe("runtime configuration", () => {
       }),
     ).toThrow("PORT"));
 });
+it("Auth0 activation rejects missing configuration, malformed bindings and mock mode", () => {
+  const live = {
+    APP_ENV: "staging",
+    SERVICE_MODE: "live",
+    DATABASE_URL: "postgresql://example.invalid/beacon",
+    REDIS_URL: "rediss://example.invalid",
+    PUBLIC_API_URL: "https://example.invalid",
+    AUTH_ENABLED: "true",
+  };
+  expect(() => loadEnvironment("api", live)).toThrow("AUTH0_ISSUER");
+  expect(() =>
+    loadEnvironment("api", {
+      APP_ENV: "development",
+      SERVICE_MODE: "mock",
+      AUTH_ENABLED: "true",
+    }),
+  ).toThrow("authentication requires live mode");
+  expect(() =>
+    loadEnvironment("api", {
+      ...live,
+      AUTH0_ISSUER: "https://synthetic.auth0.com/",
+      AUTH0_AUDIENCE: "https://api.example.invalid",
+      AUTH0_CLIENT_ID: "synthetic",
+      AUTH0_AUTH_BINDINGS: "not-json-secret",
+    }),
+  ).toThrow("AUTH0_AUTH_BINDINGS");
+  try {
+    loadEnvironment("api", { ...live, AUTH0_AUTH_BINDINGS: "not-json-secret" });
+  } catch (error) {
+    expect(String(error)).not.toContain("not-json-secret");
+  }
+});
+it("production cannot start with authentication disabled", () => {
+  expect(() =>
+    loadEnvironment("app", {
+      APP_ENV: "production",
+      SERVICE_MODE: "live",
+      PUBLIC_API_URL: "https://example.invalid",
+      AUTH_ENABLED: "false",
+    }),
+  ).toThrow("authentication required in production");
+});

@@ -3,6 +3,7 @@ export default function Page() {
     <main>
       <h1>Betriebsoberfläche</h1>
       <p>Freigaben, Agentenläufe und Audit werden in Phase 1 angebunden.</p>
+      <a href="/auth/login?returnTo=/operations">Anmelden</a>
     </main>
   );
 }

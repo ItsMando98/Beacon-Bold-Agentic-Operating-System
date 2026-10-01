@@ -124,9 +124,6 @@ services:
       APP_ENV: staging
       SERVICE_MODE: live
       PUBLIC_API_URL: https://staging.beaconandbold.com
-      CLERK_SECRET_KEY_FILE: /run/secrets/clerk_secret
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:?}
-    secrets: [clerk_secret]
     tmpfs: ["/tmp:size=64m,mode=1777", "/runtime/apps/app/.next/cache:size=32m,uid=1000,gid=1000"]
     healthcheck:
       test: [CMD, node, "-e", "fetch('http://127.0.0.1:3001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -180,4 +177,3 @@ secrets:
   redis_cert: {file: "${BEACON_SECRETS_DIR:?}/redis_cert"}
   redis_key: {file: "${BEACON_SECRETS_DIR:?}/redis_key"}
   redis_ca: {file: "${BEACON_SECRETS_DIR:?}/redis_ca"}
-  clerk_secret: {file: "${BEACON_SECRETS_DIR:?}/clerk_secret"}
