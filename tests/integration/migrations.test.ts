@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { Client } from "pg";
 import { expect, it } from "vitest";
 import { migrate } from "../../packages/db/migrate.mjs";
@@ -17,18 +17,22 @@ it("records each forward migration once and rejects changed or missing history",
     await migrate(client, "packages/db/migrations");
     await migrate(client, "packages/db/migrations");
     const rows = await client.query(
-      "SELECT checksum FROM beacon_meta.migrations",
+      "SELECT checksum FROM beacon_meta.migrations ORDER BY name",
     );
-    expect(rows.rows).toHaveLength(1);
+    const migrationNames = (await readdir("packages/db/migrations")).filter(
+      (name) => /^\d{4}_[a-z_]+\.sql$/.test(name),
+    );
+    expect(rows.rows).toHaveLength(migrationNames.length);
     await client.query(
-      "UPDATE beacon_meta.migrations SET checksum='fictional-change'",
+      "UPDATE beacon_meta.migrations SET checksum='fictional-change' WHERE name='0001_foundation.sql'",
     );
     await expect(migrate(client, "packages/db/migrations")).rejects.toThrow(
       "Applied migration changed",
     );
-    await client.query("UPDATE beacon_meta.migrations SET checksum=$1", [
-      rows.rows[0].checksum,
-    ]);
+    await client.query(
+      "UPDATE beacon_meta.migrations SET checksum=$1 WHERE name='0001_foundation.sql'",
+      [rows.rows[0].checksum],
+    );
     await client.query(
       "INSERT INTO beacon_meta.migrations(name,checksum) VALUES ('9999_missing.sql','fictional')",
     );

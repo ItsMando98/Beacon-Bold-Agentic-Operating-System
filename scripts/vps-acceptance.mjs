@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { Client } from "pg";
 import { createClient } from "redis";
 import { migrationEnvironmentSchema } from "../packages/schemas/src/index.ts";
@@ -22,9 +22,15 @@ async function main() {
   try {
     await database.connect();
     const ledger = await database.query(
-      "SELECT name FROM beacon_meta.migrations",
+      "SELECT name FROM beacon_meta.migrations ORDER BY name",
     );
-    assert.equal(ledger.rows.length, 1);
+    const expectedMigrations = (await readdir("packages/db/migrations"))
+      .filter((name) => /^\d{4}_[a-z_]+\.sql$/.test(name))
+      .sort();
+    assert.deepEqual(
+      ledger.rows.map((row) => row.name),
+      expectedMigrations,
+    );
     await database.query("BEGIN");
     await database.query(`CREATE TABLE beacon.staging_tenant_probe (tenant_id uuid NOT NULL, value text NOT NULL);
     ALTER TABLE beacon.staging_tenant_probe ENABLE ROW LEVEL SECURITY;
