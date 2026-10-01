@@ -2,6 +2,16 @@
 
 Stand: 1. Oktober 2026. Code, lokale Abnahme und externe Abnahme werden getrennt bewertet.
 
+## Aktuelle Produktklarstellung und nächste Arbeit
+
+Der Gründer hat das Ziel am 1. Oktober präzisiert: vollständige Marketing-Agentur-Webapp mit klassischer, direkt bedienbarer Fachoberfläche; KI-Agenten übernehmen dieselben Geschäftsaktionen im Hintergrund. [ADR 0011](adr/0011-classic-agency-webapp.md), Konzept und Umsetzungsplan sind angepasst. Die frühere Einschränkung auf ein Sichtfenster für Freigaben/Ausnahmen gilt nicht mehr.
+
+Aktueller Code-Stand: Grundlage, Datenmodell P1-1, Schemas P1-2, API P1-3, Auth-Code P1-4 und Beispiel-Worker P1-7 sind gemergt. Reale Auth0-Abnahme und dauerhafte Staging-Aktivierung bleiben offen. Der klassische Dashboard-Rahmen in PR #14 ist geprüft und zur Review bereit, aber noch nicht gemergt. Vollständige Fachmodule, Audit/Notbremse, MCP, Freigabe-Workflow und Modell-Router sind weiterhin offen.
+
+Nächste Priorität ist P1-4a: Accounts, Login/Signup, Logout, Passwort-Wiederherstellung, Profil und verständlicher Zugriffsstatus. P1-4b ergänzt Arbeitsbereiche/Mitgliedschaften nach ausdrücklicher Zugangs- und Rollenentscheidung. Der neue Plan zieht Grundfunktionen für Konten vor; automatisches kommerzielles Kunden-Onboarding bleibt P4-1. Es wurden für diese Planänderung keine Auth0-Einstellungen oder Laufzeitdienste verändert.
+
+Die nachfolgenden Abschnitte sind historische Abnahmen; ältere Beschreibungen werden durch die aktuelle Produktklarstellung ergänzt.
+
 Gate 0 ist technisch bestanden. PR #8 wurde regulär auf `main` mit Revision `3ee92f9102a0c23055ffb092812ec5f4e642dbde` gemergt. Alle neun Pflichtprüfungen und der begrenzte VPS-Deploy sind erfolgreich: [Deploy-Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36832592546). Migration, Mandantentrennung, öffentliche HTTPS-Endpunkte und Wiederherstellung des externen verschlüsselten Backups sind dokumentiert; [Backup-Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36834193004). Branch-Schutz ist aktiv und der fehlerhafte Merge von PR #4 wurde tatsächlich verweigert.
 
 P1-1 / PR #9, P1-2 / PR #10 und P1-7 / PR #11 sind regulär gemergt. Aktueller Aufgaben-Ausgangspunkt ist main `67311b56f5231128a1d1333436f9bb81faa7f646`; alle neun main-Pflichtprüfungen und der begrenzte VPS-Staging-Deploy sind erfolgreich: [Merge-Lauf](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36847460584). P1-3 ist auf eigenem Branch mit API-Verträgen, Fehlerformat, Scalar und atomarer Idempotenz implementiert und wird als Entwurfs-PR vorgelegt. [Ergebnis P1-3](p1-3-hono-api.md), [ADR 0008](adr/0008-api-contracts-idempotency.md).

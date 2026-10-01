@@ -1,6 +1,6 @@
 # Beacon & Bold
 
-TypeScript-Monorepo für das Agentic Operating System. Die beiden ursprünglichen Konzeptdokumente bleiben die fachliche Grundlage.
+TypeScript-Monorepo für eine vollständige Marketing-Agentur-Webapp mit klassischer Bedienoberfläche und agentenfähigem Kern. Menschen und KI-Agenten arbeiten über dieselben Geschäftsaktionen auf denselben Vorgängen. Das aktualisierte Konzept und der Umsetzungsplan bilden die fachliche Grundlage; [ADR 0011](docs/adr/0011-classic-agency-webapp.md) hält die Produktklarstellung fest.
 
 ## Lokal starten
 Node 22.21+ (22.x), pnpm 10.29.1 und Docker mit Compose benötigen.
@@ -36,4 +36,4 @@ Tests verwenden synthetische Daten. `pnpm dev:infra:stop` stoppt Dienste ohne Da
 ## Umsetzung und externe Abnahme
 Siehe [Status](docs/implementation-status.md), [VPS-Staging](docs/vps-staging.md) und [Arbeitsregeln](AGENTS.md). Wir verwenden ausschließlich den VPS; AWS ist keine aktive Hosting- oder Deployment-Option. Gate 0 wurde mit erzwungenen GitHub-Pflichtprüfungen und erfolgreichem VPS-Staging-Deployment nachgewiesen.
 
-Die Oberfläche ist eine Phase-0-Startseite. Es werden keine verfügbaren Agenten, Freigaben oder angebundenen Cloud-Dienste vorgetäuscht.
+Der App-Rahmen liegt in PR #14 und ist noch nicht gemergt. Der Zielumfang umfasst klassische Fachmodule für den vollständigen Agenturbetrieb; diese sind noch nicht umgesetzt. Als Nächstes folgen Accounts und Login/Signup (P1-4a), danach die weiteren Aufgaben gemäß ihren Abhängigkeiten. Es werden keine verfügbaren Agenten, Freigaben oder angebundenen Dienste vorgetäuscht.
