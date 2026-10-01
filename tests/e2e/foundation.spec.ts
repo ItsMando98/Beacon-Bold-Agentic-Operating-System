@@ -6,9 +6,7 @@ test("shows an honest foundation status", async ({ page }) => {
     page.getByRole("heading", { name: "Betriebsoberfläche" }),
   ).toBeVisible();
   await expect(
-    page.getByText(
-      "Freigaben, Agentenläufe und Audit werden in Phase 1 angebunden.",
-    ),
+    page.getByText("Die Betriebsdaten sind noch nicht angebunden."),
   ).toBeVisible();
 });
 

@@ -17,9 +17,26 @@ Die vorhandenen lokalen P0-7-Änderungen einschließlich aktualisierter Abnahmed
 | P0-5 | Vorläufige Tokens, lokale Schriften, shadcn-Komponenten und Storybook. Drei Browsertests einschließlich Tastatur, Axe und Mobilansicht bestanden. PR #7 gemergt; alle sieben GitHub-Prüfungen erfolgreich. |
 | P0-6 | Getrennte App-Konfigurationen, Mock nur lokal, Pflichtwerte für Live-Betrieb. 23 Unit-Tests und vier Startprüfungen erfolgreich. PR #6 gemergt. |
 | P0-7 | PR #8 regulär gemergt; VPS-Deploy, neun Pflichtprüfungen, Migration/Mandantentrennung, öffentliches HTTPS sowie externes verschlüsseltes Backup/Restore bestanden. |
-| Phase 1 | P1-1 gemergt und nach Staging deployt. P1-2 umgesetzt im eigenen Aufgaben-Branch; P1-3 wartet auf dessen Merge. Auth, MCP-Ausführung, Worker, Modell-Router und Freigabe-Workflow bleiben Folgeaufgaben. |
+| Phase 1 | P1-1, P1-2, P1-3, P1-7 und Auth-Code P1-4 gemergt. Externe Auth-Abnahme bleibt offen. P1-11a entsteht auf eigenem Branch; Audit, MCP, Modell-Router und Freigabe-Workflow bleiben Folgeaufgaben. |
 
 Staging läuft auf dem vorhandenen VPS. Weitere Anbieterzugänge und Betriebsentscheidungen gehören zu Folgeaufgaben und werden nicht durch Platzhalter als nachgewiesen ausgegeben.
+
+## Aktueller Frontend-Arbeitsstand: P1-11a
+
+P1-1, P1-2, P1-3 und P1-7 sind gemergt. Auth-PR #13 wurde auf ausdrücklichen
+Gründerauftrag am 1. Oktober 2026 regulär auf main
+a92989e35e04bcc01fe133bca64af6557cf9eb8e gemergt. Der
+[main-Lauf](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36864214181)
+ist erfolgreich. Auth0-Login-/Agentenabnahme und dauerhafte VPS-Aktivierung
+bleiben offen; dieser Merge bestätigt ausschließlich den geprüften Code.
+
+P1-11a entsteht auf eigenem Branch nach der im Konzept genannten
+Kiranism-Dashboard-Vorlage. [Umfang und Abnahme](p1-11a-frontend-shell.md),
+[Designentscheidung](adr/0010-dashboard-reference.md). P1-11b/P1-11c stehen als
+separate Folgeaufgaben im Umsetzungsplan. Audit/Notbremse P1-6, Freigaben P1-8
+und Agenten-Kern bleiben offen; P1-11 ist noch nicht vollständig abgenommen.
+
+Die folgenden Abschnitte dokumentieren ältere Aufgabenstände.
 
 ## AWS-Einrichtung
 

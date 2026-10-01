@@ -36,4 +36,7 @@ Tests verwenden synthetische Daten. `pnpm dev:infra:stop` stoppt Dienste ohne Da
 ## Umsetzung und externe Abnahme
 Siehe [Status](docs/implementation-status.md), [VPS-Staging](docs/vps-staging.md) und [Arbeitsregeln](AGENTS.md). Wir verwenden ausschließlich den VPS; AWS ist keine aktive Hosting- oder Deployment-Option. Gate 0 wurde mit erzwungenen GitHub-Pflichtprüfungen und erfolgreichem VPS-Staging-Deployment nachgewiesen.
 
-Die Oberfläche ist eine Phase-0-Startseite. Es werden keine verfügbaren Agenten, Freigaben oder angebundenen Cloud-Dienste vorgetäuscht.
+Die Betriebsoberfläche folgt dem im Konzept genannten Kiranism-Dashboard-Starter.
+P1-11a umfasst Navigation, Seitensuche, Hell-/Dunkelmodus und ehrliche Leerzustände.
+Live-Daten, Agentenausführung und wirksame Freigaben werden separat angebunden.
+Siehe [Frontend-Aufgabe](docs/p1-11a-frontend-shell.md). Die Marketing-Website bleibt eine Startseite.
