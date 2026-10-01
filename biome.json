@@ -6,6 +6,7 @@
       "**",
       "!!**/.next",
       "!!**/dist",
+      "!!**/migration-dist",
       "!!**/.cache",
       "!!**/.turbo",
       "!!**/storybook-static",
@@ -31,6 +32,20 @@
       "preset": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": [
+        "scripts/deploy-staging.mjs",
+        "scripts/migrate.mjs",
+        "scripts/runtime-secrets.mjs",
+        "scripts/vps-secrets.mjs",
+        "scripts/vps-acceptance.mjs"
+      ],
+      "linter": {
+        "rules": { "suspicious": { "noUndeclaredEnvVars": "off" } }
+      }
+    }
+  ],
   "css": {
     "parser": {
       "tailwindDirectives": true

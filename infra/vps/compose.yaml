@@ -1,0 +1,183 @@
+name: beacon-bold-staging
+x-app: &app
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  pids_limit: 128
+  logging: &logs
+    driver: json-file
+    options: {max-size: "10m", max-file: "3"}
+  tmpfs: ["/tmp:size=64m,mode=1777"]
+services:
+  postgres:
+    image: pgvector/pgvector@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f
+    restart: unless-stopped
+    network_mode: none
+    mem_limit: 1g
+    cpus: 0.75
+    pids_limit: 128
+    logging: *logs
+    environment:
+      POSTGRES_USER: beacon_owner
+      POSTGRES_DB: beacon
+      POSTGRES_PASSWORD_FILE: /run/secrets/owner_password
+      POSTGRES_INITDB_ARGS: "--auth-local=scram-sha-256 --auth-host=scram-sha-256"
+    command: [postgres, "-c", "listen_addresses=", "-c", "unix_socket_permissions=0777", "-c", "shared_buffers=128MB", "-c", "max_connections=30"]
+    secrets: [owner_password]
+    volumes: ["postgres-data:/var/lib/postgresql/data", "postgres-socket:/var/run/postgresql"]
+    healthcheck:
+      test: [CMD, pg_isready, "-U", beacon_owner, "-d", beacon]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.25
+    pids_limit: 64
+    logging: *logs
+    networks: [data]
+    command: [redis-server, /run/secrets/redis_config]
+    secrets: [redis_config, redis_password, redis_cert, redis_key, redis_ca]
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: [CMD-SHELL, "REDISCLI_AUTH=$$(cat /run/secrets/redis_password) redis-cli --tls --cacert /run/secrets/redis_ca --sni redis -h redis ping | grep -qx PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  migrate:
+    <<: *app
+    image: beacon-bold-migrate:${BEACON_RELEASE:?}
+    restart: "no"
+    profiles: [tools]
+    network_mode: none
+    mem_limit: 512m
+    cpus: 0.5
+    environment:
+      APP_ENV: staging
+      DB_TRANSPORT: unix
+      PGHOST: /var/run/postgresql
+      PGUSER: beacon_owner
+      PGDATABASE: beacon
+      PGPASSWORD_FILE: /run/secrets/owner_password
+      DB_APP_PASSWORD_FILE: /run/secrets/app_password
+    secrets: [owner_password, app_password]
+    volumes: ["postgres-socket:/var/run/postgresql:ro"]
+  acceptance:
+    <<: *app
+    image: beacon-bold-migrate:${BEACON_RELEASE:?}
+    restart: "no"
+    profiles: [tools]
+    mem_limit: 512m
+    cpus: 0.5
+    networks: [data]
+    command: [node, dist/vps-acceptance.cjs]
+    environment:
+      APP_ENV: staging
+      DB_TRANSPORT: unix
+      PGHOST: /var/run/postgresql
+      PGUSER: beacon_owner
+      PGDATABASE: beacon
+      PGPASSWORD_FILE: /run/secrets/owner_password
+      DB_APP_PASSWORD_FILE: /run/secrets/app_password
+    secrets: [owner_password, app_password, redis_url, redis_ca]
+    volumes: ["postgres-socket:/var/run/postgresql:ro"]
+  api:
+    <<: *app
+    image: beacon-bold-api:${BEACON_RELEASE:?}
+    mem_limit: 256m
+    cpus: 0.25
+    networks: [proxy, data]
+    environment:
+      APP_ENV: staging
+      SERVICE_MODE: live
+      DATABASE_URL_FILE: /run/secrets/database_url
+      REDIS_URL_FILE: /run/secrets/redis_url
+      REDIS_CA_FILE: /run/secrets/redis_ca
+      PUBLIC_API_URL: https://staging.beaconandbold.com
+    secrets: [database_url, redis_url, redis_ca]
+    volumes: ["postgres-socket:/var/run/postgresql:ro"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, "-e", "fetch('http://127.0.0.1:3002/health').then(async r=>process.exit(r.ok&&(await r.json()).status==='ok'?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: coolify
+      traefik.http.routers.beacon-bold-staging-api.rule: Host(`staging.beaconandbold.com`)
+      traefik.http.routers.beacon-bold-staging-api.entrypoints: https
+      traefik.http.routers.beacon-bold-staging-api.tls.certresolver: cloudflare
+      traefik.http.services.beacon-bold-staging-api.loadbalancer.server.port: "3002"
+  app:
+    <<: *app
+    image: beacon-bold-app:${BEACON_RELEASE:?}
+    mem_limit: 512m
+    cpus: 0.375
+    networks: [proxy]
+    environment:
+      APP_ENV: staging
+      SERVICE_MODE: live
+      PUBLIC_API_URL: https://staging.beaconandbold.com
+      CLERK_SECRET_KEY_FILE: /run/secrets/clerk_secret
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:?}
+    secrets: [clerk_secret]
+    tmpfs: ["/tmp:size=64m,mode=1777", "/runtime/apps/app/.next/cache:size=32m,uid=1000,gid=1000"]
+    healthcheck:
+      test: [CMD, node, "-e", "fetch('http://127.0.0.1:3001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: coolify
+      traefik.http.routers.beacon-bold-staging-app.rule: Host(`app.staging.beaconandbold.com`)
+      traefik.http.routers.beacon-bold-staging-app.entrypoints: https
+      traefik.http.routers.beacon-bold-staging-app.tls.certresolver: cloudflare
+      traefik.http.services.beacon-bold-staging-app.loadbalancer.server.port: "3001"
+  web:
+    <<: *app
+    image: beacon-bold-web:${BEACON_RELEASE:?}
+    mem_limit: 512m
+    cpus: 0.375
+    networks: [proxy]
+    environment:
+      APP_ENV: staging
+      SERVICE_MODE: live
+      PUBLIC_API_URL: https://staging.beaconandbold.com
+    tmpfs: ["/tmp:size=64m,mode=1777", "/runtime/apps/web/.next/cache:size=32m,uid=1000,gid=1000"]
+    healthcheck:
+      test: [CMD, node, "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: coolify
+      traefik.http.routers.beacon-bold-staging-web.rule: Host(`web.staging.beaconandbold.com`)
+      traefik.http.routers.beacon-bold-staging-web.entrypoints: https
+      traefik.http.routers.beacon-bold-staging-web.tls.certresolver: cloudflare
+      traefik.http.services.beacon-bold-staging-web.loadbalancer.server.port: "3000"
+networks:
+  proxy: {external: true, name: coolify}
+  data: {internal: true}
+volumes:
+  postgres-data:
+  postgres-socket:
+  redis-data:
+secrets:
+  owner_password: {file: "${BEACON_SECRETS_DIR:?}/owner_password"}
+  app_password: {file: "${BEACON_SECRETS_DIR:?}/app_password"}
+  database_url: {file: "${BEACON_SECRETS_DIR:?}/database_url"}
+  redis_password: {file: "${BEACON_SECRETS_DIR:?}/redis_password"}
+  redis_url: {file: "${BEACON_SECRETS_DIR:?}/redis_url"}
+  redis_config: {file: "${BEACON_SECRETS_DIR:?}/redis_config"}
+  redis_cert: {file: "${BEACON_SECRETS_DIR:?}/redis_cert"}
+  redis_key: {file: "${BEACON_SECRETS_DIR:?}/redis_key"}
+  redis_ca: {file: "${BEACON_SECRETS_DIR:?}/redis_ca"}
+  clerk_secret: {file: "${BEACON_SECRETS_DIR:?}/clerk_secret"}

@@ -1,6 +1,6 @@
 # CI und Pflichtprüfungen
 
-Die fünf unabhängigen Checks heißen `lint`, `typecheck`, `test`, `build` und `secret-scan`. Alle laufen für Pull Requests und nach einem Merge auf main. Jeder Installationsschritt verwendet das eingefrorene Lockfile. Gitleaks scannt die vollständige Git-Historie und maskiert Fundstellen.
+Die sieben unabhängigen Checks heißen `lint`, `typecheck`, `test`, `build`, `secret-scan`, `integration` und `browser`. Sie laufen für Pull Requests und nach Merge auf main. Installationen verwenden das eingefrorene Lockfile. Gitleaks scannt die vollständige Git-Historie und maskiert Fundstellen. Integration startet echte lokale Dienste; Browser prüft Komponenten, Tastaturbedienung, Kontrast und Startseiten. Der Build prüft außerdem, dass vier Apps bei ungültiger Startkonfiguration abbrechen.
 
 Administratoren richten den Branch-Schutz mit `.github/branch-protection.json` ein:
 
@@ -8,8 +8,6 @@ Administratoren richten den Branch-Schutz mit `.github/branch-protection.json` e
 gh api --method PUT repos/ItsMando98/Beacon-Bold-Agentic-Operating-System/branches/main/protection --input .github/branch-protection.json
 ```
 
-Das verlangt Administratorrechte und einen GitHub-Tarif, der geschützte Branches in privaten Repositories unterstützt. Ein nicht unterstützter Tarif wird als offener externer Abnahmepunkt dokumentiert; die Repository-Sichtbarkeit wird nicht verändert.
+Dieser Aufruf wurde versucht und von GitHub mit HTTP 403 abgelehnt: Ein privates Repository benötigt einen unterstützten Tarif. Die Sichtbarkeit wurde nicht verändert. Die Checks laufen trotzdem; ein verbindlich erzwungener Merge-Block ist noch nicht nachgewiesen.
 
-Abnahmeszenario P0-3: separater Branch und PR mit einem absichtlich fehlschlagenden Test. `test` muss fehlschlagen und der Merge muss blockiert sein. Den Test-PR schließen; den fehlerhaften Test nie nach main mergen.
-
-Compose-Integrationstests und Browser-/Storybook-Abnahme werden mit P0-4 bzw. P0-5 zusätzlich in CI integriert.
+Der absichtlich fehlschlagende PR #4 zeigte einen roten `test`-Check; die übrigen Checks bestanden. Er wurde geschlossen und nie gemergt. P0-3 und Gate 0 bleiben extern offen bis Branch-Schutz verfügbar und aktiviert ist. Alle sieben Checks am finalen Stand des UI-PR #7 waren erfolgreich vor dessen Merge.

@@ -1,0 +1,8 @@
+# Fill only with resource identifiers, never secret values.
+zone_id                 = "REPLACE_FROM_BOOTSTRAP"
+github_oidc_provider_arn = "arn:aws:iam::212626318809:oidc-provider/token.actions.githubusercontent.com"
+runtime_secret_arn      = "REPLACE_FROM_BOOTSTRAP"
+runtime_kms_key_arn     = "REPLACE_FROM_BOOTSTRAP"
+budget_email            = "REPLACE_WITH_FOUNDER_ADDRESS"
+approval_reference      = "REPLACE_WITH_ACTUAL_APPROVAL"
+postgres_version        = "17.11"

@@ -1,16 +1,42 @@
 # Umsetzungsstatus
 
-Der Status unterscheidet Code, lokale Abnahme und externe Abnahme. Ein offenes Gate ist nicht bestanden.
+Stand: 1. Oktober 2026. Code, lokale Abnahme und externe Abnahme werden getrennt bewertet.
 
-| Aufgabe | Status |
+Aktueller Deploy-Auftrag: Vorbereitung und Deployment auf dem vorhandenen VPS sind ausdrücklich angefordert. Die VPS-Implementierung in PR #8 enthält separate Compose-Dienste, feste Ressourcenlimits, PostgreSQL über authentifizierten lokalen Socket, Redis-TLS, gemountete Secret-Dateien, eingeschränkten CI-Receiver sowie Migration und echte Mandantentrennungsabnahme. Alle neun CI-Prüfungen auf 502e535 bestanden, einschließlich tatsächlicher VPS-Container-Topologie mit ausschließlich synthetischen CI-Werten; lokale Lint-/Typ-/Build-/Startprüfungen, 29 Unit-Tests und vier Receiver-Tests bestanden. [CI-Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36830310882).
+
+Das Repository ist jetzt öffentlich. Main-Branch-Schutz mit neun Pflichtprüfungen, striktem Basisstand und Administrator-Erzwingung ist aktiv. Die vorhandene fehlschlagende PR #4 wurde erneut geöffnet; ihr Merge wurde tatsächlich verweigert (`9 of 9 required status checks are expected`), danach wieder geschlossen. P0-3-Tarifblocker ist damit behoben.
+
+Server-Deploy bleibt offen: Beide Clerk-Werte und alle drei DNS-Namen fehlen weiterhin. Der Gründer hat den dauerhaften, auf Deploy/Backup begrenzten CI-Zugang ausdrücklich genehmigt. Ein neuer eigener SSH-Schlüssel ist eingerichtet; allgemeine Befehle wurden bei echter SSH-Anmeldung abgewiesen. VPS-Adresse, neuer Deploy-Schlüssel und gepinnter Hostschlüssel sind als GitHub-Actions-Secrets hinterlegt. Der ursprüngliche administrative Root-Schlüssel und private Clerk-Werte bleiben außerhalb GitHubs.
+
+Der eigene Pfad `/opt/beacon-bold-staging`, feste Compose-/Receiver-Konfiguration, separate Datenbank-/Redis-Zugangswerte und Backup-Verschlüsselungszertifikat sind auf dem VPS vorbereitet. Der private Wiederherstellungsschlüssel bleibt lokal. Es wurden noch keine Staging-Anwendungen gestartet; vorhandene Dienste werden erhalten. Der Server besitzt acht CPU-Kerne, rund 16 GB RAM und derzeit ausreichend Kapazität für die festgelegten Limits. Keine AWS-Provisionierung und keine neue Serverbestellung. Umfang und Kostengrenzen stehen in [vps-approval.md](vps-approval.md).
+
+Gate 0 bleibt bis zum echten Merge-Deploy, Migration-/Mandantentrennungsnachweis, HTTPS und externem Backup-/Restore-Nachweis offen. Phase 1 hat nicht begonnen. Die nachfolgenden AWS-Abschnitte dokumentieren die vorbereitete, nicht provisionierte Alternative.
+
+| Aufgabe | Nachweis / offene Punkte |
 |---|---|
-| P0-1 | Monorepo implementiert, Installation/Build/Typecheck/Lint und drei Tests lokal bestanden; PR #1 gemergt. |
-| P0-2 | Arbeitsregeln und Befehlsreferenz implementiert. |
-| P0-3 | CI und erzwungene GitHub-Pflichtprüfungen folgen. |
-| P0-4 | Compose und Dienste-Abnahme folgen. |
-| P0-5 | Vorläufige Design Tokens und Storybook folgen. |
-| P0-6 | Erweiterte Umgebungsvalidierung folgt. |
-| P0-7 | Terraform/Deployment folgen; AWS-Konto fehlt. |
-| Phase 1 | Noch nicht begonnen; Gate 0 ist Voraussetzung. |
+| P0-1 | Vier Apps und sechs Pakete, eingefrorene Abhängigkeiten. PR #1 gemergt. |
+| P0-2 | Zwölf Arbeitsregeln, Ordnerkarte und Befehle. PR #2 gemergt. |
+| P0-3 | Sieben echte GitHub-Prüfungen erfolgreich. PR #3 gemergt. Absichtlich fehlschlagender PR #4 geschlossen, nicht gemergt. Nach Umstellung auf öffentliche Sichtbarkeit: neun Pflichtprüfungen und Administrator-Erzwingung aktiv; tatsächlicher Mergeversuch von PR #4 verweigert. |
+| P0-4 | PostgreSQL/pgvector, eingeschränkte Datenbankrolle, Redis, persistenter Temporal-Entwicklungsserver und Mailpit. Vier echte Diensttests lokal und in CI bestanden. PR #5 gemergt. |
+| P0-5 | Vorläufige Tokens, lokale Schriften, shadcn-Komponenten und Storybook. Drei Browsertests einschließlich Tastatur, Axe und Mobilansicht bestanden. PR #7 gemergt; alle sieben GitHub-Prüfungen erfolgreich. |
+| P0-6 | Getrennte App-Konfigurationen, Mock nur lokal, Pflichtwerte für Live-Betrieb. 23 Unit-Tests und vier Startprüfungen erfolgreich. PR #6 gemergt. |
+| P0-7 | Entwurfs-PR #8 auf feat/p0-7-staging fortgeführt. AWS-MCP-Proxy 1.7.0 mit beacon-bold einschließlich echtem STS-Aufruf bestätigt. Terraform für Bootstrap und Frankfurt-Staging validiert; zwei simulierte Sicherheitstests grün. Begrenzte OIDC-Rolle verwendet tatsächliche unveränderliche Repository-IDs und nur main. Vorwärtsmigration mit Checksummen/Sperre, echte lokale Historien- und RLS-Abnahme; insgesamt sechs Integrationstests und 27 Unit-Tests grün. Deployment-Pipeline vorbereitet, noch nicht aktiviert. Kostenantrag: 118,94 USD Monatsplanung, 150 USD beantragt. Gründerfreigabe, DNS, Clerk, Cloud-Provisionierung und echter Merge-Deploy bleiben offen. |
+| Phase 1 | Noch nicht begonnen; Gate 0 ist Voraussetzung. Keine Kunden-, MCP-, Freigabe- oder Modellfunktionen implementiert. |
 
-Gate 0 bleibt offen bis ein echter Merge nach Staging deployt und die CI fehlerhafte Änderungen blockiert. Domain beaconandbold.com ist verfügbar; Staging wird staging.beaconandbold.com. Temporal-Cloud-Namespace und weitere Dienstkonten müssen ebenfalls bereitgestellt werden.
+Gate 0 bleibt offen bis ein echter Merge nach Staging deployt und GitHub fehlerhafte Änderungen verbindlich blockiert. Ziel ist staging.beaconandbold.com auf dem vorhandenen VPS; dessen Standort ist noch nicht unabhängig bestätigt. Temporal Cloud, Clerk und Anbieterzugänge sowie freigegebene Betriebsbudgets sind noch bereitzustellen. Die vorhandene Komponenten-Vorschau ist eine lokale UI-Abnahme.
+
+## AWS-Einrichtung
+
+AWS CLI 2.37.6 wurde mit gültiger Amazon-Signatur benutzerspezifisch installiert. Profil beacon-bold, Standardregion eu-central-1. STS bestätigt Konto 212626318809 mit Root-Anmeldung. Zugangswerte liegen ausschließlich in AWS-eigener Benutzerkonfiguration. AWS-MCP ist in diesem Chat nicht als direkt aufrufbares Werkzeug geladen; der vorhandene konfigurierte Proxy wurde deshalb über das MCP-Protokoll gestartet. Initialisierung, Werkzeugliste und entfernter aws___run_script/STS GetCallerIdentity waren erfolgreich. Infrastruktur und OIDC-Rolle sind als Terraform vorbereitet, aber noch nicht provisioniert.
+
+## P0-7 Teilabnahmen
+
+- Bootstrap: S3-State, KMS, OIDC, leere Secret-Hülle, delegierte Staging-Zone als Code; Validierung und simulierte Abnahme bestanden, Apply offen.
+- Frankfurt-Staging: VPC, private RDS/Redis, ECR, ECS, ALB/ACM/DNS, Budgetalarme als Code; Validierung und simulierte Abnahme bestanden. DNS-Schreibzugriff wird auf die delegierte Staging-Zone geprüft.
+- Migrationen: Foundation ohne Phase-1-Fachmodell; reale lokale Vorwärts-/Checksummen- und Mandantentrennungstests bestanden. Cloud-Abnahme offen.
+- CI/Deployment: Migration vor Dienststart, Commit-Images per Digest, ECS-/HTTPS-Abnahme und Wiederherstellung vorheriger Revisionen; vier simulierte Deployment-Fehler-/Erfolgstests bestanden. Echte GitHub-OIDC-Annahme und Merge-Deploy offen.
+- Kosten: [konkreter requestApproval-Antrag](staging-approval.md), Entscheidung offen. DNS-Delegation, Alarmadresse, Clerk und GitHub-Tarifentscheidung bleiben menschliche Voraussetzungen.
+
+Lint, Typprüfung, Build, fehlende Startkonfiguration und drei Browsertests lokal bestanden. Storybook verwendet manuelle Axe-Prüfung, damit die Playwright-Abnahme nicht mit einer zweiten Analyse kollidiert. Externe Abnahmen werden nicht durch diese lokalen Tests ersetzt. Der frühere HTTP-403-Blocker beim Branch-Schutz ist inzwischen behoben; Phase 1 bleibt bis Gate 0 geschlossen.
+
+GitHub-CI auf 546dc77 bestätigt acht Code-/Containerprüfungen: Lint, Typecheck, Unit, Build, Secret-Scan, Integration, Browser und vier Runtime-Image-Builds mit sicherem Abbruch ohne Konfiguration. Der erste Terraform-Lauf deckte den fehlenden Linux-h1-Providerhash auf; beide Lockfiles wurden danach offiziell um den signaturgeprüften Linux-Hash ergänzt und Terraform-CI auf 9acc68d bestand. Ein weiterer Browserlauf zeigte die Axe-Kollision; der manuelle Storybook-Modus wurde entsprechend der aktuellen Dokumentation in initialGlobals korrigiert, die Playwright-Axe-Abnahme bleibt aktiv. Der lokale Docker-Daemon antwortete beim zusätzlichen Image-Build nicht; dieser wurde abgebrochen, die Containerabnahme stammt aus GitHub-CI. Aktuelle Prüfresultate stehen in [Entwurfs-PR #8](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/pull/8); Cloud-Abnahmen bleiben separat offen.

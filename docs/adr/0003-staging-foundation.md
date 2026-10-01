@@ -1,0 +1,13 @@
+# ADR 0003: Staging-Infrastruktur (P0-7)
+
+Status: vorgeschlagen; Kostenfreigabe und externe Abnahme offen.
+
+Frankfurt, ein eigenes VPC, zwei öffentliche Subnetze für ALB/Fargate und zwei isolierte Datensubnetze. Container haben öffentliche IPs für Image-/Log-/Secret-Zugriff, aber eingehender Verkehr wird ausschließlich vom ALB erlaubt. Dadurch entfallen NAT-Gateway-Grundkosten. PostgreSQL und Redis sind nicht öffentlich; PostgreSQL erzwingt TLS, Redis verwendet Transport- und Speicherverschlüsselung. Single-AZ und eine Task pro Dienst sind für synthetisches Staging vorgesehen, keine Produktionsverfügbarkeit zugesagt.
+
+Der Bootstrap verwaltet verschlüsselten und versionierten S3-State mit nativer Sperrdatei, eine eigene Staging-DNS-Zone, GitHub-OIDC und einen leeren Secret-Container. Ein Mensch delegiert nur die Staging-Zone beim vorhandenen DNS-Betreiber. Die produktive Zone wird durch Terraform nicht verändert. Secret-Werte bleiben außerhalb des States; RDS verwaltet den Administratorzugang. GitHub besitzt weder Secret-Lesezugriff noch Infrastruktur- oder IAM-Verwaltungsrechte. Task-Ausführungsrollen lesen ihre Referenzen; die eigentliche Task-Rolle hat in Phase 0 keine AWS-Rechte.
+
+GitHub-OIDC vertraut exakt dem tatsächlich abgefragten unveränderlichen Repository-Subject für main und der Audience sts.amazonaws.com. Ein GitHub-Environment würde das Subject ändern; deshalb verwendet die Pipeline Branch-Bindung und kein Environment-Subject. Die CI läuft vor Deployment; STAGING_READY wird erst nach dokumentierten Voraussetzungen aktiviert. GitHub-Branch-Schutz muss zusätzlich wirksam sein und bleibt wegen HTTP 403 offen. Die Pipeline darf keinen Ersatz dafür behaupten.
+
+Terraform provisioniert Dienste mit gewünschter Anzahl null. Nach erfolgreicher Vorwärtsmigration deployt die Pipeline unveränderliche Commit-Images per Digest. Sie prüft Migration-Exitcode, ECS-Task-Version und drei HTTPS-Endpunkte. Bei Fehlern setzt sie vorherige Dienstrevisionen und Anzahlen zurück; Migrationen werden nie rückwärts ausgeführt. Checksummen und Datenbanksperre sichern den Migrationslauf. Die Foundation enthält nur Extension, Schema und eingeschränkte Rolle. Fachliche Mandantenmodelle bleiben P1-1 vorbehalten; ein ausschließlich lokaler, zurückgerollter Testfixture beweist RLS-Lesen und verweigertes mandantenfremdes Schreiben.
+
+Freigaben bleiben menschlich, solange P1-8 fehlt. Offene Entscheidungen: Monatsbudget und Alarmadresse, GitHub-Tariflösung, DNS-Delegation, Clerk-Zugang. Nach Kostenfreigabe sind echte Pläne, OIDC-Annahme, Cloud-Migration und Merge-Deployment abzunehmen. Gate 0 und Phase 1 bleiben bis dahin geschlossen.

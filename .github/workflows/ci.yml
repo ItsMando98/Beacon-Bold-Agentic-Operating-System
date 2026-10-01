@@ -7,8 +7,148 @@ permissions:
   contents: read
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  containers:
+    name: containers
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.STAGING_CLERK_PUBLISHABLE_KEY || 'synthetic-ci-only' }}
+      BEACON_RELEASE: ${{ github.sha }}
+      BEACON_SECRETS_DIR: ${{ github.workspace }}/.cache/vps-ci-secrets
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build runtime images and reject missing configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for service in api app web migrate; do
+            docker build --target "$service" --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "beacon-bold-$service:$GITHUB_SHA" .
+            set +e
+            timeout 30s docker run --rm "beacon-bold-$service:$GITHUB_SHA"
+            code=$?
+            set -e
+            test "$code" -eq 1
+          done
+      - name: Test restricted receiver
+        run: python3 -m unittest discover -s tests/infra
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.21.1
+      - name: Accept VPS topology with synthetic credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CLERK_SECRET_KEY=synthetic-ci-only
+          export NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-synthetic-ci-only}
+          node scripts/vps-secrets.mjs "$BEACON_SECRETS_DIR"
+          docker network create coolify
+          docker compose -f infra/vps/compose.yaml config --quiet
+          docker compose -f infra/vps/compose.yaml up -d --wait --wait-timeout 180 postgres redis
+          docker compose -f infra/vps/compose.yaml run --rm --no-deps migrate
+          docker compose -f infra/vps/compose.yaml run --rm --no-deps migrate
+          docker compose -f infra/vps/compose.yaml run --rm --no-deps acceptance
+          docker compose -f infra/vps/compose.yaml up -d --wait --wait-timeout 180 api app web
+      - name: Archive immutable runtime images
+        run: |
+          docker save beacon-bold-api:$GITHUB_SHA beacon-bold-app:$GITHUB_SHA beacon-bold-web:$GITHUB_SHA beacon-bold-migrate:$GITHUB_SHA | gzip > runtime-images.tar.gz
+          python3 -c "import importlib.util, os; s=importlib.util.spec_from_file_location('receiver', 'infra/vps/receiver.py'); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); m.validate_archive('runtime-images.tar.gz', os.environ['GITHUB_SHA'])"
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: vps-images-${{ github.sha }}
+          path: runtime-images.tar.gz
+          retention-days: 1
+      - if: always()
+        run: docker compose -f infra/vps/compose.yaml down --volumes
+  terraform:
+    name: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.5
+      - run: terraform -chdir=infra/staging fmt -check -recursive
+      - run: terraform -chdir=infra/staging init -backend=false -lockfile=readonly
+      - run: terraform -chdir=infra/staging validate
+      - run: terraform -chdir=infra/staging test
+      - run: terraform -chdir=infra/staging/bootstrap init -backend=false -lockfile=readonly
+      - run: terraform -chdir=infra/staging/bootstrap validate
+      - run: terraform -chdir=infra/staging/bootstrap test
+  staging:
+    name: staging-deploy
+    needs: [quality, secret-scan, integration, browser, terraform, containers]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_READY == 'true' && vars.STAGING_TARGET == 'aws'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: eu-central-1
+      STAGING_SUBNETS: ${{ vars.STAGING_SUBNETS }}
+      STAGING_SECURITY_GROUP: ${{ vars.STAGING_SECURITY_GROUP }}
+      APPROVAL_REFERENCE: ${{ vars.STAGING_APPROVAL_REFERENCE }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.STAGING_CLERK_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.21.1
+      - name: Require documented founder approval and Clerk configuration
+        run: test -n "$APPROVAL_REFERENCE" && test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+      - uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: arn:aws:iam::212626318809:role/beacon-bold-staging-github-deploy
+          aws-region: eu-central-1
+          allowed-account-ids: '212626318809'
+      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and publish immutable release images
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry=212626318809.dkr.ecr.eu-central-1.amazonaws.com
+          for service in api app web migrate; do
+            repository="beacon-bold-staging-$service"
+            if ! aws ecr describe-images --repository-name "$repository" --image-ids "imageTag=$GITHUB_SHA" >/dev/null 2>&1; then
+              docker build --target "$service" --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY -t "$registry/$repository:$GITHUB_SHA" .
+              docker push "$registry/$repository:$GITHUB_SHA"
+            fi
+          done
+      - run: node scripts/deploy-staging.mjs
+  vps-staging:
+    name: vps-staging-deploy
+    needs: [quality, secret-scan, integration, browser, terraform, containers]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_READY == 'true' && vars.STAGING_TARGET == 'vps'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: vps-staging-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vps-images-${{ github.sha }}
+      - name: Deploy through restricted SSH endpoint
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          APPROVAL_REFERENCE: ${{ vars.STAGING_APPROVAL_REFERENCE }}
+        run: |
+          set -euo pipefail
+          test -n "$APPROVAL_REFERENCE"
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_DEPLOY_KEY" > ~/.ssh/beacon_deploy
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/beacon_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 root@"$VPS_HOST" "deploy $GITHUB_SHA" < runtime-images.tar.gz
   quality:
     name: ${{ matrix.command }}
     runs-on: ubuntu-latest
