@@ -2,15 +2,17 @@
 
 Sep 30, 2026 · @Mathis
 
-Beacon & Bold läuft als agentengeführte Agentur: Ein Team spezialisierter KI-Agenten führt alle operativen Prozesse über eine gemeinsame Daten- und Tool-Schicht, Menschen setzen nur Strategie, Freigaben und Ausnahmen.
+Beacon & Bold baut eine vollständige Webapp für den Marketing-Agenturbetrieb. Die Oberfläche ist klassisch aufgebaut: Menschen verwalten Kunden, Projekte, Aufgaben, Kampagnen, Inhalte, Assets, Kommunikation und Finanzen direkt über Listen, Detailseiten, Formulare und Boards. Im Hintergrund können spezialisierte KI-Agenten dieselben Geschäftsaktionen über eine gemeinsame Daten- und Tool-Schicht ausführen und den operativen Betrieb übernehmen.
+
+Produktklarstellung vom 1. Oktober 2026: Die klassische, vollständig bedienbare Agentur-Webapp ist das Produktziel. Agentenfähigkeit und Automatisierung ergänzen jeden Fachbereich von Anfang an. Die Oberfläche bleibt auch bei hohem Automatisierungsgrad voll nutzbar. Diese Klarstellung ersetzt frühere Formulierungen, die das Frontend auf ein Sichtfenster für Freigaben und Ausnahmen beschränkten.
 
 ## Leitidee
 
-Beacon & Bold baut kein Tool für Mitarbeiter, sondern ein System, das Agenten bedienen. Jede Funktion hat zuerst eine API und ein Tool-Schema, die Oberfläche für Menschen ist nur ein Sichtfenster darauf. Die Agentur ist ihr eigener Referenzkunde: Alles, was wir Kunden verkaufen, läuft zuerst bei uns.
+Menschen und Agenten bedienen ein gemeinsames System. Jede Geschäftsaktion hat einen schema-basierten Vertrag und wird über dieselbe Geschäftslogik ausgeführt, unabhängig davon, ob sie aus einem Formular, einem Board, einer REST-Anfrage oder einem MCP-Tool kommt. Die Agentur ist ihr eigener Referenzkunde: Alles, was wir Kunden verkaufen, läuft zuerst bei uns.
 
-1. **Agent-first, UI-second.** Jede Aktion ist per API/MCP aufrufbar, dokumentiert und maschinenlesbar. Menschen nutzen dieselben Endpunkte über ein Dashboard.
+1. **Klassische Oberfläche, agentenfähiger Kern.** Jede fachliche Funktion ist für berechtigte Menschen direkt bedienbar und für berechtigte Agenten per API/MCP aufrufbar. Ein Chat ist ein zusätzlicher Zugang, keine Voraussetzung für normale Bedienung.
 2. **Ein gemeinsames Gedächtnis.** Kunden, Kampagnen, Assets, Verträge und Ergebnisse liegen in einer Datenschicht, auf die alle Agenten zugreifen.
-3. **Menschen setzen Ziele, Agenten führen aus.** Der Mensch definiert Strategie, Budgetrahmen und Marke; Agenten planen, produzieren, schalten und rechnen ab.
+3. **Menschen können arbeiten und delegieren.** Menschen bearbeiten Vorgänge direkt oder geben Ziele an Agenten. Agenten planen, produzieren und koordinieren innerhalb ihrer Rechte und Freigaben; Ergebnisse bleiben in den normalen Fachansichten sichtbar.
 4. **Autonomie in Stufen.** Jede Aufgabe hat einen Autonomiegrad (Vorschlag, Freigabe, autonom), der mit nachgewiesener Qualität steigt.
 5. **Alles nachvollziehbar.** Jede Agentenaktion wird mit Grund, Eingaben und Ergebnis protokolliert.
 6. **Selbst zuerst.** Neue Funktionen gehen erst bei Beacon & Bold live, dann zu Kunden. So entstehen echte Fallstudien.
@@ -52,7 +54,7 @@ Ein Orchestrator-Agent verteilt Aufgaben an spezialisierte Agenten, die jeweils 
 | --- | --- | --- | --- |
 | Orchestrator | Ziele in Aufgaben zerlegen, priorisieren, Agenten koordinieren | Aufgaben-Queue, Kalender, alle Agenten | Autonom, mit Tageslimit |
 | Strategie-Agent | Marktanalyse, Positionierung, Kanalmix, Kampagnenplan | Web-Recherche, Analytics, Wettbewerbsdaten | Vorschlag, Mensch gibt frei |
-| Ads-Agent | Kampagnen in Meta, Google, TikTok aufsetzen, Gebote und Budgets steuern | Werbe-APIs, Reporting | Autonom im Budgetrahmen |
+| Ads-Agent | Kampagnen in Meta, Google, TikTok aufsetzen, Gebote und Budgets steuern | Werbe-APIs, Reporting | Entwürfe autonom; Geldwirkungen anfangs mit Gründerfreigabe |
 | Content-Agent | Blog, SEO, Newsletter, Social Posts erstellen und planen | CMS, SEO-Tools, Social-APIs | Freigabe für neue Marken, danach autonom |
 | UGC-Agent | KI-Creator und Avatare verwalten, Videos und Bilder erzeugen | Bild-/Videomodelle, Asset-Bibliothek | Freigabe je Kunde |
 | Sales-Agent | Leads finden, qualifizieren, Erstgespräche buchen | CRM, E-Mail, Kalender | Autonom bis Termin |
@@ -65,7 +67,33 @@ Ein Orchestrator-Agent verteilt Aufgaben an spezialisierte Agenten, die jeweils 
 
 ## Module
 
-Jedes Modul besteht aus Daten, Tools für Agenten und einem Ergebnisziel. Der Mensch sieht nur Freigaben, Ausnahmen und Kennzahlen.
+Jedes Modul besteht aus Daten, gemeinsamer Geschäftslogik, einer vollständigen klassischen Bedienoberfläche, Tools für Agenten und einem Ergebnisziel. Menschen können Vorgänge anlegen, bearbeiten, prüfen und nachverfolgen. Automatisierung erzeugt dieselben Datensätze und Zustände wie direkte Bedienung.
+
+### Aufbau der Webapp
+
+Die Betriebsoberfläche in `apps/app` folgt dem Kiranism-Dashboard-Starter als Layout- und Komponentenvorlage. Sidebar, Kopfzeile, Suche, Filter, Tabellen, Detailseiten, Formulare und Boards bilden die normale Navigation. Fachseiten zeigen Lade-, Leer-, Fehler- und Berechtigungszustände. Agentenstatus und Aktionen werden dort ergänzt, wo sie zum Vorgang gehören.
+
+| Bereich | Klassische Bedienung | Arbeit durch Agenten |
+| --- | --- | --- |
+| Übersicht | Kennzahlen, Termine, offene Aufgaben und Freigaben | Prioritäten, Risiken und Ergebnisse zusammenfassen |
+| Kunden und CRM | Kunden, Kontakte, Leads, Deals und Pipeline bearbeiten | Leads recherchieren, qualifizieren und Datensätze pflegen |
+| Projekte und Aufgaben | Projekte, Aufgaben, Verantwortliche, Fristen und Boards verwalten | Aufträge zerlegen, Aufgaben zuweisen und Fortschritt überwachen |
+| Kampagnen und Ads | Entwürfe, Creatives, Budgets und Ergebnisse prüfen und bearbeiten | Kampagnen vorbereiten, Tests auswerten und Änderungen vorschlagen oder ausführen |
+| Content und Redaktion | Briefings, Texte, Versionen und Veröffentlichungskalender verwalten | Recherchieren, erstellen, prüfen und Veröffentlichungen vorbereiten |
+| Assets und KI-Creator | Dateien, Herkunft, Nutzungsrechte und Creator verwalten | Bilder, Videos und Skripte erzeugen und zuordnen |
+| Kommunikation und Termine | Kundenverlauf, Nachrichten, Briefings und Termine bearbeiten | Antworten vorbereiten, Onboarding begleiten und Termine koordinieren |
+| Finanzen | Angebote, Rechnungen, Zahlungsstatus, Belege und Exporte verwalten | Entwürfe erstellen, abgleichen und Buchhaltung vorbereiten |
+| Berichte | Ergebnisse je Kunde, Kampagne und Zeitraum ansehen | Berichte erstellen, Auffälligkeiten erklären und Maßnahmen ableiten |
+| Automatisierung und Kontrolle | Agenten, Läufe, Freigaben, Audit und Notbremse bedienen | Ziele bearbeiten und Arbeit innerhalb kontrollierter Rechte übernehmen |
+| Konto und Einstellungen | Anmeldung, Registrierung, Profil, Arbeitsbereich, Mitglieder und Rechte | Eigene getrennte Agentenidentitäten und begrenzte Zugänge |
+
+Diese Tabelle beschreibt den Zielumfang für den Vollbetrieb, keine bereits verfügbaren Funktionen. Die Module entstehen schrittweise mit ihrer API- und Agentenanbindung. Kundenportal und spätere Vermarktung an weitere Agenturen sind zusätzliche Ausbaustufen.
+
+### Accounts und Zugang
+
+Login, Signup, Logout, Passwort-Wiederherstellung und Kontoprofil gehören bereits zur ersten nutzbaren Webapp. Auth0 übernimmt die Authentifizierung; die App verwaltet die fachliche Zuordnung zu Arbeitsbereichen und Berechtigungen. Eine Registrierung allein erteilt keine Rechte auf bestehende Agentur- oder Kundendaten.
+
+Offen ist, ob neue Registrierungen über Einladung beziehungsweise Freigabe in einen bestehenden Arbeitsbereich kommen oder automatisch einen eigenen Arbeitsbereich erhalten. Ebenso sind Rollenmatrix, Einladungsprozess und Mitgliedschaftsverwaltung vor ihrer Implementierung festzulegen. Öffentliches Kunden-Onboarding einschließlich Abrechnung bleibt eine spätere Ausbauaufgabe; die grundlegenden Kontofunktionen warten nicht darauf.
 
 ### Marketing (für uns und für Kunden)
 
@@ -118,7 +146,7 @@ Ein durchgängiger TypeScript-Stack mit dauerhafter Workflow-Engine im Zentrum: 
 | Schicht | Empfehlung | Begründung |
 | --- | --- | --- |
 | Frontend | Next.js (App Router), TypeScript, Tailwind, shadcn/ui | Größtes Ökosystem, Server Components, gut für SEO. Das bestehende Design System (Tokens, Bricolage Grotesque, JetBrains Mono) wird als Tailwind-Tokens übernommen. |
-| Agenten-UI | Vercel AI SDK, TanStack Query | Streaming, Freigabe-Dialoge und Agenten-Chat ohne Eigenbau. |
+| Fachoberfläche und Agenten-Assistenz | TanStack Query; Vercel AI SDK für Streaming | Klassische Fachseiten und Formulare; ergänzend Streaming, Tool-Anzeige, Freigabe-Dialoge und Agenten-Chat. |
 | Backend-API | Hono oder Fastify, Zod-Schemas, daraus OpenAPI | Ein Schema erzeugt REST-API, Typen und Tool-Definitionen. Nicht tRPC als Hauptschnittstelle, weil externe Agenten OpenAPI und MCP brauchen. |
 | Agenten-Schnittstelle | MCP-Server (offizielles TypeScript-SDK), OAuth 2.1 mit Scopes | Grok-Bots, Claude und andere docken ohne Anpassung an, jeder Agent hat eine eigene Identität. |
 | Workflow-Engine | Temporal (leichter: Inngest oder Restate) | Agenten-Aufgaben laufen lange und brauchen Wiederholungen, Wartezeiten und menschliche Freigaben. |
@@ -127,15 +155,15 @@ Ein durchgängiger TypeScript-Stack mit dauerhafter Workflow-Engine im Zentrum: 
 | Cache und Events | Redis, später Kafka oder NATS | Zuerst einfach: Events laufen über Postgres (Outbox-Muster). |
 | Analytics | ClickHouse, sobald Kampagnendaten wachsen | Schnelle Auswertung über viele Kunden und Regionen. |
 | Dateien | S3-kompatibler Speicher (S3 oder Cloudflare R2) | Assets, UGC-Videos, Verträge. |
-| Auth für Menschen | WorkOS oder Clerk | SSO und Rollen ohne Eigenbau. |
+| Auth für Menschen | Auth0 (aktuelle Entscheidung, ADR 0009) | Login, Signup und Sessions über den Anbieter; Arbeitsbereich und Fachrechte im eigenen System. |
 | Zahlungen und Buchhaltung | Stripe Billing und Stripe Tax, DATEV- oder Lexoffice-Anbindung | Mehrere Währungen und Steuern pro Land. Die Buchhaltungsanbindung pro Land ist der größte Sonderfall. |
-| Infrastruktur | Terraform oder Pulumi, zuerst managed (Vercel oder Cloudflare, AWS ECS oder Fly.io), Kubernetes erst bei Bedarf | Skaliert schrittweise und spart am Anfang Betriebsaufwand. EU-Datenhaltung zuerst, weitere Regionen später. |
+| Infrastruktur | Vorhandener VPS mit versionierter Compose-/Deploy-Konfiguration (aktuelle Betriebsentscheidung) | Bestehenden Staging-Pfad weiterverwenden; AWS und die früher genannten Hosting-Alternativen sind nicht aktiv. |
 | Beobachtbarkeit | OpenTelemetry, Grafana, Sentry, Langfuse | Nachvollziehbarkeit und LLM-Evals sind für autonome Agenten Pflicht. |
 | Repo und CI | pnpm-Monorepo mit Turborepo, GitHub Actions | Frontend, API, Agenten und geteilte Schemas an einem Ort. |
 
 ### Architekturentscheidungen
 
-1. **Schema zuerst.** Jede Funktion wird einmal mit Zod definiert. Daraus entstehen API, MCP-Tool, Dokumentation und Formulare, sodass Mensch und Agent nie auseinanderlaufen.
+1. **Schema zuerst.** Jede Geschäftsaktion wird einmal mit Zod definiert. Daraus entstehen API, MCP-Tool, Dokumentation und Formularvalidierung. Fachregeln, Mandantentrennung, Berechtigungen, Freigaben und Audit gelten für Menschen und Agenten gleichermaßen.
 2. **Dauerhafte Workflows statt Skripte.** Jeder Agenten-Ablauf läuft in der Workflow-Engine mit Wiederholung, Zeitlimit und Freigabe-Schritt. Ein Absturz verliert keinen Zustand, und Freigaben durch Menschen sind ein normaler Schritt.
 3. **Eigenes CRM-Kernmodell auf Postgres.** Für volle Agenten-Kontrolle lohnt ein schlanker Eigenbau. Meta, Google, Stripe und E-Mail bleiben Adapter dahinter und lassen sich pro Region austauschen.
 4. **Modellunabhängigkeit.** Ein Router wählt das Modell je Aufgabe nach Qualität und Kosten. Kein Anbieter wird zur Abhängigkeit.
@@ -215,16 +243,24 @@ Die Wellen sind meine Gruppierung nach Volumen. Neben dem Budget entscheiden Spr
 
 ## Roadmap
 
-&#91;embedded content: Roadmap · 4 Phasen, 3 Gates\]
+| Phase | Ergebnis |
+| --- | --- |
+| 0: Grundlage | Getestete Projektstruktur, Design-System und Staging |
+| 1: Fundament | Accounts, klassischer App-Rahmen und gemeinsamer API-/Agenten-/Workflow-Kern |
+| 2: Selbst zuerst | Bedienbare CRM-, Marketing-, Kommunikations- und Onboarding-Prozesse mit Agentenunterstützung |
+| 3: Vollbetrieb | Vollständige Fachoberfläche einschließlich Projekte, Assets und Finanzen; Agenten können die Geschäftsabläufe übernehmen |
+| 4: Skalierung | Selbstständiges Kunden-Onboarding, weitere Märkte und Kanäle |
 
 Jede Phase endet an einem Gate: Erst wenn dessen Kriterium erfüllt ist, startet die nächste. Beacon & Bold ist in Phase 2 der erste Kunde des eigenen Systems und liefert damit die Fallstudien für Phase 4.
 
 ## Kennzahlen
 
-Die wichtigste Größe ist der Anteil der Arbeit, den Agenten ohne menschlichen Eingriff erledigen.
+Wir messen sowohl die Nutzbarkeit im vollständigen Agenturbetrieb als auch den Anteil der Arbeit, den Agenten übernehmen. Eine steigende Autonomiequote reduziert den Bedienaufwand, nicht den Funktionsumfang der Oberfläche.
 
 | Kennzahl | Bedeutung | Zielrichtung |
 | --- | --- | --- |
+| Fachliche Abdeckung | Agenturprozesse, die vollständig in der Webapp bedienbar sind | Steigt bis zum Vollbetrieb |
+| Bedienbarkeit | Erfolgreich abgeschlossene Fachabläufe ohne Chat-Zwang | Bleibt bei jeder Automatisierungsstufe erhalten |
 | Autonomiequote | Anteil der Aufgaben ohne menschlichen Eingriff | Steigt pro Quartal |
 | Menschliche Stunden pro Kunde und Monat | Restaufwand je Kunde | Sinkt |
 | Zeit bis zur ersten Kampagne | Vertrag bis Live-Schaltung | Sinkt |
@@ -242,3 +278,5 @@ Die wichtigste Größe ist der Anteil der Arbeit, den Agenten ohne menschlichen 
 - **Märkte:** Start in DACH, danach schrittweise die EU-Länder, beginnend mit den höchsten Werbeausgaben (Auswertung im Abschnitt „Global skalieren“).
 - **Modelle und Anbieter:** Alle sind erlaubt, auch Grok. Der Modell-Router wählt je Aufgabe nach Qualität und Kosten.
 - **Abrechnung:** Situationsabhängig mit mehreren Optionen (Retainer, Paket, Performance-Anteil, ergebnisbasiert).
+- **Produkt und Oberfläche:** Vollständige Marketing-Agentur-Webapp mit klassischer Navigation und direkt bedienbaren Fachmodulen. Agenten können dieselben Aktionen im Hintergrund übernehmen. Die Betriebsoberfläche ist nicht auf Beobachtung und Freigaben begrenzt.
+- **Accounts:** Grundlegende Kontofunktionen werden vor weiteren Fachmodulen umgesetzt. Arbeitsbereichserstellung und Zugangsmodell bleiben eine ausdrückliche Entscheidung; Signup darf keine fremden Daten freigeben.
