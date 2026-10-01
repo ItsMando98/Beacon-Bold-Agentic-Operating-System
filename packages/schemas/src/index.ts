@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export * from "./access.js";
+export * from "./access-contracts.js";
 export * from "./contracts.js";
 export * from "./domain.js";
 export * from "./generators.js";
