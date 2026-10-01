@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src",
+    "tsup.config.ts",
+    "../../tests/fixtures/temporal-worker.ts",
+    "../../tests/integration/temporal-worker.test.ts",
+    "../../tests/unit/example-workflow.test.ts"
+  ]
+}

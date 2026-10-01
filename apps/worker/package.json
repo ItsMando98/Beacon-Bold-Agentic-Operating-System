@@ -5,11 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsup src/index.ts --format esm --target node22 --out-dir dist",
-    "typecheck": "tsc --noEmit",
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.check.json --noEmit",
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@beacon/config": "workspace:*"
+    "@beacon/config": "workspace:*",
+    "@beacon/integrations": "workspace:*",
+    "@beacon/schemas": "workspace:*",
+    "@temporalio/activity": "1.24.0",
+    "@temporalio/common": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0"
   }
 }

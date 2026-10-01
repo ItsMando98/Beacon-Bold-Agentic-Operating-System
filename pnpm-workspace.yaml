@@ -3,5 +3,9 @@ packages:
   - packages/*
 
 onlyBuiltDependencies:
+  - '@swc/core'
   - esbuild
   - protobufjs
+
+overrides:
+  '@swc/core': 1.15.3

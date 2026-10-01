@@ -1,2 +1,2 @@
-/** External service adapters are introduced in Phase 1. */
-export const packageName = "@beacon/integrations";
+export * from "./example.js";
+export * from "./temporal.js";
