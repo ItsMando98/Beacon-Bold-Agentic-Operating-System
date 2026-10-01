@@ -13,9 +13,10 @@ FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b1
 WORKDIR /runtime
 ENV NODE_ENV=production PORT=3002
 COPY --from=build --chown=node:node /workspace/apps/api/dist ./dist
+COPY --chown=node:node scripts/runtime-secrets.mjs ./runtime-secrets.mjs
 USER node
 EXPOSE 3002
-CMD ["node", "dist/server.js"]
+CMD ["node", "runtime-secrets.mjs", "dist/server.js"]
 
 FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS app
 WORKDIR /runtime
@@ -23,9 +24,10 @@ ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3001
 COPY --from=build --chown=node:node /workspace/apps/app/.next/standalone ./
 COPY --from=build --chown=node:node /workspace/apps/app/.next/static ./apps/app/.next/static
 COPY --from=build --chown=node:node /workspace/licenses ./licenses
+COPY --chown=node:node scripts/runtime-secrets.mjs ./runtime-secrets.mjs
 USER node
 EXPOSE 3001
-CMD ["node", "apps/app/server.js"]
+CMD ["node", "runtime-secrets.mjs", "apps/app/server.js"]
 
 FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS web
 WORKDIR /runtime
@@ -33,9 +35,10 @@ ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000
 COPY --from=build --chown=node:node /workspace/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /workspace/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=node:node /workspace/licenses ./licenses
+COPY --chown=node:node scripts/runtime-secrets.mjs ./runtime-secrets.mjs
 USER node
 EXPOSE 3000
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "runtime-secrets.mjs", "apps/web/server.js"]
 
 FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS migrate
 WORKDIR /runtime

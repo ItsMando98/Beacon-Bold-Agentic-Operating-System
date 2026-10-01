@@ -1,18 +1,24 @@
 import { readFile } from "node:fs/promises";
 import { Client } from "pg";
 import { migrate } from "../packages/db/migrate.mjs";
+import { migrationEnvironmentSchema } from "../packages/schemas/src/index.ts";
+import { hydrateSecrets } from "./runtime-secrets.mjs";
 
 async function main() {
   let client;
   try {
+    await hydrateSecrets(process.env);
+    const config = migrationEnvironmentSchema.parse(process.env);
     client = new Client({
       ssl:
-        process.env.APP_ENV === "staging"
-          ? {
-              ca: await readFile(process.env.PGSSLROOTCERT, "utf8"),
-              rejectUnauthorized: true,
-            }
-          : undefined,
+        config.DB_TRANSPORT === "unix"
+          ? false
+          : config.APP_ENV !== "development"
+            ? {
+                ca: await readFile(config.PGSSLROOTCERT, "utf8"),
+                rejectUnauthorized: true,
+              }
+            : undefined,
       connectionTimeoutMillis: 10000,
       statement_timeout: 60000,
     });

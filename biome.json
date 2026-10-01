@@ -34,7 +34,13 @@
   },
   "overrides": [
     {
-      "includes": ["scripts/deploy-staging.mjs", "scripts/migrate.mjs"],
+      "includes": [
+        "scripts/deploy-staging.mjs",
+        "scripts/migrate.mjs",
+        "scripts/runtime-secrets.mjs",
+        "scripts/vps-secrets.mjs",
+        "scripts/vps-acceptance.mjs"
+      ],
       "linter": {
         "rules": { "suspicious": { "noUndeclaredEnvVars": "off" } }
       }

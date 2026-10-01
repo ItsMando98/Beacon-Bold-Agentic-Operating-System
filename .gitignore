@@ -5,6 +5,7 @@ migration-dist/
 .turbo/
 .cache/
 /VPS*/
+__pycache__/
 coverage/
 storybook-static/
 playwright-report/

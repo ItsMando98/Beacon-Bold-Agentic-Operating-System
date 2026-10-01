@@ -13,6 +13,10 @@ jobs:
     name: containers
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.STAGING_CLERK_PUBLISHABLE_KEY || 'synthetic-ci-only' }}
+      BEACON_RELEASE: ${{ github.sha }}
+      BEACON_SECRETS_DIR: ${{ github.workspace }}/.cache/vps-ci-secrets
     steps:
       - uses: actions/checkout@v4
       - name: Build runtime images and reject missing configuration
@@ -20,13 +24,44 @@ jobs:
         run: |
           set -euo pipefail
           for service in api app web migrate; do
-            docker build --target "$service" -t "beacon-bold-$service:check" .
+            docker build --target "$service" --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "beacon-bold-$service:$GITHUB_SHA" .
             set +e
-            timeout 30s docker run --rm "beacon-bold-$service:check"
+            timeout 30s docker run --rm "beacon-bold-$service:$GITHUB_SHA"
             code=$?
             set -e
             test "$code" -eq 1
           done
+      - name: Test restricted receiver
+        run: python3 -m unittest discover -s tests/infra
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.21.1
+      - name: Accept VPS topology with synthetic credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CLERK_SECRET_KEY=synthetic-ci-only
+          export NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-synthetic-ci-only}
+          node scripts/vps-secrets.mjs "$BEACON_SECRETS_DIR"
+          docker network create coolify
+          docker compose -f infra/vps/compose.yaml config --quiet
+          docker compose -f infra/vps/compose.yaml up -d --wait --wait-timeout 180 postgres redis
+          docker compose -f infra/vps/compose.yaml run --rm --no-deps migrate
+          docker compose -f infra/vps/compose.yaml run --rm --no-deps migrate
+          docker compose -f infra/vps/compose.yaml run --rm --no-deps acceptance
+          docker compose -f infra/vps/compose.yaml up -d --wait --wait-timeout 180 api app web
+      - name: Archive immutable runtime images
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker save beacon-bold-api:$GITHUB_SHA beacon-bold-app:$GITHUB_SHA beacon-bold-web:$GITHUB_SHA beacon-bold-migrate:$GITHUB_SHA | gzip > runtime-images.tar.gz
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: vps-images-${{ github.sha }}
+          path: runtime-images.tar.gz
+          retention-days: 1
+      - if: always()
+        run: docker compose -f infra/vps/compose.yaml down --volumes
   terraform:
     name: terraform
     runs-on: ubuntu-latest
@@ -45,7 +80,7 @@ jobs:
   staging:
     name: staging-deploy
     needs: [quality, secret-scan, integration, browser, terraform, containers]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_READY == 'true'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_READY == 'true' && vars.STAGING_TARGET == 'aws'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
@@ -86,6 +121,34 @@ jobs:
             fi
           done
       - run: node scripts/deploy-staging.mjs
+  vps-staging:
+    name: vps-staging-deploy
+    needs: [quality, secret-scan, integration, browser, terraform, containers]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_READY == 'true' && vars.STAGING_TARGET == 'vps'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: vps-staging-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vps-images-${{ github.sha }}
+      - name: Deploy through restricted SSH endpoint
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          APPROVAL_REFERENCE: ${{ vars.STAGING_APPROVAL_REFERENCE }}
+        run: |
+          set -euo pipefail
+          test -n "$APPROVAL_REFERENCE"
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_DEPLOY_KEY" > ~/.ssh/beacon_deploy
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/beacon_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 root@"$VPS_HOST" "deploy $GITHUB_SHA" < runtime-images.tar.gz
   quality:
     name: ${{ matrix.command }}
     runs-on: ubuntu-latest
