@@ -1,9 +1,10 @@
+import { DashboardOverview } from "../components/dashboard/overview";
+import { DashboardShell } from "../components/dashboard/shell";
+
 export default function Page() {
   return (
-    <main>
-      <h1>Betriebsoberfläche</h1>
-      <p>Freigaben, Agentenläufe und Audit werden in Phase 1 angebunden.</p>
-      <a href="/auth/login?returnTo=/operations">Anmelden</a>
-    </main>
+    <DashboardShell>
+      <DashboardOverview />
+    </DashboardShell>
   );
 }

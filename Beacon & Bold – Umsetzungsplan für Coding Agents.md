@@ -96,6 +96,18 @@ Ziel: Ein externer Agent kann über MCP Aufgaben auslösen, und jede Geldwirkung
 | P1-11 | Agent-UI in `apps/app` mit AI Elements: Chat mit Streaming, Anzeige von Tool-Aufrufen, Freigabe-Dialog | P0-5, P1-4, P1-8 | Ein Playwright-Test streamt eine Antwort und erteilt eine Freigabe |
 | P1-12 | Beobachtbarkeit: OpenTelemetry, Sentry, Langfuse für Modellaufrufe | P1-3, P1-7 | Ein Trace zeigt einen Aufruf von der API bis in den Workflow |
 
+### P1-11: getrennte Frontend-Teilaufgaben
+
+Beschlossen am 1. Oktober 2026: Die Betriebsoberfläche folgt dem im Konzept
+benannten Kiranism-Dashboard-Starter als Layout-/Komponentenvorlage.
+Die vollständige P1-11-Abnahme bleibt bis zur echten Anbindung offen.
+
+| ID | Aufgabe | Abhängig von | Abnahme |
+| --- | --- | --- | --- |
+| P1-11a | Dashboard-Rahmen, Navigation, Seitensuche, Hell-/Dunkelmodus und ehrliche Leerzustände | P0-5, P1-4 | Playwright prüft Desktop/Mobilnavigation, Tastatur, Axe, Themes und geschlossene Auth-Routen |
+| P1-11b | Interaktive Beispielstrecke: Ziel, Beispiel-Lauf, Tool-Aufruf und Beispiel-Freigabe; Zod-Verträge und erfundene Daten | P1-11a, P1-2 | Playwright durchläuft die klar als Beispiel gekennzeichnete Strecke; keine echte Ausgabe oder Modellnutzung |
+| P1-11c | Echte Agenten-, Audit- und Freigabe-Anbindung mit Streaming | P1-11b, P1-4, P1-6, P1-8, P1-10 | Playwright streamt eine echte Testantwort und erteilt eine persistierte Testfreigabe |
+
 **Gate 1:** Ein externer MCP-Client (zum Beispiel ein Grok- oder Claude-Agent) legt über MCP einen Kunden an und startet einen Workflow mit Freigabe, alles im Audit-Log sichtbar.
 
 ## Phase 2: Selbst zuerst

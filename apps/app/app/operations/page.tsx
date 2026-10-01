@@ -2,6 +2,8 @@ import { humanBinding } from "@beacon/integrations/auth";
 import { getAuth0 } from "@beacon/integrations/auth0";
 import { auth0AppEnvironmentSchema } from "@beacon/schemas";
 import { redirect } from "next/navigation";
+import { DashboardOverview } from "../../components/dashboard/overview";
+import { DashboardShell } from "../../components/dashboard/shell";
 export const dynamic = "force-dynamic";
 export default async function Operations() {
   if (process.env.AUTH_ENABLED !== "true")
@@ -27,13 +29,8 @@ export default async function Operations() {
       </main>
     );
   return (
-    <main>
-      <h1>Betriebsoberfläche</h1>
-      <p>
-        Du bist angemeldet. Freigaben, Agentenläufe und Audit werden in Phase 1
-        angebunden.
-      </p>
-      <a href="/auth/logout">Abmelden</a>
-    </main>
+    <DashboardShell authenticated>
+      <DashboardOverview />
+    </DashboardShell>
   );
 }
