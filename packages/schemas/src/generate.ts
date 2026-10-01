@@ -26,7 +26,7 @@ for (const [name, artifact] of Object.entries(artifacts)) {
     const actual = await readFile(path, "utf8").catch(() => "");
     if (actual.replaceAll("\r\n", "\n") !== expected)
       throw new Error(
-        `Stale contract artifact: ${name}. Run pnpm --filter @beacon/schemas generate.`,
+        `Stale contract artifact: ${name}. Run pnpm --filter @roaswell/schemas generate.`,
       );
   } else {
     await mkdir(directory, { recursive: true });

@@ -1,7 +1,7 @@
 import {
   auth0ApiEnvironmentSchema,
   auth0AppEnvironmentSchema,
-} from "@beacon/schemas/auth";
+} from "@roaswell/schemas/auth";
 import { z } from "zod";
 export type Service = "web" | "app" | "api" | "worker";
 export const baseEnvironment = z.object({

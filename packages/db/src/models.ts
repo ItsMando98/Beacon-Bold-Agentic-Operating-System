@@ -1,4 +1,4 @@
-import { type EntityName, entitySchemas, z } from "@beacon/schemas";
+import { type EntityName, entitySchemas, z } from "@roaswell/schemas";
 import { getTableColumns, sql } from "drizzle-orm";
 import {
   type AnyPgColumn,

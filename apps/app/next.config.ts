@@ -1,4 +1,4 @@
-import { loadEnvironment } from "@beacon/config";
+import { loadEnvironment } from "@roaswell/config";
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 export default function config(phase: string): NextConfig {
@@ -6,10 +6,10 @@ export default function config(phase: string): NextConfig {
   return {
     output: "standalone",
     transpilePackages: [
-      "@beacon/ui",
-      "@beacon/config",
-      "@beacon/schemas",
-      "@beacon/integrations",
+      "@roaswell/ui",
+      "@roaswell/config",
+      "@roaswell/schemas",
+      "@roaswell/integrations",
     ],
     webpack(config) {
       config.resolve.extensionAlias = { ".js": [".ts", ".tsx", ".js"] };

@@ -194,7 +194,7 @@ export function generateOpenApi(
     openapi: "3.1.1",
     jsonSchemaDialect: "https://json-schema.org/draft/2020-12/schema",
     info: {
-      title: "Beacon & Bold contracts",
+      title: "ROASWELL contracts",
       version: "0.0.0",
       description:
         "Schema-derived REST contracts. Auth0 bearer authentication; MCP follows in P1-5.",

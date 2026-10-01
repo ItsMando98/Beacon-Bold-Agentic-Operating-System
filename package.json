@@ -1,5 +1,5 @@
 {
-  "name": "beacon-bold",
+  "name": "roaswell",
   "private": true,
   "packageManager": "pnpm@10.29.1",
   "engines": {
@@ -13,11 +13,11 @@
     "lint": "node node_modules/@biomejs/biome/bin/biome check .",
     "typecheck": "turbo typecheck",
     "test": "vitest run --project unit",
-    "test:integration": "pnpm --filter @beacon/worker build && vitest run --project integration",
+    "test:integration": "pnpm --filter @roaswell/worker build && vitest run --project integration",
     "test:e2e": "node scripts/playwright.mjs test",
     "build": "turbo build",
-    "storybook": "pnpm --filter @beacon/ui storybook",
-    "build:storybook": "pnpm --filter @beacon/ui build:storybook",
+    "storybook": "pnpm --filter @roaswell/ui storybook",
+    "build:storybook": "pnpm --filter @roaswell/ui build:storybook",
     "test:startup": "node scripts/check-startup.mjs",
     "browser:install": "node scripts/playwright.mjs install chromium"
   },

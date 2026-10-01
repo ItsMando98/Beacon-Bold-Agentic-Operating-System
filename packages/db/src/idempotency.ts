@@ -4,7 +4,7 @@ import {
   customerCommandSchema,
   idempotencyRecordSchema,
   serializeEntity,
-} from "@beacon/schemas";
+} from "@roaswell/schemas";
 import { and, eq, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {

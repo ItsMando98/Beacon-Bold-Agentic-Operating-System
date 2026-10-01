@@ -33,6 +33,7 @@ test("valid OpenAPI and contract responses cover every registered route", async 
   const api = app();
   const document = await (await api.request("/openapi.json")).json();
   expect(document).toEqual(generateOpenApi());
+  expect(document.info.title).toBe("ROASWELL contracts");
   expect((await validate(JSON.stringify(document))).valid).toBe(true);
   const registered = [
     ...new Set(

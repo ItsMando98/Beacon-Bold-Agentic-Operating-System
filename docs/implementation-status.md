@@ -2,6 +2,10 @@
 
 Stand: 1. Oktober 2026. Code, lokale Abnahme und externe Abnahme werden getrennt bewertet.
 
+## Aktueller Produktplan: ROASWELL
+
+Der neue [Umsetzungsplan](roaswell-umsetzungsplan.md) und die [Einzelaufgaben](roaswell-aufgaben.md) ersetzen die ursprüngliche Produktplanung. R0-01 basiert auf main a92989e: Namenswechsel, ADRs und Aufgaben sind implementiert und lokal abgenommen; [Nachweis und Grenzen](roaswell-r0.md). Der Gründer hat Auth0 erneut bestätigt. R1–R11 bleiben offen; PR-Merge und externe Abnahmen werden gesondert dokumentiert. Die folgenden Abschnitte erhalten die historischen P0/P1-Nachweise.
+
 Gate 0 ist technisch bestanden. PR #8 wurde regulär auf `main` mit Revision `3ee92f9102a0c23055ffb092812ec5f4e642dbde` gemergt. Alle neun Pflichtprüfungen und der begrenzte VPS-Deploy sind erfolgreich: [Deploy-Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36832592546). Migration, Mandantentrennung, öffentliche HTTPS-Endpunkte und Wiederherstellung des externen verschlüsselten Backups sind dokumentiert; [Backup-Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36834193004). Branch-Schutz ist aktiv und der fehlerhafte Merge von PR #4 wurde tatsächlich verweigert.
 
 P1-1 / PR #9, P1-2 / PR #10 und P1-7 / PR #11 sind regulär gemergt. Aktueller Aufgaben-Ausgangspunkt ist main `67311b56f5231128a1d1333436f9bb81faa7f646`; alle neun main-Pflichtprüfungen und der begrenzte VPS-Staging-Deploy sind erfolgreich: [Merge-Lauf](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36847460584). P1-3 ist auf eigenem Branch mit API-Verträgen, Fehlerformat, Scalar und atomarer Idempotenz implementiert und wird als Entwurfs-PR vorgelegt. [Ergebnis P1-3](p1-3-hono-api.md), [ADR 0008](adr/0008-api-contracts-idempotency.md).

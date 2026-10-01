@@ -4,6 +4,13 @@ export default defineConfig({
   use: { baseURL: "http://127.0.0.1:13000", trace: "retain-on-failure" },
   webServer: [
     {
+      command:
+        "node apps/web/node_modules/next/dist/bin/next start apps/web --port 13001",
+      url: "http://127.0.0.1:13001",
+      reuseExistingServer: false,
+      env: { APP_ENV: "development", SERVICE_MODE: "mock" },
+    },
+    {
       command: "node apps/api/dist/server.js",
       url: "http://127.0.0.1:13002/health",
       reuseExistingServer: false,

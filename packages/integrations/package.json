@@ -1,5 +1,5 @@
 {
-  "name": "@beacon/integrations",
+  "name": "@roaswell/integrations",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "4.31.0",
-    "@beacon/db": "workspace:*",
-    "@beacon/schemas": "workspace:*",
+    "@roaswell/db": "workspace:*",
+    "@roaswell/schemas": "workspace:*",
     "@temporalio/worker": "1.24.0",
     "drizzle-orm": "0.45.3",
     "jose": "6.2.12",

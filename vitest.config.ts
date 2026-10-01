@@ -8,6 +8,8 @@ export default defineConfig({
           name: "integration",
           include: ["tests/integration/**/*.test.ts"],
           testTimeout: 30000,
+          // Migration fixtures alter the same cluster-wide PostgreSQL role.
+          fileParallelism: false,
         },
       },
     ],

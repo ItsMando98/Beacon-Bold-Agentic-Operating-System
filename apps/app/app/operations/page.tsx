@@ -1,6 +1,6 @@
-import { humanBinding } from "@beacon/integrations/auth";
-import { getAuth0 } from "@beacon/integrations/auth0";
-import { auth0AppEnvironmentSchema } from "@beacon/schemas";
+import { humanBinding } from "@roaswell/integrations/auth";
+import { getAuth0 } from "@roaswell/integrations/auth0";
+import { auth0AppEnvironmentSchema } from "@roaswell/schemas";
 import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 export default async function Operations() {

@@ -6,7 +6,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@beacon/ui/*": ["./src/*"]
+      "@roaswell/ui/*": ["./src/*"]
     }
   },
   "include": ["src"]

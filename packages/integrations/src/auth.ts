@@ -6,7 +6,7 @@ import {
   authBindingsSchema,
   authIdentitySchema,
   type z,
-} from "@beacon/schemas";
+} from "@roaswell/schemas";
 import { createRemoteJWKSet, type JWTVerifyGetKey, jwtVerify } from "jose";
 export class AuthenticationError extends Error {
   constructor(public readonly status: 401 | 403) {

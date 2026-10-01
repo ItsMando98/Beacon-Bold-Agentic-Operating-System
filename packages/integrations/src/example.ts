@@ -3,7 +3,7 @@ import {
   type ExampleActivityResult,
   exampleActivityInputSchema,
   exampleActivityResultSchema,
-} from "@beacon/schemas";
+} from "@roaswell/schemas";
 export interface ExampleAdapter {
   execute(
     input: ExampleActivityInput,

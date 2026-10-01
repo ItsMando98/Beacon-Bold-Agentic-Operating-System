@@ -1,4 +1,4 @@
-import { loadEnvironment } from "@beacon/config";
+import { loadEnvironment } from "@roaswell/config";
 export function register() {
   if (
     process.env.NEXT_RUNTIME === "nodejs" &&

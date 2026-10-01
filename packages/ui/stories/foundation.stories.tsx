@@ -17,7 +17,7 @@ function Foundation() {
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-8 py-10">
       <header className="flex flex-col gap-3">
-        <h1 className="text-3xl font-semibold">Beacon & Bold</h1>
+        <h1 className="text-3xl font-semibold">ROASWELL</h1>
         <p className="text-muted-foreground">Vorläufige Design-Grundlagen</p>
       </header>
       <section className="flex flex-col gap-4" aria-label="Komponenten">

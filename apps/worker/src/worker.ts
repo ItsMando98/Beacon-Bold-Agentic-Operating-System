@@ -3,11 +3,11 @@ import {
   createTemporalWorker,
   type ExampleAdapter,
   localExampleAdapter,
-} from "@beacon/integrations";
+} from "@roaswell/integrations";
 import {
   exampleActivityInputSchema,
   exampleActivityResultSchema,
-} from "@beacon/schemas";
+} from "@roaswell/schemas";
 import { Context } from "@temporalio/activity";
 import { ApplicationFailure } from "@temporalio/common";
 export async function createExampleWorker(

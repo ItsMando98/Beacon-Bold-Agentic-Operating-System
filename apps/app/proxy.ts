@@ -1,4 +1,4 @@
-import { getAuth0 } from "@beacon/integrations/auth0";
+import { getAuth0 } from "@roaswell/integrations/auth0";
 import { type NextRequest, NextResponse } from "next/server";
 export default async function proxy(request: NextRequest) {
   if (process.env.AUTH_ENABLED !== "true") {

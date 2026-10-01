@@ -1,5 +1,8 @@
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
-import { auth0AppEnvironmentSchema, operationContracts } from "@beacon/schemas";
+import {
+  auth0AppEnvironmentSchema,
+  operationContracts,
+} from "@roaswell/schemas";
 
 let client: Auth0Client | undefined;
 export function getAuth0() {

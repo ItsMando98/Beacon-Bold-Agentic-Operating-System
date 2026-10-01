@@ -1,6 +1,6 @@
-# Beacon & Bold
+# ROASWELL
 
-TypeScript-Monorepo für das Agentic Operating System. Die beiden ursprünglichen Konzeptdokumente bleiben die fachliche Grundlage.
+TypeScript-Monorepo für das ROASWELL-Agenturbetriebssystem. Die aktuelle fachliche Grundlage bilden der [Umsetzungsplan](docs/roaswell-umsetzungsplan.md) und die [abhängigen Einzelaufgaben](docs/roaswell-aufgaben.md). Auth0 bleibt der bestätigte Anmeldeanbieter.
 
 ## Lokal starten
 Node 22.21+ (22.x), pnpm 10.29.1 und Docker mit Compose benötigen.

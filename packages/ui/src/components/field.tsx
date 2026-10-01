@@ -1,8 +1,8 @@
 "use client";
 
-import { Label } from "@beacon/ui/components/label";
-import { Separator } from "@beacon/ui/components/separator";
-import { cn } from "@beacon/ui/lib/utils";
+import { Label } from "@roaswell/ui/components/label";
+import { Separator } from "@roaswell/ui/components/separator";
+import { cn } from "@roaswell/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@beacon/app",
+  "name": "@roaswell/app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,10 +10,10 @@
     "start": "next start --port 3000"
   },
   "dependencies": {
-    "@beacon/config": "workspace:*",
-    "@beacon/integrations": "workspace:*",
-    "@beacon/schemas": "workspace:*",
-    "@beacon/ui": "workspace:*",
+    "@roaswell/config": "workspace:*",
+    "@roaswell/integrations": "workspace:*",
+    "@roaswell/schemas": "workspace:*",
+    "@roaswell/ui": "workspace:*",
     "next": "16.3.7",
     "react": "19.3.0",
     "react-dom": "19.3.0"
