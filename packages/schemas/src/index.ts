@@ -1,11 +1,11 @@
 import { z } from "zod";
 
+export * from "./contracts.js";
 export * from "./domain.js";
+export * from "./generators.js";
+export * from "./health.js";
+export * from "./wire.js";
 export { z };
-export const healthSchema = z.object({
-  status: z.literal("ok"),
-  service: z.literal("api"),
-});
 export const migrationEnvironmentSchema = z
   .object({
     APP_ENV: z.enum(["development", "staging", "production"]),
