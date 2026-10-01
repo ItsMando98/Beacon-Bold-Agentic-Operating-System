@@ -4,6 +4,7 @@ dist/
 migration-dist/
 .turbo/
 .cache/
+/VPS*/
 coverage/
 storybook-static/
 playwright-report/

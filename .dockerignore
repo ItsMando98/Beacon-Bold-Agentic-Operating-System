@@ -1,5 +1,6 @@
 .git
 .cache
+VPS*/
 **/node_modules
 **/.next
 **/dist

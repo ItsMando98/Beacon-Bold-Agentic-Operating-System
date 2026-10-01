@@ -2,7 +2,7 @@
 
 Stand: 30. September 2026. Code, lokale Abnahme und externe Abnahme werden getrennt bewertet.
 
-Aktuelle P0-7-Steuerung: Der Gründer möchte den vorhandenen VPS für zusätzliches Staging nutzen; bestehende Dienste müssen erhalten bleiben. SSH-Port 22 ist erreichbar, die Anmeldung als `root` mit dem zur Laufzeit aus `.env` geladenen Passwort wurde abgewiesen. Es wurden keine Serveränderungen durchgeführt. [VPS-Vorbereitung und offene Abnahmen](vps-staging.md) dokumentieren den Wechsel; die unten aufgeführten AWS-Nachweise bleiben Nachweise der vorbereiteten Alternative, nicht des VPS. Die tatsächliche VPS-Konfiguration und das Deployment sind noch offen. Keine AWS-Provisionierung und keine neue Serverbestellung.
+Aktuelle P0-7-Steuerung (1. Oktober 2026): Der Gründer möchte den vorhandenen VPS für zusätzliches Staging nutzen; bestehende Dienste müssen erhalten bleiben. Passwort-Anmeldung wurde abgewiesen, die Anmeldung als `root` mit dem nachträglich bereitgestellten Ed25519-Schlüssel ist bestätigt. Die lesende Prüfung zeigt acht CPU-Kerne, rund 16 GB RAM, 41 laufende Container und belegte Web-Ports 80/443. Es wurden keine Serveränderungen durchgeführt. Lokale VPS-Schlüsselordner sind aus Git und Docker-Builds ausgeschlossen. [VPS-Vorbereitung und offene Abnahmen](vps-staging.md) dokumentieren den Wechsel; die unten aufgeführten AWS-Nachweise bleiben Nachweise der vorbereiteten Alternative, nicht des VPS. Die tatsächliche VPS-Konfiguration und das Deployment sind noch offen. Keine AWS-Provisionierung und keine neue Serverbestellung.
 
 | Aufgabe | Nachweis / offene Punkte |
 |---|---|

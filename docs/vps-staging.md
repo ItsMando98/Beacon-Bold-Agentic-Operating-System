@@ -1,12 +1,14 @@
 # P0-7: Staging auf dem vorhandenen VPS
 
-Status: Vorbereitung; Server-Abnahme und Deployment offen.
+Status: SSH-Schlüsselzugang bestätigt; Server-Bestandsprüfung begonnen, Deployment offen. Stand: 1. Oktober 2026.
 
-Der Gründer hat einen bestehenden VPS bereitgestellt und zusätzliches Staging unter Erhalt bestehender Dienste autorisiert. Der angegebene SSH-Benutzer ist `root`. `VPS_IP` und `VPS_PASSWORD` liegen ausschließlich in der ignorierten `.env`. Werte werden weder dokumentiert noch in GitHub übertragen.
+Der Gründer hat einen bestehenden VPS bereitgestellt und zusätzliches Staging unter Erhalt bestehender Dienste autorisiert. Der angegebene SSH-Benutzer ist `root`. `VPS_IP` und `VPS_PASSWORD` liegen ausschließlich in der ignorierten `.env`. Der nachträglich bereitgestellte lokale VPS-Ordner enthält ein bereits auf dem Server zugelassenes Ed25519-Schlüsselpaar. VPS-Ordner sind ausdrücklich aus Git und dem Docker-Build-Kontext ausgeschlossen. Werte und private Schlüssel werden weder dokumentiert noch in GitHub übertragen.
 
 ## Zugangsprüfung
 
-Der SSH-Port 22 ist erreichbar. Der erste Anmeldeversuch mit dem angegebenen Benutzer und dem zur Laufzeit geladenen Passwort wurde mit `AuthenticationException` abgewiesen. Es wurden keine Serverdateien verändert oder Dienste gestartet. Die Betriebssystem-, Ressourcen- und Dienstprüfung ist deshalb weiterhin offen. Keine automatischen Passwort-Wiederholungsversuche.
+Der SSH-Port 22 ist erreichbar. Passwort-Anmeldungen wurden mit `AuthenticationException` abgewiesen. Am 1. Oktober wurde das bereitgestellte Schlüsselpaar zur Laufzeit geladen, die Übereinstimmung von öffentlichem und privatem Schlüssel geprüft und eine ausschließlich schlüsselbasierte Root-Anmeldung mit `id -u` bestätigt. Ein weiterer Schlüssel war nicht nötig. Es wurden keine Serverdateien verändert, Schlüssel entfernt, Anmeldemethoden umgestellt oder Dienste gestartet.
+
+Die lesende Bestandsprüfung bestätigt Ubuntu 24.04.4 LTS, x86_64, acht CPU-Kerne, rund 16 GB RAM und 417 GB freien Plattenplatz. Zum Prüfzeitpunkt waren rund 7,7 GB RAM verfügbar; der Swap war mit rund 3,3 von 4 GB belegt. Docker 29.3.0 und Compose v5.1.0 sind vorhanden. Es laufen 41 Container; unter anderem sind Ports 80 und 443 bereits belegt. Der vorgesehene eigene Staging-Pfad existiert noch nicht. Proxy-Zuordnung, Lastverlauf und verfügbare Kapazität müssen vor der Einrichtung genauer geprüft werden. Ein zweiter Proxy darf nicht die bestehenden Web-Ports übernehmen.
 
 Der erstmals empfangene SSH-Hostschlüssel liegt ausschließlich im lokalen ignorierten Cache. Das ist eine Erstkontakt-Pinbindung, keine unabhängige Bestätigung durch den Anbieter. Vor dauerhafter CI-Einrichtung wird der Fingerabdruck über die Anbieter-Konsole bestätigt und als bekannter Host fest hinterlegt; wechselnde Schlüssel werden nicht automatisch akzeptiert.
 
@@ -30,7 +32,7 @@ Nach der Bestandsprüfung wird ein konkreter Antrag mit bestehenden Serverkosten
 
 ## Offene Abnahmen
 
-- Funktionierender SSH-Zugang und unabhängig bestätigter Hostschlüssel.
+- Unabhängig bestätigter Hostschlüssel; der SSH-Schlüsselzugang selbst ist bestanden.
 - Ressourcen, Standort und Vereinbarkeit mit bestehenden Diensten; Frankfurt bleibt bis zur Standortentscheidung das dokumentierte Ziel.
 - Compose-Konfiguration, begrenzter Deploy-Zugang, Image-Registry und Secret-Verteilung.
 - Staging-DNS/HTTPS, Clerk-Live-Konfiguration, Backup und Wiederherstellung.
