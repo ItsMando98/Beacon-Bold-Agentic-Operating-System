@@ -15,7 +15,22 @@ export default async function proxy(request: NextRequest) {
       });
     return NextResponse.next();
   }
-  return getPortalAuth0().middleware(request);
+  const auth = getPortalAuth0();
+  const response = await auth.middleware(request);
+  if (
+    (path === "/workspace" || path.startsWith("/workspace/")) &&
+    (await auth.getSession(request))
+  ) {
+    try {
+      // Persist a refreshed token in middleware before the read-only Server Component.
+      await auth.getAccessToken(request, response);
+    } catch {
+      return new NextResponse("Dein Bereich ist derzeit nicht verfügbar", {
+        status: 503,
+      });
+    }
+  }
+  return response;
 }
 export const config = {
   matcher: [

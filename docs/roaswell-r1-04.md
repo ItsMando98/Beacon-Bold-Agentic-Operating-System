@@ -31,7 +31,7 @@ Automatische Prüfungen umfassen getrennte Clients/Cookies, minimale Scopes, feh
 
 | Prüfung | Ergebnis |
 |---|---|
-| Lint | 159 Dateien, bestanden |
+| Lint | 160 Dateien, bestanden |
 | Typecheck | 16 Workspace-Aufgaben, bestanden |
 | Unit | 74 Tests, bestanden |
 | Integration | 14 Tests mit lokalen PostgreSQL-/Temporal-Diensten, bestanden |
@@ -42,3 +42,7 @@ Automatische Prüfungen umfassen getrennte Clients/Cookies, minimale Scopes, feh
 | Diff | Keine Whitespace-Fehler; keine neue Migration |
 
 Die erste Startprüfung entdeckte den fehlenden Instrumentierungs-Hook im Standalone-Portal. Nach Übernahme des bestehenden Startschutzes bestanden Build und vollständige Startprüfung. GitHub prüft zusätzlich die Container des veröffentlichten PR-Stands.
+
+Token-Erneuerung erfolgt im Auth0-Middleware-Aufruf vor der geschützten Server-Komponente, damit aktualisierte Sitzungsdaten in Cookies gespeichert werden. Erneuerungsfehler geben keine Kundendaten frei. Der echte Provider-Test dieses Ablaufs bleibt Teil der offenen Sandbox-Abnahme.
+
+Beim finalen lokalen Portal-Build trat der bereits bekannte Webpack-Cachefehler auf. Der Cache wurde im ignorierten Arbeitsbereich erhalten; der frische Gesamtbuild und erneute Typ-, Browser- und Startprüfungen bestanden. Die Sicherheitskonfiguration blieb unverändert.

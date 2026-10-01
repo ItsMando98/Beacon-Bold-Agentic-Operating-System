@@ -21,3 +21,5 @@ Das Docker-Ziel portal und infra/vps/portal.compose.yaml ermöglichen einen sepa
 ## Offene externe Abnahme
 
 Eine reale Auth0-Sandbox mit separat registriertem Web-Client, erlaubten Callback-/Logout-Adressen und organizations:read muss Login, Callback, Logout, fremde Sitzung und Token-Erneuerung prüfen. Synthetisch signierte JWTs beweisen die API-Trennung, ersetzen diesen Provider-Test aber nicht. Solange Zugänge fehlen, gilt die externe Login-Abnahme ausdrücklich als offen. Es werden keine echten Identitäten oder Zugangsdaten erfunden.
+
+Token-Erneuerung erfolgt im Auth0-Middleware-Aufruf vor der geschützten Server-Komponente, damit aktualisierte Sitzungsdaten in Cookies gespeichert werden. Erneuerungsfehler geben keine Kundendaten frei. Der echte Provider-Test dieses Ablaufs bleibt Teil der offenen Sandbox-Abnahme.
