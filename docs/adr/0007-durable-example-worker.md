@@ -19,4 +19,3 @@ Der Worker-Prozess unterstützt die SDK-Signalbehandlung und schließt seine Ver
 Offen: Betreiberwahl für Staging-Namespace, TLS/Authentifizierung, Worker-Betrieb und Überwachung. Es wird kein weiterer Dienst auf dem VPS gestartet, kein Temporal-Cloud-Konto eingerichtet und keine AWS-Ressource provisioniert. Workflow-Versionierung, öffentliche Starter, Audit-Einträge, Freigaben und fachliche Adapter bleiben ihren geplanten Aufgaben vorbehalten. Bis P1-8 gilt der dokumentierte manuelle Gründerfreigabeweg.
 
 Referenzen: [Worker-Lifecycle](https://typescript.temporal.io/api/classes/worker.Worker), [Activity-Zeitlimits](https://typescript.temporal.io/api/interfaces/common.ActivityOptions), [Worker-Optionen](https://typescript.temporal.io/api/interfaces/worker.WorkerOptions).
-
