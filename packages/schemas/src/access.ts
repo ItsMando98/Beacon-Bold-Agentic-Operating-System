@@ -180,6 +180,12 @@ export const accessRecordSchemas = {
   memberships: membershipSchema,
   versionApprovals: versionApprovalSchema,
 } as const;
+// Trusted operator setup only; never a public registration command or MCP tool.
+export const agencyCustomerSetupSchema = z.strictObject({
+  organization: organizationSchema,
+  user: entitySchemas.users,
+  membership: membershipSchema,
+});
 export const wireOrganizationSchema = toWireSchema(organizationSchema);
 export const wireMembershipSchema = toWireSchema(membershipSchema);
 export const wireVersionApprovalSchema = toWireSchema(versionApprovalSchema);

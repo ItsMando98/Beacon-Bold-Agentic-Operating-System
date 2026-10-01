@@ -1,7 +1,7 @@
 # ROASWELL – Umsetzungsplan und Tech-Stack
 
 **Stand:** 1. Oktober 2026
-**Status:** R0 regulär gemergt und nach VPS-Staging deployt. R1-01 (Verträge) implementiert und lokal abgenommen ([Nachweis](roaswell-r1-01.md)); regulärer Merge bleibt Voraussetzung für R1-02. Der übrige Umfang von R1–R11 ist offen.
+**Status:** R0 und R1-01 regulär gemergt und nach VPS-Staging deployt. R1-02 (Datenmodell) implementiert und lokal abgenommen; [Abnahme und Grenzen](roaswell-r1-02.md). Sein regulärer Merge bleibt Voraussetzung für R1-03. Der übrige Umfang von R1–R11 ist offen.
 **Aufgaben:** [Abhängige Einzelaufgaben](roaswell-aufgaben.md)
 **Entscheidungen:** [Architektur](adr/0010-roaswell-operating-system.md), [Budgets](adr/0011-approved-budget-envelopes.md), [Sichtbarkeit](adr/0012-customer-visibility-and-publication.md).
 
