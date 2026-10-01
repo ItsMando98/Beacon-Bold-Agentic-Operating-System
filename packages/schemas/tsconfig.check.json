@@ -1,5 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "rootDir": "../..", "noEmit": true },
-  "include": ["src", "../../tests/unit/schema-contracts.test.ts"]
+  "include": [
+    "src",
+    "../../tests/unit/schema-contracts.test.ts",
+    "../../tests/unit/access-contracts.test.ts"
+  ]
 }

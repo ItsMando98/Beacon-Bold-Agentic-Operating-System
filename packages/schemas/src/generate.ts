@@ -1,12 +1,20 @@
 import { spawnSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { accessOperationContracts } from "./access-contracts.js";
 import { generateOpenApi, generateToolDefinitions } from "./generators.js";
 
 const directory = new URL("../generated/", import.meta.url);
 const artifacts = {
   "openapi.json": generateOpenApi(),
   "tools.json": generateToolDefinitions(),
+  "access-openapi.json": generateOpenApi(accessOperationContracts, {
+    includeSupportRoutes: false,
+    title: "ROASWELL access specification",
+    description:
+      "Planned R1 access contracts only. These routes are not implemented or registered in the live API.",
+  }),
+  "access-tools.json": generateToolDefinitions(accessOperationContracts),
 };
 for (const [name, artifact] of Object.entries(artifacts)) {
   const formatted = spawnSync(

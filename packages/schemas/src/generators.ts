@@ -88,6 +88,11 @@ export function generateToolDefinitions(
 
 export function generateOpenApi(
   contracts: readonly OperationContract[] = operationContracts,
+  options: {
+    includeSupportRoutes?: boolean;
+    title?: string;
+    description?: string;
+  } = {},
 ) {
   assertContracts(contracts);
   const schemas: Record<string, JsonSchema> = {};
@@ -165,7 +170,9 @@ export function generateOpenApi(
       security: contract.scopes.length ? [{ bearerAuth: [] }] : [],
     };
   }
-  for (const route of apiSupportRoutes) {
+  for (const route of options.includeSupportRoutes === false
+    ? []
+    : apiSupportRoutes) {
     const output = addSchema(
       `${route.operationId}Output`,
       generateJsonSchema(route.output),
@@ -194,9 +201,10 @@ export function generateOpenApi(
     openapi: "3.1.1",
     jsonSchemaDialect: "https://json-schema.org/draft/2020-12/schema",
     info: {
-      title: "ROASWELL contracts",
+      title: options.title ?? "ROASWELL contracts",
       version: "0.0.0",
       description:
+        options.description ??
         "Schema-derived REST contracts. Auth0 bearer authentication; MCP follows in P1-5.",
     },
     paths,
