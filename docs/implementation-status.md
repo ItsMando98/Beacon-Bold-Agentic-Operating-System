@@ -54,3 +54,5 @@ P1-3 ist im eigenen codex/p1-3-hono-api-Branch implementiert: Hono Zod-OpenAPI, 
 P1-3 / PR #12 ist regulär gemergt auf e17976044e7aea6e503b91f130bcabef66c13081; alle neun main-Prüfungen und der vorhandene VPS-Staging-Deploy bestanden ([Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36852140339)). P1-4 wurde im separaten Branch codex/p1-4-auth begonnen. Der Gründer hat Auth0 als Anbieter gewählt. [Ergebnis, Einrichtung und Abnahme](p1-4-auth0.md), [ADR 0009](adr/0009-auth0-identities.md).
 
 Echte Auth0-Sandbox-Zugänge und VPS-Aktivierung stehen aus; Live-Schreibzugriffe bleiben bis dahin geschlossen. Kein neuer Dienst, keine Produktionsänderung oder AWS-Provisionierung. P1-8 und der manuelle Geldfreigabeweg bleiben unverändert.
+
+Der Gründer hat am 1. Oktober 2026 ausdrücklich bestätigt: AWS wird nicht mehr verwendet. P1-4 entfernt den AWS-CI-Deploy, sperrt das historische CLI-Deploy-Skript und entfernt den RDS-Zertifikatsdownload. VPS ist der einzige aktive Hosting-/Deploy-Pfad. Historische Terraform-Vorlagen bleiben als Mock-validiertes Archiv erhalten; keine neue AWS-Auth0-Konfiguration.

@@ -47,3 +47,7 @@ Lokal bestanden: Lint, Typecheck (15 Tasks), Build (10 Tasks), 54 Unit-Tests, 12
 ## Build-Kompatibilität
 
 Die Betriebsoberfläche verwendet Webpack mit expliziter .js→.ts/.tsx-Auflösung für die vorhandenen ESM-Importpfade der gemeinsamen Schemas. Der Marketing-Build bleibt bei Turbopack. Das Auth0-SDK erzeugt eine Build-Warnung für seinen optionalen dynamischen DPoP-Import; DPoP wird in dieser Integration nicht aktiviert. Build und Startprüfung müssen dennoch vollständig bestehen.
+
+## Ausschließlich VPS
+
+AWS wird nicht mehr verwendet. Der AWS-Deploy-Job ist entfernt und das historische AWS-Deploy-Skript kann nicht mehr direkt ausgeführt werden. Keine neuen Auth0-Anpassungen an den archivierten AWS-Terraform-Vorlagen. Die vorhandene terraform-Pflichtprüfung bleibt als lokale Mock-Prüfung erhalten, um den bestehenden Branch-Schutz nicht zu umgehen. Aktiver Deploy-Pfad ist ausschließlich der VPS mit unveränderter Gründerfreigabe.

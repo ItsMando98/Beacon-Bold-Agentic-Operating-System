@@ -34,6 +34,6 @@ pnpm build:storybook
 Tests verwenden synthetische Daten. `pnpm dev:infra:stop` stoppt Dienste ohne Datenlöschung. Die lokale Datenbank hat getrennte Owner- und Laufzeitrollen. Das ist Vorbereitung; Geschäftsmodelle und RLS-Policies folgen in P1-1.
 
 ## Umsetzung und externe Abnahme
-Siehe [Status](docs/implementation-status.md), [Staging](infra/staging/README.md) und [Arbeitsregeln](AGENTS.md). Gate 0 erfordert ein tatsächlich erfolgreiches Staging-Deployment und erzwungene GitHub-Pflichtprüfungen. Solange das AWS-Konto fehlt, ist dieses Gate offen und Phase 1 beginnt nicht.
+Siehe [Status](docs/implementation-status.md), [VPS-Staging](docs/vps-staging.md) und [Arbeitsregeln](AGENTS.md). Wir verwenden ausschließlich den VPS; AWS ist keine aktive Hosting- oder Deployment-Option. Gate 0 wurde mit erzwungenen GitHub-Pflichtprüfungen und erfolgreichem VPS-Staging-Deployment nachgewiesen.
 
 Die Oberfläche ist eine Phase-0-Startseite. Es werden keine verfügbaren Agenten, Freigaben oder angebundenen Cloud-Dienste vorgetäuscht.

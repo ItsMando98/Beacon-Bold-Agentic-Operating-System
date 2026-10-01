@@ -236,4 +236,4 @@ export async function deployStaging({
   }
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
-  await deployStaging();
+  throw new Error("AWS deployment is retired; use docs/vps-staging.md");

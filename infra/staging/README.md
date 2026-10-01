@@ -1,6 +1,8 @@
-# Staging (P0-7, externe Abnahme offen)
+# Archiv: frühere AWS-Staging-Planung
 
-AWS-Konto 212626318809, eu-central-1. Terraform 1.13.5, AWS-Provider 6.14.1 mit signiertem Lockfile. Runtime-Images: api, app, web und ein kurzlebiges Migrationsimage; kein Worker. Mock-Provider-Tests provisionieren nichts.
+Diese Vorlage ist stillgelegt. Ausschließlich der [VPS](../../docs/vps-staging.md) wird verwendet; der AWS-CI-Deploy ist entfernt und der frühere Deploy-Skripteinstieg gesperrt. Die folgenden Abschnitte dokumentieren die historische Planung und sind keine aktuellen Ausführungsanweisungen. Der bestehende Pflichtcheck terraform prüft nur lokale Mock-Vorlagen, ohne AWS-Zugänge oder Cloud-Aufrufe.
+
+Historischer Entwurf: AWS-Konto 212626318809, eu-central-1. Terraform 1.13.5, AWS-Provider 6.14.1 mit signiertem Lockfile. Runtime-Images: api, app, web und ein kurzlebiges Migrationsimage; kein Worker. Mock-Provider-Tests provisionieren nichts.
 
 ## Freigabe und Voraussetzungen
 

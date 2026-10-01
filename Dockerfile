@@ -40,7 +40,6 @@ CMD ["node", "runtime-secrets.mjs", "apps/web/server.js"]
 
 FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS migrate
 WORKDIR /runtime
-ADD --checksum=sha256:56a0cae044b6cc433971d964347401692a92ea0294e392753a3ebdaee54d8b84 https://truststore.pki.rds.amazonaws.com/eu-central-1/eu-central-1-bundle.pem /runtime/rds-ca.pem
 COPY --from=build --chown=node:node /workspace/migration-dist ./dist
 COPY --from=build --chown=node:node /workspace/packages/db/migrations ./packages/db/migrations
 USER node
