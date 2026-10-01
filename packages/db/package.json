@@ -1,5 +1,5 @@
 {
-  "name": "@beacon/db",
+  "name": "@roaswell/db",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "typecheck": "tsc -p tsconfig.check.json --noEmit"
   },
   "dependencies": {
-    "@beacon/schemas": "workspace:*",
+    "@roaswell/schemas": "workspace:*",
     "drizzle-orm": "0.45.3",
     "pg": "8.23.0"
   }

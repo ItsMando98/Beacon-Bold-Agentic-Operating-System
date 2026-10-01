@@ -1,4 +1,4 @@
-import { tenantContextSchema } from "@beacon/schemas";
+import { tenantContextSchema } from "@roaswell/schemas";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import type {

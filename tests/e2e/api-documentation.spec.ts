@@ -16,7 +16,7 @@ test("the built API renders Scalar using local assets and serves its contract", 
   });
   await page.goto("http://127.0.0.1:13002/docs");
   await expect(
-    page.getByText("Beacon & Bold contracts", { exact: true }).first(),
+    page.getByText("ROASWELL contracts", { exact: true }).first(),
   ).toBeVisible();
   await expect(
     page.getByText("Create customer", { exact: true }).first(),

@@ -6,7 +6,7 @@ import {
   type ExampleWorkflowState,
   exampleWorkflowInputSchema,
   exampleWorkflowResultSchema,
-} from "@beacon/schemas";
+} from "@roaswell/schemas";
 import {
   ApplicationFailure,
   defineQuery,

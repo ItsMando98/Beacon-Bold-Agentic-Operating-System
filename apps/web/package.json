@@ -1,5 +1,5 @@
 {
-  "name": "@beacon/web",
+  "name": "@roaswell/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
     "start": "next start --port 3001"
   },
   "dependencies": {
-    "@beacon/config": "workspace:*",
-    "@beacon/ui": "workspace:*",
+    "@roaswell/config": "workspace:*",
+    "@roaswell/ui": "workspace:*",
     "next": "16.3.7",
     "react": "19.3.0",
     "react-dom": "19.3.0"

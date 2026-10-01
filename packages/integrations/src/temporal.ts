@@ -1,4 +1,4 @@
-import { temporalConnectionSchema } from "@beacon/schemas";
+import { temporalConnectionSchema } from "@roaswell/schemas";
 import {
   NativeConnection,
   Worker,

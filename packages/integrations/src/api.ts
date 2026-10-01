@@ -5,14 +5,14 @@ import {
   IdempotencyConflict,
   models,
   withTenant,
-} from "@beacon/db";
+} from "@roaswell/db";
 import {
   type AuthIdentity,
   type CustomerCommand,
   type CustomerResponse,
   customerCommandSchema,
   wireEntitySchemas,
-} from "@beacon/schemas";
+} from "@roaswell/schemas";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";

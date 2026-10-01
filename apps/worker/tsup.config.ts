@@ -4,5 +4,9 @@ export default defineConfig({
   format: ["esm"],
   target: "node22",
   outDir: "dist",
-  noExternal: ["@beacon/config", "@beacon/schemas", "@beacon/integrations"],
+  noExternal: [
+    "@roaswell/config",
+    "@roaswell/schemas",
+    "@roaswell/integrations",
+  ],
 });

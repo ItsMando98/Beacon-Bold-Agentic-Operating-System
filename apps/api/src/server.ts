@@ -1,11 +1,11 @@
-import { loadEnvironment } from "@beacon/config";
+import { serve } from "@hono/node-server";
+import { loadEnvironment } from "@roaswell/config";
 import {
   createMemoryCustomerStore,
   createPostgresCustomerStore,
-} from "@beacon/integrations/api";
-import { createAuth0Authenticator } from "@beacon/integrations/auth";
-import { auth0ApiEnvironmentSchema } from "@beacon/schemas";
-import { serve } from "@hono/node-server";
+} from "@roaswell/integrations/api";
+import { createAuth0Authenticator } from "@roaswell/integrations/auth";
+import { auth0ApiEnvironmentSchema } from "@roaswell/schemas";
 import { createApp } from "./app";
 
 const env = loadEnvironment("api", process.env);

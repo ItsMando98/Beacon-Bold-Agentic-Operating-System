@@ -1,4 +1,4 @@
-# Beacon & Bold — Regeln für Coding Agents
+# ROASWELL — Regeln für Coding Agents
 
 ## Arbeitsregeln
 1. Eine Aufgabe, ein Branch, ein Pull Request. Nur Dateien ändern, die die Aufgabe braucht.
@@ -6,13 +6,16 @@
 3. Abnahme als automatischer Test, bevor eine Aufgabe als fertig gilt.
 4. Definition of Done: Lint, Typecheck, Tests, Build und Abnahme grün; kurz dokumentiert; keine Secrets.
 5. Kleine Schritte: Größere Aufgaben aufteilen und als separate Aufgaben eintragen.
-6. Jede Geldwirkung geht durch `requestApproval` (P1-8). Auch unter Budgetlimits ist anfangs eine Gründerfreigabe nötig.
+6. Geldwirkungen benötigen einen durch `requestApproval` genehmigten Budgetrahmen (ADR 0011). Innerhalb von Zweck, Anbieter, Zeitraum und Limits dürfen berechtigte Agenten selbstständig handeln. Bis zur technischen Budgetabnahme bleibt jede reale Geldwirkung einzeln freigabepflichtig.
 7. Externe Dienste ausschließlich hinter Adaptern in `packages/integrations`. Tests verwenden Mock oder Sandbox, keine echten Kundenkonten.
 8. Keine Secrets oder echten Kundendaten. Konfiguration über validierte Umgebungsvariablen, ausschließlich erfundene Testdaten.
 9. Migrationen nur vorwärts und mit automatischem Test für Mandantentrennung.
 10. Prompts, Regeln und Modellwahl in `packages/agents` versionieren und evaluieren.
 11. Fehlende Entscheidungen nicht erraten. In der PR-Beschreibung benennen; Entscheidungen in `docs/adr` dokumentieren.
 12. Keine Produktion ändern. Produktionsdeployments, Zahlungen und Rechtstexte bleiben bei Menschen.
+
+## Aktuelle Produktgrundlage
+[ROASWELL-Umsetzungsplan](docs/roaswell-umsetzungsplan.md) und [Einzelaufgaben](docs/roaswell-aufgaben.md) ersetzen die ursprünglichen Produktkonzepte für neue Aufgaben. Historische Abnahmen bleiben erhalten. Auth0 bleibt der bestätigte Anbieter; VPS ist der einzige aktive Deployment-Pfad.
 
 ## Ordnerkarte
 - `apps/web`: Marketing-Website; `apps/app`: Betriebsoberfläche.

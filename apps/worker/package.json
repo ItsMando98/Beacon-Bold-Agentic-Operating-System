@@ -1,5 +1,5 @@
 {
-  "name": "@beacon/worker",
+  "name": "@roaswell/worker",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,9 +10,9 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@beacon/config": "workspace:*",
-    "@beacon/integrations": "workspace:*",
-    "@beacon/schemas": "workspace:*",
+    "@roaswell/config": "workspace:*",
+    "@roaswell/integrations": "workspace:*",
+    "@roaswell/schemas": "workspace:*",
     "@temporalio/activity": "1.24.0",
     "@temporalio/common": "1.24.0",
     "@temporalio/worker": "1.24.0",

@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   type CustomerStore,
   IdempotencyConflict,
-} from "@beacon/integrations/api";
+} from "@roaswell/integrations/api";
 import {
   AuthenticationError,
   type Authenticator,
-} from "@beacon/integrations/auth";
+} from "@roaswell/integrations/auth";
 import {
   apiErrorSchema,
   apiSupportRoutes,
@@ -15,8 +16,7 @@ import {
   operationContracts,
   tenantContextSchema,
   type z,
-} from "@beacon/schemas";
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+} from "@roaswell/schemas";
 import { Scalar } from "@scalar/hono-api-reference";
 import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -147,7 +147,7 @@ export function createApp(dependencies: ApiDependencies = {}) {
       cdn: script.path,
       telemetry: false,
       withDefaultFonts: false,
-      pageTitle: "Beacon & Bold API",
+      pageTitle: "ROASWELL API",
       hideClientButton: true,
     }),
   );

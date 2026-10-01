@@ -1,5 +1,5 @@
 {
-  "name": "@beacon/api",
+  "name": "@roaswell/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,9 +10,9 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@beacon/config": "workspace:*",
-    "@beacon/integrations": "workspace:*",
-    "@beacon/schemas": "workspace:*",
+    "@roaswell/config": "workspace:*",
+    "@roaswell/integrations": "workspace:*",
+    "@roaswell/schemas": "workspace:*",
     "@hono/node-server": "2.1.3",
     "@hono/zod-openapi": "1.6.3",
     "@scalar/api-reference": "1.72.3",

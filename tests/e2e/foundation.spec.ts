@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("shows an honest foundation status", async ({ page }) => {
   await page.goto("/");
+  await expect(page).toHaveTitle("Betrieb | ROASWELL");
   await expect(
     page.getByRole("heading", { name: "Betriebsoberfläche" }),
   ).toBeVisible();
@@ -9,6 +10,14 @@ test("shows an honest foundation status", async ({ page }) => {
     page.getByText(
       "Freigaben, Agentenläufe und Audit werden in Phase 1 angebunden.",
     ),
+  ).toBeVisible();
+});
+
+test("shows the ROASWELL marketing brand", async ({ page }) => {
+  await page.goto("http://127.0.0.1:13001/");
+  await expect(page).toHaveTitle("ROASWELL");
+  await expect(
+    page.getByRole("heading", { name: "ROASWELL", exact: true }),
   ).toBeVisible();
 });
 

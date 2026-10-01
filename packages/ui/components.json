@@ -12,10 +12,10 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@beacon/ui/components",
-    "ui": "@beacon/ui/components",
-    "utils": "@beacon/ui/lib/utils",
-    "lib": "@beacon/ui/lib",
-    "hooks": "@beacon/ui/hooks"
+    "components": "@roaswell/ui/components",
+    "ui": "@roaswell/ui/components",
+    "utils": "@roaswell/ui/lib/utils",
+    "lib": "@roaswell/ui/lib",
+    "hooks": "@roaswell/ui/hooks"
   }
 }

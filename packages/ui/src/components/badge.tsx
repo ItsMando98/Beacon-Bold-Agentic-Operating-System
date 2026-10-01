@@ -1,4 +1,4 @@
-import { cn } from "@beacon/ui/lib/utils";
+import { cn } from "@roaswell/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import type * as React from "react";

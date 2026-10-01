@@ -1,4 +1,4 @@
-import { loadEnvironment } from "@beacon/config";
+import { loadEnvironment } from "@roaswell/config";
 import { createExampleWorker } from "./worker.js";
 
 loadEnvironment("worker", process.env);
