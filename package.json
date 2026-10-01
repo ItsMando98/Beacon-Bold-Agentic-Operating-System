@@ -13,7 +13,7 @@
     "lint": "node node_modules/@biomejs/biome/bin/biome check .",
     "typecheck": "turbo typecheck",
     "test": "vitest run --project unit",
-    "test:integration": "vitest run --project integration",
+    "test:integration": "pnpm --filter @beacon/worker build && vitest run --project integration",
     "test:e2e": "node scripts/playwright.mjs test",
     "build": "turbo build",
     "storybook": "pnpm --filter @beacon/ui storybook",
