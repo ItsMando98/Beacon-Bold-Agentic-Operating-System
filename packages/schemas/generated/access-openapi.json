@@ -4,7 +4,7 @@
   "info": {
     "title": "ROASWELL access specification",
     "version": "0.0.0",
-    "description": "Planned R1 access contracts only. These routes are not implemented or registered in the live API."
+    "description": "R1 access specification. getOrganization is implemented; the other operations remain planned and are not registered in the live API."
   },
   "paths": {
     "/v1/organization": {

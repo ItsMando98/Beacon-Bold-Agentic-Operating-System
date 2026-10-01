@@ -3,9 +3,9 @@ import {
   apiErrorSchema,
   contractMetadataSchema,
   type OperationContract,
-  operationContracts,
 } from "./contracts.js";
 import { apiSupportRoutes, idempotencyKeySchema } from "./http.js";
+import { liveOperationContracts } from "./live-contracts.js";
 import { wireEntitySchemas } from "./wire.js";
 
 export type JsonSchema = z.core.JSONSchema.JSONSchema;
@@ -66,7 +66,7 @@ function componentSchema(schema: JsonSchema, name: string): JsonSchema {
   return relocate(schema) as JsonSchema;
 }
 export function generateToolDefinitions(
-  contracts: readonly OperationContract[] = operationContracts,
+  contracts: readonly OperationContract[] = liveOperationContracts,
 ) {
   assertContracts(contracts);
   return contracts.map((contract) => {
@@ -87,7 +87,7 @@ export function generateToolDefinitions(
 }
 
 export function generateOpenApi(
-  contracts: readonly OperationContract[] = operationContracts,
+  contracts: readonly OperationContract[] = liveOperationContracts,
   options: {
     includeSupportRoutes?: boolean;
     title?: string;

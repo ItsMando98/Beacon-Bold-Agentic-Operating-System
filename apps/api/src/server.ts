@@ -23,7 +23,6 @@ const authenticate = config
       humanClientId: config.AUTH0_CLIENT_ID,
       audience: config.AUTH0_AUDIENCE,
       bindings: config.AUTH0_AUTH_BINDINGS,
-      verifyIdentity: store.verifyIdentity,
     })
   : undefined;
 const server = serve({
