@@ -78,6 +78,11 @@ deshalb nicht sinnvoll.
 | Inhalte | Deutsche Fachnavigation und Vorschau-/Leertexte statt fiktiver Umsatz-/Kundenzahlen; bewusste fachliche Anpassung |
 | Interaktion | Suche, Escape/Fokus, Sidebar, Theme und mobile Navigation geprüft; Theme/Sidebar bleiben beim Seitenwechsel erhalten |
 
+Der Linux-CI-Browserlauf fand während des Theme-Wechsels einen vorübergehenden
+Kontrast von 4,33:1 durch die gemeinsame Button-Transition. Dashboard-Buttons
+wechseln Text-/Flächenfarben deshalb unmittelbar zusammen; nur der Schatten
+bleibt animiert. Die Axe-Prüfung wird beibehalten und nicht abgeschwächt.
+
 Textvergleich der sichtbaren Übersicht: alle sechs Navigationseinträge, Titel,
 Vorschauhinweise und vier Kennzahlenbeschriftungen geprüft; keine unbelegten
 Leistungs- oder Umsatzangaben. Beabsichtigte Abweichungen sind Marke, deutsche

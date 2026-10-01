@@ -33,6 +33,11 @@
   min-height: 100svh;
   background: var(--background);
 }
+/* Change theme colors together: interpolating text/background separately can
+   briefly violate contrast while switching between light and dark. */
+.dashboard-theme [data-slot="button"] {
+  transition-property: box-shadow;
+}
 .dashboard-shell a:focus-visible,
 .dashboard-command a:focus-visible {
   outline: 2px solid var(--ring);
