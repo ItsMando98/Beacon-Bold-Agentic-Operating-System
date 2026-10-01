@@ -1,7 +1,7 @@
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
 import {
   auth0AppEnvironmentSchema,
-  operationContracts,
+  liveOperationContracts,
 } from "@roaswell/schemas";
 
 let client: Auth0Client | undefined;
@@ -25,7 +25,7 @@ export function getAuth0() {
             "openid",
             "profile",
             "email",
-            ...operationContracts.flatMap((contract) => contract.scopes),
+            ...liveOperationContracts.flatMap((contract) => contract.scopes),
           ]),
         ].join(" "),
       },

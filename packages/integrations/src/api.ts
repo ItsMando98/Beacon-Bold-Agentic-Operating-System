@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
 import {
+  AuthorizationError,
+  createAuthorizedCustomer,
   createCustomerOnce,
   customerRequestHash,
   IdempotencyConflict,
   models,
+  readAuthorizedOrganization,
   withTenant,
 } from "@roaswell/db";
 import {
@@ -12,16 +15,27 @@ import {
   type CustomerResponse,
   customerCommandSchema,
   wireEntitySchemas,
+  type wireOrganizationSchema,
+  type z,
 } from "@roaswell/schemas";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-export { IdempotencyConflict };
+export { AuthorizationError, IdempotencyConflict };
 export interface CustomerStore {
+  getOrganization?(
+    identity: AuthIdentity,
+    requestId: string,
+  ): Promise<z.output<typeof wireOrganizationSchema>>;
   create(command: CustomerCommand): Promise<CustomerResponse>;
   close(): Promise<void>;
   verifyIdentity(identity: AuthIdentity): Promise<boolean>;
+  createAuthorized?(
+    command: CustomerCommand,
+    identity: AuthIdentity,
+    requestId: string,
+  ): Promise<CustomerResponse>;
 }
 export function createPostgresCustomerStore(
   connectionString: string,
@@ -29,7 +43,11 @@ export function createPostgresCustomerStore(
   const pool = new Pool({ connectionString, max: 5 });
   const database = drizzle(pool, { schema: models });
   return {
+    getOrganization: (identity, requestId) =>
+      readAuthorizedOrganization(database, { identity, requestId }),
     create: (command) => createCustomerOnce(database, command),
+    createAuthorized: (command, identity, requestId) =>
+      createAuthorizedCustomer(database, command, { identity, requestId }),
     verifyIdentity: (identity) =>
       withTenant(database, identity.tenantId, async (tx) => {
         if (identity.kind === "human") {
@@ -66,7 +84,7 @@ export function createMemoryCustomerStore(): CustomerStore {
     string,
     { hash: string; response: CustomerResponse }
   >();
-  return {
+  const store: CustomerStore = {
     async create(command) {
       const parsed = customerCommandSchema.parse(command);
       const key = JSON.stringify([
@@ -96,4 +114,14 @@ export function createMemoryCustomerStore(): CustomerStore {
       records.clear();
     },
   };
+  store.createAuthorized = async (command, identity) => {
+    // Explicit development fixture only. Live authorization always uses PostgreSQL.
+    if (
+      command.tenantId !== identity.tenantId ||
+      !identity.scopes.includes("customers:write")
+    )
+      throw new AuthorizationError();
+    return store.create(command);
+  };
+  return store;
 }

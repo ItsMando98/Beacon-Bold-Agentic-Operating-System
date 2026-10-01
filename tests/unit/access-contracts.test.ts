@@ -67,7 +67,7 @@ const plannedOptions = {
   includeSupportRoutes: false,
   title: "ROASWELL access specification",
   description:
-    "Planned R1 access contracts only. These routes are not implemented or registered in the live API.",
+    "R1 access specification. getOrganization is implemented; the other operations remain planned and are not registered in the live API.",
 };
 
 describe("R1-01 organisation and access contracts", () => {
@@ -298,7 +298,7 @@ describe("R1-01 organisation and access contracts", () => {
     ]);
   });
 
-  it("generates valid separate REST/MCP specifications without advertising live endpoints", async () => {
+  it("generates separate contracts and advertises only the implemented organization read", async () => {
     const document = generateOpenApi(accessOperationContracts, plannedOptions);
     expect((await validate(JSON.stringify(document))).valid).toBe(true);
     expect(Object.keys(document.paths)).toEqual([
@@ -323,7 +323,7 @@ describe("R1-01 organisation and access contracts", () => {
       const response = await api.request(contract.path, {
         method: contract.method.toUpperCase(),
       });
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(index === 0 ? 401 : 404);
     }
     expect(
       JSON.parse(
@@ -335,10 +335,8 @@ describe("R1-01 organisation and access contracts", () => {
         readFileSync("packages/schemas/generated/access-tools.json", "utf8"),
       ),
     ).toEqual(tools);
-    expect(Object.keys(generateOpenApi().paths)).not.toContain(
-      "/v1/organization",
-    );
-    expect(generateToolDefinitions()).toHaveLength(2);
+    expect(Object.keys(generateOpenApi().paths)).toContain("/v1/organization");
+    expect(generateToolDefinitions()).toHaveLength(3);
     expect(JSON.stringify(document)).not.toContain('"storage"');
   });
 });

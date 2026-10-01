@@ -91,6 +91,17 @@ test("signed Auth0 identities must belong to the tenant and cannot use paused ag
       "INSERT INTO beacon.users (id,tenant_id,name,external_subject,created_at) VALUES ($1,$2,'Synthetic user','auth0|synthetic',now())",
       [userId, tenantA],
     );
+    await fixture.query(
+      "INSERT INTO beacon.organizations SELECT id,name,created_at,'customer',false FROM beacon.tenants",
+    );
+    await fixture.query(
+      "INSERT INTO beacon.agency_memberships(id,tenant_id,created_at,user_id,role,status,revoked_at,client_id) VALUES($1,$2,now(),$3,'founder','active',null,'human')",
+      [randomUUID(), tenantA, userId],
+    );
+    await fixture.query(
+      "INSERT INTO beacon.agent_grants(id,tenant_id,created_at,agent_id,kind,subject,client_id,organization_id,view,scopes,expires_at,status,revoked_at) VALUES($1,$2,now(),$3,'m2m','agent@clients','agent',null,'agency','[\"customers:write\"]',now()+interval '1 hour','active',null)",
+      [randomUUID(), tenantA, agentId],
+    );
     expect((await post(tenantA)).status).toBe(201);
     expect((await post(tenantA, true)).status).toBe(201);
     expect((await post(tenantB)).status).toBe(403);

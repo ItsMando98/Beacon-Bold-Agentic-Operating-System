@@ -7,7 +7,7 @@ import { models, sqlName } from "./models.js";
 const quote = (name: string) => `"${name.replaceAll('"', '""')}"`;
 const literal = (value: string) => `'${value.replaceAll("'", "''")}'`;
 const qualified = (name: string) => `"beacon".${quote(name)}`;
-function expression(value: SQL) {
+export function expression(value: SQL) {
   const query = new PgDialect().sqlToQuery(value);
   return query.sql.replace(/\$(\d+)/g, (_, index: string) => {
     const parameter = query.params[Number(index) - 1];
@@ -19,7 +19,7 @@ function expression(value: SQL) {
 }
 
 /** Compile this bounded JSON Schema subset, refusing unsupported constraints. */
-function validation(
+export function validation(
   schema: z.core.JSONSchema._JSONSchema,
   value: string,
 ): string {
@@ -41,6 +41,8 @@ function validation(
     "format",
     "pattern",
     "storage",
+    "items",
+    "maxItems",
   ]);
   for (const key of Object.keys(schema))
     if (!allowed.has(key))
@@ -54,9 +56,27 @@ function validation(
     const type = schema.type === "integer" ? "number" : schema.type;
     if (typeof type !== "string")
       throw new Error("Expected scalar schema type");
-    if (!["number", "string", "boolean", "object", "null"].includes(type))
+    if (
+      !["number", "string", "boolean", "object", "null", "array"].includes(type)
+    )
       throw new Error(`Unsupported storage type: ${type}`);
     checks.push(`jsonb_typeof(${value}) = ${literal(type)}`);
+    if (type === "array") {
+      const item = schema.items;
+      if (
+        !item ||
+        typeof item !== "object" ||
+        Array.isArray(item) ||
+        item.type !== "string" ||
+        !item.pattern ||
+        Object.keys(item).some((key) => !["type", "pattern"].includes(key))
+      )
+        throw new Error("Only constrained scope arrays are supported");
+      const path = `strict $[*] ? (@.type() != "string" || !(@ like_regex ${JSON.stringify(item.pattern)}))`;
+      checks.push(
+        `CASE WHEN jsonb_typeof(${value}) = 'array' THEN ${schema.maxItems === undefined ? "true" : `jsonb_array_length(${value}) <= ${schema.maxItems}`} AND NOT jsonb_path_exists(${value}, ${literal(path)}::jsonpath) ELSE false END`,
+      );
+    }
     if (type === "object") {
       if (
         schema.additionalProperties !== false ||

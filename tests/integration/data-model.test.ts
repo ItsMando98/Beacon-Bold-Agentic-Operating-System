@@ -148,14 +148,14 @@ it("migrates all 13 real models and isolates every read, write and relationship"
     const flags = await migrationClient.query(
       "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class JOIN pg_namespace n ON n.oid=relnamespace WHERE n.nspname='beacon' AND relkind='r' ORDER BY relname",
     );
-    expect(flags.rows).toHaveLength(17);
+    expect(flags.rows).toHaveLength(19);
     expect(
       flags.rows.every((row) => row.relrowsecurity && row.relforcerowsecurity),
     ).toBe(true);
     const keys = await migrationClient.query(
       "SELECT count(*)::int AS count FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='beacon' AND c.contype='f'",
     );
-    expect(keys.rows[0].count).toBe(13 + tenantReferences.length + 7);
+    expect(keys.rows[0].count).toBe(13 + tenantReferences.length + 11);
     for (const name of names) {
       entitySchemas[name].parse(a[name]);
       entitySchemas[name].parse(b[name]);

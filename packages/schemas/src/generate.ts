@@ -12,7 +12,7 @@ const artifacts = {
     includeSupportRoutes: false,
     title: "ROASWELL access specification",
     description:
-      "Planned R1 access contracts only. These routes are not implemented or registered in the live API.",
+      "R1 access specification. getOrganization is implemented; the other operations remain planned and are not registered in the live API.",
   }),
   "access-tools.json": generateToolDefinitions(accessOperationContracts),
 };

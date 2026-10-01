@@ -16,7 +16,7 @@ import {
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { columns, models } from "./models.js";
-import { withTenant } from "./tenant.js";
+import { type TenantTransaction, withTenant } from "./tenant.js";
 
 export const idempotency = pgSchema("beacon")
   .table("idempotency", columns(idempotencyRecordSchema.shape), (table) => {
@@ -49,48 +49,54 @@ export async function createCustomerOnce(
   command: CustomerCommand,
 ) {
   const parsed = customerCommandSchema.parse(command);
+  return withTenant(database, parsed.tenantId, (transaction) =>
+    createCustomerInTransaction(transaction, parsed),
+  );
+}
+
+export async function createCustomerInTransaction(
+  transaction: TenantTransaction,
+  command: CustomerCommand,
+) {
+  const parsed = customerCommandSchema.parse(command);
   const requestHash = customerRequestHash(parsed.input);
-  return withTenant(database, parsed.tenantId, async (transaction) => {
-    await transaction.execute(
-      sql`SELECT set_config('lock_timeout', '5s', true)`,
+  await transaction.execute(sql`SELECT set_config('lock_timeout', '5s', true)`);
+  await transaction.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([parsed.tenantId, "createCustomer", parsed.key])}, 0))`,
+  );
+  const [existing] = await transaction
+    .select()
+    .from(idempotency)
+    .where(
+      and(
+        eq(idempotency.tenantId, parsed.tenantId),
+        eq(idempotency.operation, "createCustomer"),
+        eq(idempotency.key, parsed.key),
+      ),
     );
-    await transaction.execute(
-      sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([parsed.tenantId, "createCustomer", parsed.key])}, 0))`,
-    );
-    const [existing] = await transaction
-      .select()
-      .from(idempotency)
-      .where(
-        and(
-          eq(idempotency.tenantId, parsed.tenantId),
-          eq(idempotency.operation, "createCustomer"),
-          eq(idempotency.key, parsed.key),
-        ),
-      );
-    if (existing) {
-      if (existing.requestHash !== requestHash) throw new IdempotencyConflict();
-      return idempotencyRecordSchema.parse(existing).response;
-    }
-    const [created] = await transaction
-      .insert(models.customers)
-      .values({
-        id: randomUUID(),
-        tenantId: parsed.tenantId,
-        createdAt: new Date(),
-        name: parsed.input.name,
-      })
-      .returning();
-    const response = serializeEntity("customers", created);
-    await transaction.insert(idempotency).values({
+  if (existing) {
+    if (existing.requestHash !== requestHash) throw new IdempotencyConflict();
+    return idempotencyRecordSchema.parse(existing).response;
+  }
+  const [created] = await transaction
+    .insert(models.customers)
+    .values({
+      id: randomUUID(),
       tenantId: parsed.tenantId,
-      operation: "createCustomer",
-      key: parsed.key,
-      requestHash,
-      response,
       createdAt: new Date(),
-    });
-    return response;
+      name: parsed.input.name,
+    })
+    .returning();
+  const response = serializeEntity("customers", created);
+  await transaction.insert(idempotency).values({
+    tenantId: parsed.tenantId,
+    operation: "createCustomer",
+    key: parsed.key,
+    requestHash,
+    response,
+    createdAt: new Date(),
   });
+  return response;
 }
 export function renderIdempotencyMigration() {
   const config = getTableConfig(idempotency);

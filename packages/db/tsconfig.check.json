@@ -6,6 +6,8 @@
     "../../tests/unit/data-model.test.ts",
     "../../tests/integration/data-model.test.ts",
     "../../tests/unit/access-model.test.ts",
-    "../../tests/integration/access-model.test.ts"
+    "../../tests/integration/access-model.test.ts",
+    "../../tests/unit/authorization.test.ts",
+    "../../tests/integration/authorization.test.ts"
   ]
 }

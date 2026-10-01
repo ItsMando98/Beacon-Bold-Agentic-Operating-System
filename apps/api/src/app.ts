@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
+  AuthorizationError,
   type CustomerStore,
   IdempotencyConflict,
 } from "@roaswell/integrations/api";
@@ -9,6 +10,8 @@ import {
   type Authenticator,
 } from "@roaswell/integrations/auth";
 import {
+  type AuthIdentity,
+  accessOperationContracts,
   apiErrorSchema,
   apiSupportRoutes,
   generateOpenApi,
@@ -22,7 +25,11 @@ import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { scalarScript } from "./documentation.js";
 
-type Variables = { requestId: string; tenantId: string };
+type Variables = {
+  requestId: string;
+  tenantId: string;
+  identity: AuthIdentity | undefined;
+};
 type ApiContext = Context<{ Variables: Variables }>;
 type ErrorCode = z.output<typeof apiErrorSchema>["error"]["code"];
 function errorResponse(
@@ -80,7 +87,10 @@ export const customerRoute = createRoute({
   },
 });
 export type ApiDependencies = {
-  store?: Pick<CustomerStore, "create" | "close">;
+  store?: Pick<
+    CustomerStore,
+    "create" | "close" | "createAuthorized" | "getOrganization"
+  >;
   authenticate?: Authenticator;
   /** Internal trusted boundary, implemented by P1-4. Never read tenant IDs from public headers. */
   resolveTenant?: (request: Request) => Promise<string | undefined>;
@@ -105,12 +115,7 @@ export function createApp(dependencies: ApiDependencies = {}) {
   app.use(customer.path, async (context, next) => {
     if (context.req.method !== "POST") return next();
     const identity = await dependencies.authenticate?.(context.req.raw);
-    if (
-      identity &&
-      !customer.scopes.every((scope) => identity.scopes.includes(scope))
-    ) {
-      throw new AuthenticationError(403);
-    }
+    context.set("identity", identity);
     const tenantId =
       identity?.tenantId ??
       (dependencies.authenticate
@@ -131,13 +136,44 @@ export function createApp(dependencies: ApiDependencies = {}) {
   );
   app.openapi(customerRoute, async (context) => {
     if (!dependencies.store) throw new Error("Customer store unavailable");
-    const response = await dependencies.store.create({
+    const command = {
       tenantId: context.get("tenantId"),
       key: context.req.valid("header")["idempotency-key"],
       input: context.req.valid("json"),
-    });
+    };
+    const identity = context.get("identity");
+    const authorized = dependencies.store.createAuthorized;
+    if (identity && !authorized) throw new AuthorizationError();
+    const response = identity
+      ? await authorized?.(command, identity, context.get("requestId"))
+      : await dependencies.store.create(command);
     return context.json(customer.output.parse(response), 201);
   });
+  const organization = accessOperationContracts[0];
+  app.openapi(
+    createRoute({
+      method: organization.method,
+      path: organization.path,
+      operationId: organization.operationId,
+      responses: {
+        200: {
+          description: organization.description,
+          content: { "application/json": { schema: organization.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) => {
+      const identity = await dependencies.authenticate?.(context.req.raw);
+      if (!identity) throw new AuthenticationError(401);
+      if (!dependencies.store?.getOrganization) throw new AuthorizationError();
+      const result = await dependencies.store.getOrganization(
+        identity,
+        context.get("requestId"),
+      );
+      return context.json(organization.output.parse(result), 200);
+    },
+  );
   const [openapi, docs, script] = apiSupportRoutes;
   app.get(openapi.path, (context) => context.json(generateOpenApi()));
   app.get(
@@ -161,6 +197,8 @@ export function createApp(dependencies: ApiDependencies = {}) {
     errorResponse(context, "NOT_FOUND", "Route not found", 404),
   );
   app.onError((error, context) => {
+    if (error instanceof AuthorizationError)
+      return errorResponse(context, "FORBIDDEN", "Access denied", 403);
     if (error instanceof AuthenticationError) {
       if (error.status === 401) context.header("WWW-Authenticate", "Bearer");
       return errorResponse(
