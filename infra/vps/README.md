@@ -28,4 +28,6 @@ Der Ablauf startet ausschließlich eigene Datenbankdienste, erstellt eine versch
 
 Vor Gate 0: Sicherung außerhalb des VPS speichern und in einer separaten Testdatenbank wiederherstellen, echten Merge-Deploy und HTTPS beweisen. Dauerhafte Backup-Abholung und Verantwortlichkeit müssen dokumentiert sein; eine ausschließlich lokale Kopie auf dem VPS ist kein externer Backup-Nachweis.
 
+Die vorbereitete GitHub-Backup-Pipeline holt täglich eine verschlüsselte P0-Sicherung ab und hält sie sieben Tage außerhalb des VPS vor. Für diese automatischen Artefakte gilt eine engere Grenze von 1 MiB pro Sicherung (höchstens 7 MiB bei einem täglichen Lauf). Größere Sicherungen führen zum sicheren Abbruch und benötigen eine neue Speicherentscheidung. Der Entschlüsselungsschlüssel liegt niemals in GitHub. Aktivierung erst nach CI-Zugangsfreigabe, echtem Deploy und Wiederherstellungstest; Workflow-Fehler müssen vom Betreiber bearbeitet werden.
+
 Keine globale Docker-Bereinigung, kein Stoppen fremder Dienste, keine Änderungen an produktiven DNS-Einträgen oder bestehender Proxy-Konfiguration. Ein erforderlicher Host-Neustart bleibt ein menschlich geplantes Wartungsfenster. Root-Deploy-Receiver und Compose werden nur durch den administrativen Projektzugang aktualisiert, niemals über den beschränkten CI-Schlüssel.

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { Client } from "pg";
 import { migrate } from "../packages/db/migrate.mjs";
 import { migrationEnvironmentSchema } from "../packages/schemas/src/index.ts";
-import { hydrateSecrets } from "./runtime-secrets.mjs";
+import { hydrateSecrets } from "./secret-files.mjs";
 
 async function main() {
   let client;

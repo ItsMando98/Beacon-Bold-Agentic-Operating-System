@@ -1,0 +1,33 @@
+name: VPS backup
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  encrypted-backup:
+    if: vars.STAGING_READY == 'true' && vars.STAGING_TARGET == 'vps'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Retrieve encrypted staging backup
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_DEPLOY_KEY" > ~/.ssh/beacon_deploy
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/beacon_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 root@"$VPS_HOST" backup > staging-backup.cms
+          test -s staging-backup.cms
+          test "$(stat -c %s staging-backup.cms)" -le 1048576
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-staging-backup-${{ github.run_id }}
+          path: staging-backup.cms
+          retention-days: 7

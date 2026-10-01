@@ -2,6 +2,8 @@
 
 Status: technische VPS-Eignung für kleines Staging bestätigt; Konfiguration, Lastabnahme und Deployment offen. Stand: 1. Oktober 2026.
 
+Implementierungsfortschritt: Compose-Datei, Secret-Lader, lokaler PostgreSQL-Socket, Redis-TLS, eingeschränkter SSH-Receiver und Migration-/Mandantentrennungsabnahme sind vorbereitet. Alle neun GitHub-Prüfungen auf 2f4b6fb bestanden einschließlich real gestarteter VPS-Topologie im isolierten CI-Runner. Das ist noch kein Server-Deploy. Das neue Bootstrap-Skript wurde von der automatischen Freigabeprüfung wegen dauerhafter CI-Zugänge und privaten Deploy-Schlüssels in GitHub-Secrets abgewiesen und nicht ausgeführt; ausdrückliche Zustimmung ist angefragt. Clerk und DNS werden vom Gründer vorbereitet. Der neue öffentliche main-Branch ist jetzt geschützt; ein fehlerhafter Merge wurde nachweislich abgewiesen. [VPS-Runbook](../infra/vps/README.md) und [manueller Freigabeumfang](vps-approval.md) beschreiben die konkrete Umsetzung.
+
 Der Gründer hat einen bestehenden VPS bereitgestellt und zusätzliches Staging unter Erhalt bestehender Dienste autorisiert. Der angegebene SSH-Benutzer ist `root`. `VPS_IP` und `VPS_PASSWORD` liegen ausschließlich in der ignorierten `.env`. Der nachträglich bereitgestellte lokale VPS-Ordner enthält ein bereits auf dem Server zugelassenes Ed25519-Schlüsselpaar. VPS-Ordner sind ausdrücklich aus Git und dem Docker-Build-Kontext ausgeschlossen. Werte und private Schlüssel werden weder dokumentiert noch in GitHub übertragen.
 
 ## Zugangsprüfung
