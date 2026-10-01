@@ -4,6 +4,8 @@ Stand: 30. September 2026. Code, lokale Abnahme und externe Abnahme werden getre
 
 Aktuelle P0-7-Steuerung (1. Oktober 2026): Der Gründer möchte den vorhandenen VPS für zusätzliches Staging nutzen; bestehende Dienste müssen erhalten bleiben. Passwort-Anmeldung wurde abgewiesen, die Anmeldung als `root` mit dem nachträglich bereitgestellten Ed25519-Schlüssel ist bestätigt. Die lesende Prüfung zeigt acht CPU-Kerne, rund 16 GB RAM, 41 laufende Container und belegte Web-Ports 80/443. Es wurden keine Serveränderungen durchgeführt. Lokale VPS-Schlüsselordner sind aus Git und Docker-Builds ausgeschlossen. [VPS-Vorbereitung und offene Abnahmen](vps-staging.md) dokumentieren den Wechsel; die unten aufgeführten AWS-Nachweise bleiben Nachweise der vorbereiteten Alternative, nicht des VPS. Die tatsächliche VPS-Konfiguration und das Deployment sind noch offen. Keine AWS-Provisionierung und keine neue Serverbestellung.
 
+Die vertiefte VPS-Eignungsprüfung bestätigt ausreichende aktuelle Kapazität für kleines synthetisches Staging: 7,53 GiB verfügbarer RAM, niedrige CPU-Last, keine aktuelle Memory-Pressure und keine OOM-Ereignisse in den letzten 24 Stunden. Coolify/Traefik mit Docker-Provider und Cloudflare-HTTPS ist vorhanden; neue Staging-Routen können darauf aufbauen. Alle drei Staging-DNS-Namen lösen noch nicht auf; lokale Clerk-Werte fehlen. VPS-Compose, Ressourcenlimits, Datenbank-Transport, begrenzter CI-Deploy und Backups bleiben umzusetzen. Kein Deploy, Neustart oder Eingriff in bestehende Dienste durchgeführt; Gate 0 bleibt offen.
+
 | Aufgabe | Nachweis / offene Punkte |
 |---|---|
 | P0-1 | Vier Apps und sechs Pakete, eingefrorene Abhängigkeiten. PR #1 gemergt. |
