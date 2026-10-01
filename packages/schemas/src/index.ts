@@ -1,4 +1,7 @@
 import { z } from "zod";
+
+export * from "./domain.js";
+export { z };
 export const healthSchema = z.object({
   status: z.literal("ok"),
   service: z.literal("api"),
