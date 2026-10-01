@@ -4,6 +4,7 @@ export * from "./contracts.js";
 export * from "./domain.js";
 export * from "./generators.js";
 export * from "./health.js";
+export * from "./http.js";
 export * from "./wire.js";
 export { z };
 export const migrationEnvironmentSchema = z

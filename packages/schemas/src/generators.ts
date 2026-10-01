@@ -5,6 +5,7 @@ import {
   type OperationContract,
   operationContracts,
 } from "./contracts.js";
+import { apiSupportRoutes, idempotencyKeySchema } from "./http.js";
 import { wireEntitySchemas } from "./wire.js";
 
 export type JsonSchema = z.core.JSONSchema.JSONSchema;
@@ -149,10 +150,43 @@ export function generateOpenApi(
               required: true,
               content: { "application/json": { schema: input } },
             },
+            parameters: [
+              {
+                name: "Idempotency-Key",
+                in: "header",
+                required: true,
+                schema: generateJsonSchema(idempotencyKeySchema, "input"),
+              },
+            ],
           }
         : { parameters }),
       responses,
       "x-beacon-scopes": contract.scopes,
+    };
+  }
+  for (const route of apiSupportRoutes) {
+    const output = addSchema(
+      `${route.operationId}Output`,
+      generateJsonSchema(route.output),
+    );
+    paths[route.path] = {
+      [route.method]: {
+        operationId: route.operationId,
+        responses: {
+          200: {
+            description: "API documentation",
+            content: { [route.contentType]: { schema: output } },
+          },
+          500: {
+            description: "Internal error",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
     };
   }
   return {
@@ -162,7 +196,7 @@ export function generateOpenApi(
       title: "Beacon & Bold contracts",
       version: "0.0.0",
       description:
-        "Generated contracts. Serving REST and MCP operations requires P1-3 through P1-5.",
+        "Schema-derived REST contracts. Authentication and MCP follow in P1-4 and P1-5.",
     },
     paths,
     components: { schemas },
