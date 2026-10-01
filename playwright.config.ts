@@ -5,6 +5,17 @@ export default defineConfig({
   webServer: [
     {
       command:
+        "node apps/portal/node_modules/next/dist/bin/next start apps/portal --port 13003",
+      url: "http://127.0.0.1:13003",
+      reuseExistingServer: false,
+      env: {
+        APP_ENV: "development",
+        SERVICE_MODE: "mock",
+        AUTH_ENABLED: "false",
+      },
+    },
+    {
+      command:
         "node apps/web/node_modules/next/dist/bin/next start apps/web --port 13001",
       url: "http://127.0.0.1:13001",
       reuseExistingServer: false,

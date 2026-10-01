@@ -51,6 +51,7 @@ export const authIdentitySchema = z.strictObject({
   subject: z.string().min(1),
   organizationId: z.string().min(1).optional(),
   clientId: z.string().optional(),
+  surface: z.enum(["agency", "customer"]).optional(),
   scopes: z.array(authScopeSchema),
   expiresAt: z.number().int().positive(),
 });
@@ -77,6 +78,7 @@ export const auth0IssuerSchema = z.url().refine((value) => {
 export const auth0ApiEnvironmentSchema = z.object({
   AUTH0_ISSUER: auth0IssuerSchema,
   AUTH0_CLIENT_ID: z.string().min(1),
+  PORTAL_AUTH0_CLIENT_ID: z.string().min(1).optional(),
   AUTH0_AUDIENCE: z.url(),
   AUTH0_AUTH_BINDINGS: z.string().transform((value, ctx) => {
     try {
@@ -104,3 +106,29 @@ export const auth0AppEnvironmentSchema = auth0ApiEnvironmentSchema
   });
 export type AuthIdentity = z.output<typeof authIdentitySchema>;
 export type AuthBinding = z.output<typeof authBindingSchema>;
+
+export const auth0PortalEnvironmentSchema = z
+  .object({
+    AUTH0_ISSUER: auth0IssuerSchema,
+    AUTH0_DOMAIN: z.string().regex(/^[a-zA-Z0-9.-]+$/),
+    AUTH0_AUDIENCE: z.url(),
+    AUTH0_CLIENT_ID: z.string().min(1),
+    PORTAL_AUTH0_CLIENT_ID: z.string().min(1),
+    PORTAL_AUTH0_CLIENT_SECRET: z.string().min(1),
+    PORTAL_AUTH0_SECRET: z.string().regex(/^[a-fA-F0-9]{64}$/),
+    PORTAL_BASE_URL: z.url(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.AUTH0_CLIENT_ID === value.PORTAL_AUTH0_CLIENT_ID)
+      ctx.addIssue({
+        code: "custom",
+        path: ["PORTAL_AUTH0_CLIENT_ID"],
+        message: "Separate portal client required",
+      });
+    if (new URL(value.AUTH0_ISSUER).hostname !== value.AUTH0_DOMAIN)
+      ctx.addIssue({
+        code: "custom",
+        path: ["AUTH0_DOMAIN"],
+        message: "Domain must match issuer",
+      });
+  });

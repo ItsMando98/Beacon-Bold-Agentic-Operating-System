@@ -21,6 +21,7 @@ const authenticate = config
   ? createAuth0Authenticator({
       issuer: config.AUTH0_ISSUER,
       humanClientId: config.AUTH0_CLIENT_ID,
+      portalClientId: config.PORTAL_AUTH0_CLIENT_ID,
       audience: config.AUTH0_AUDIENCE,
       bindings: config.AUTH0_AUTH_BINDINGS,
     })

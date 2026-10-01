@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./api": "./src/api.ts",
     "./auth": "./src/auth.ts",
-    "./auth0": "./src/auth0.ts"
+    "./auth0": "./src/auth0.ts",
+    "./portal": "./src/portal.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

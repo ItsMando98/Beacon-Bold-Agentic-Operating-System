@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for service in api app web migrate; do
+          for service in api app web migrate portal; do
             docker build --target "$service" --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "beacon-bold-$service:$GITHUB_SHA" .
             set +e
             timeout 30s docker run --rm "beacon-bold-$service:$GITHUB_SHA"
@@ -47,6 +47,11 @@ jobs:
           docker compose -f infra/vps/compose.yaml run --rm --no-deps migrate
           docker compose -f infra/vps/compose.yaml run --rm --no-deps acceptance
           docker compose -f infra/vps/compose.yaml up -d --wait --wait-timeout 180 api app web
+      - name: Accept separately deployable portal
+        run: |
+          docker run -d --name roaswell-portal-ci -e APP_ENV=staging -e SERVICE_MODE=live -e AUTH_ENABLED=false -e PUBLIC_API_URL=https://synthetic.example.invalid -p 13003:3003 beacon-bold-portal:$GITHUB_SHA
+          node scripts/check-portal-runtime.mjs
+          docker rm -f roaswell-portal-ci
       - name: Archive immutable runtime images
         run: |
           docker save beacon-bold-api:$GITHUB_SHA beacon-bold-app:$GITHUB_SHA beacon-bold-web:$GITHUB_SHA beacon-bold-migrate:$GITHUB_SHA | gzip > runtime-images.tar.gz

@@ -39,6 +39,7 @@ it("enforces persisted rights, scope expiry, audit and concurrent revocation on 
         issuer,
         audience,
         humanClientId: "human",
+        portalClientId: "portal",
         bindings: [
           {
             kind: "human",
@@ -72,7 +73,14 @@ it("enforces persisted rights, scope expiry, audit and concurrent revocation on 
   ) {
     return new SignJWT({
       sub: kind === "m2m" ? "agent@clients" : "auth0|synthetic",
-      azp: kind === "human" ? "human" : kind === "m2m" ? "agent" : "delegated",
+      azp:
+        kind === "human"
+          ? "human"
+          : kind === "m2m"
+            ? "agent"
+            : kind === "portal"
+              ? "portal"
+              : "delegated",
       gty: kind === "m2m" ? "client-credentials" : undefined,
       scope,
     })
@@ -142,6 +150,8 @@ it("enforces persisted rights, scope expiry, audit and concurrent revocation on 
     const organization = await call();
     expect(organization.status).toBe(200);
     expect((await organization.json()).id).toBe(tenantId);
+    expect((await call("GET", "portal")).status).toBe(200);
+    expect((await call("POST", "portal")).status).toBe(403);
     expect((await call("POST")).status).toBe(403);
     expect((await call("GET", "human", randomUUID(), "")).status).toBe(403);
     expect(
@@ -157,10 +167,13 @@ it("enforces persisted rights, scope expiry, audit and concurrent revocation on 
       [tenantId],
     );
     expect((await call("POST")).status).toBe(403);
+    expect((await call("POST", "portal")).status).toBe(403);
     await fixture.query(
       "UPDATE beacon.agency_memberships SET client_id='human' WHERE tenant_id=$1",
       [tenantId],
     );
+    expect((await call("GET", "portal")).status).toBe(200);
+    expect((await call("POST", "portal")).status).toBe(403);
     const first = await call("POST", "human", replayKey);
     expect(first.status).toBe(201);
     const created = await first.json();

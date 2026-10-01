@@ -4,6 +4,8 @@ Stand: 1. Oktober 2026. Code, lokale Abnahme und externe Abnahme werden getrennt
 
 ## Aktueller Produktplan: ROASWELL
 
+R1-04 implementiert das separate Kundenportal mit eigener Auth0-Konfiguration und Container. R1-03 ist als PR #19 regulär gemergt; Main-CI und VPS-Staging bestanden. [Abnahme, Betrieb und offene Auth0-Sandbox](roaswell-r1-04.md), [ADR 0016](adr/0016-separate-customer-portal.md).
+
 R1-02 ist als PR #18 auf 3fccbb925b14e2153967e3bb5367c80d7aa16f5e gemergt; [Main-CI und VPS-Staging](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36915041492) bestanden. R1-03 ergänzt die persistierte Autorisierung für POST /customers und GET /v1/organization, transaktionales Audit und den internen Widerrufsdienst; [Abnahme und Grenzen](roaswell-r1-03.md), [ADR 0015](adr/0015-persisted-request-authorization.md). Das Kundenportal bleibt R1-04, übrige R1-Ressourcen bleiben unregistriert. Die folgenden Absätze sind Nachweise der vorherigen Aufgabenstände.
 
 R0-01 ist als PR #16 regulär gemergt auf 5383be20e4b12214775be329669776b146f0cc11; alle neun Main-Prüfungen und VPS-Staging-Deploy bestanden ([Nachweis](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36909267120)). R1-01 ist als PR #17 auf ad66eb9c8b638f25fa8e0fb5ac787cd2d3a81bd6 gemergt; [Main-CI und VPS-Staging](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36911518359) bestanden. R1-02 ergänzt darauf die Zod-abgeleitete Vorwärtsmigration, Mitgliedschaften, RLS, separaten Gründerkanal und explizite Eigenkundeneinrichtung; [Abnahme und Grenzen](roaswell-r1-02.md), [ADR 0014](adr/0014-access-persistence-and-founder-role.md). Live-Endpunkte und Auth0-Rechteintegration bleiben Folgeaufgaben.

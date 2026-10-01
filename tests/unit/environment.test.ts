@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { loadEnvironment, type Service } from "../../packages/config/src/env";
 
-const services: Service[] = ["web", "app", "api", "worker"];
+const services: Service[] = ["web", "app", "portal", "api", "worker"];
 describe("runtime configuration", () => {
   it.each(services)("%s refuses absent required configuration", (service) =>
     expect(() => loadEnvironment(service, {})).toThrow(

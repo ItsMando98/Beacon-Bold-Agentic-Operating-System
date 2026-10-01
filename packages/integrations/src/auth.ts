@@ -31,11 +31,14 @@ export function createAuth0Authenticator(
     issuer: string;
     audience: string;
     humanClientId: string;
+    portalClientId?: string;
     bindings: AuthBinding[];
     verifyIdentity?: (identity: AuthIdentity) => Promise<boolean>;
   },
   key?: JWTVerifyGetKey,
 ): Authenticator {
+  if (options.portalClientId === options.humanClientId)
+    throw new Error("Separate portal client required");
   const issuer = `${auth0IssuerSchema.parse(options.issuer).replace(/\/$/, "")}/`;
   const bindings = authBindingsSchema.parse(options.bindings);
   const keys =
@@ -69,7 +72,8 @@ export function createAuth0Authenticator(
       throw new AuthenticationError(401);
     const kind = machine
       ? "m2m"
-      : claims.azp === options.humanClientId
+      : claims.azp === options.humanClientId ||
+          claims.azp === options.portalClientId
         ? "human"
         : "oauth";
     const binding = bindings.find(
@@ -90,6 +94,12 @@ export function createAuth0Authenticator(
       subject: claims.sub,
       organizationId: claims.org_id,
       clientId: claims.azp,
+      surface:
+        kind === "human"
+          ? claims.azp === options.portalClientId
+            ? "customer"
+            : "agency"
+          : undefined,
       scopes: binding.scopes.filter((scope) => granted.has(scope)),
       expiresAt: claims.exp,
     });

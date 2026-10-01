@@ -50,6 +50,8 @@ async function assess(
   if (!scopes) throw new Error("Unknown authorization operation");
   const view = viewFor(operation);
   if (identity.kind === "human") {
+    if (view === "agency" && identity.surface === "customer")
+      return { ...verdict, reason: "membership_missing" };
     const actor = await tx
       .select()
       .from(models.users)

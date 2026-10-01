@@ -1,0 +1,24 @@
+{
+  "name": "@roaswell/portal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --webpack --port 3003",
+    "build": "next build --webpack",
+    "typecheck": "tsc --noEmit",
+    "start": "next start --port 3003"
+  },
+  "dependencies": {
+    "@roaswell/config": "workspace:*",
+    "@roaswell/integrations": "workspace:*",
+    "@roaswell/schemas": "workspace:*",
+    "@roaswell/ui": "workspace:*",
+    "next": "16.3.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3"
+  }
+}
