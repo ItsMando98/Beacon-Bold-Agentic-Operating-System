@@ -111,13 +111,20 @@ export function projectCustomerResult(input: CustomerProjectionInput) {
   });
 }
 export function searchCustomerResults(
+  trustedContext: AccessContext,
   inputs: CustomerProjectionInput[],
   query: string,
 ) {
+  const context = accessContextSchema.safeParse(trustedContext);
+  if (!context.success) return [];
   const { query: parsed } = customerSearchInputSchema.parse({ query });
   const needle = parsed.toLocaleLowerCase("de");
   return inputs.flatMap((input) => {
-    const result = projectCustomerResult(input);
+    const result = projectCustomerResult({
+      context: context.data,
+      snapshot: input.snapshot,
+      evidence: input.evidence,
+    });
     if (
       !result ||
       !`${result.title}\n${result.summary}`

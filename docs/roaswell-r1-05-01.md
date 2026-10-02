@@ -7,7 +7,7 @@ R1-04 wurde regulär als PR #20 auf 4182bd03cda0036e86f4f6c68a8a91167e020819 gem
 ## Ergebnis
 
 - Zod-Verträge für vertrauenswürdige Ergebnisversionen, Qualitäts-/Rollenbelege und strikt begrenzte Kundenprojektionen.
-- Gemeinsame reine Dienste für Kundensichtbarkeit, Suchprojektion, Textdownload und Ereignisprojektion.
+- Gemeinsame reine Dienste für Kundensichtbarkeit, Suchprojektion, Textdownload und Ereignisprojektion; Sammelsuchen sind an einen einzigen verifizierten Kundenkontext gebunden.
 - Exakte Bindung von Freigaben und Qualität an Organisation, Ergebnisart, ID und Version.
 - Angebotsfreigabe durch Gründer; gesonderte externe Freigabe und gegebenenfalls Kundenadministrator-Zustimmung.
 - Validierte Entscheidungs-/Widerrufsübergänge und Versionserhöhung bei Änderungen.
@@ -33,7 +33,7 @@ R1-05 als Gesamtaufgabe und seine fachlichen Folgeaufgaben bleiben bis zur Abnah
 |---|---|
 | Lint | 163 Dateien, bestanden |
 | Typecheck | 16 Workspace-Aufgaben inklusive neuer Abnahme, bestanden |
-| Unit/Fachliche Abnahme | 87 Tests in 16 Dateien, davon 13 neue Policy-Fälle, bestanden |
+| Unit/Fachliche Abnahme | 88 Tests in 16 Dateien, davon 14 neue Policy-Fälle, bestanden |
 | Build | 11 Pakete, bestanden; bekannte Auth0-DPOP-Abhängigkeitswarnung |
 | Startschutz | 5 Dienste, bestanden |
 | Diff | Keine Whitespace-Fehler; Apps, Infrastruktur, bestehende Migrationen und generierte API-Verträge unverändert |

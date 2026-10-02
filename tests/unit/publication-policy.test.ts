@@ -111,7 +111,7 @@ function approvedOffer() {
 function allChannels(source: CustomerProjectionInput) {
   return [
     projectCustomerResult(source),
-    searchCustomerResults([source], ""),
+    searchCustomerResults(source.context, [source], ""),
     downloadCustomerResult(source),
     customerResultEvent(source),
   ];
@@ -130,8 +130,10 @@ it("uses one explicit customer projection for portal, search, download and event
   expect(serialized).not.toContain("SECRET");
   expect(serialized).not.toContain("internal");
   expect(serialized).not.toContain("tenantId");
-  expect(searchCustomerResults([result], "SECRET")).toEqual([]);
-  expect(searchCustomerResults([result], "READY")).toHaveLength(1);
+  expect(searchCustomerResults(result.context, [result], "SECRET")).toEqual([]);
+  expect(searchCustomerResults(result.context, [result], "READY")).toHaveLength(
+    1,
+  );
   expect(downloadCustomerResult(result)?.fileName).toBe(`${recordId}-v1.txt`);
 });
 it.each(["internal_note", "calculation"] as const)(
@@ -451,4 +453,18 @@ it("rejects extra public fields while retaining adaptive private data in trusted
     ...input(),
     evidence: { ...input().evidence, now: new Date("invalid") },
   });
+});
+
+it("binds a mixed search batch to exactly one verified customer context", () => {
+  const first = input();
+  const second = {
+    ...input(),
+    snapshot: { ...snapshot(), tenantId: other, title: "Foreign result" },
+    context: { ...customer, tenantId: other },
+  };
+  expect(searchCustomerResults(customer, [first, second], "")).toHaveLength(1);
+  expect(searchCustomerResults(customer, [first, second], "Foreign")).toEqual(
+    [],
+  );
+  expect(searchCustomerResults(founder, [first, second], "")).toEqual([]);
 });

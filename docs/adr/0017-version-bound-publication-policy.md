@@ -32,6 +32,6 @@ Entscheiden und Widerrufen erzeugen nur validierte Zustandsübergänge. Sie schr
 
 ## Ausgabewege
 
-Die gemeinsame Projektion wird für Portalobjekt, Suchtreffer, Textdownload und Ereignisobjekt verwendet. Suche untersucht nur sichtbaren Titel und Zusammenfassung. Dateinamen enthalten ausschließlich UUID und Version; Downloads sind Klartext. Ereignisobjekte enthalten nur dieselbe Kundenprojektion. Dies ist eine getestete Vertragsgrundlage, noch kein Nachweis laufender HTTP-Downloads oder SSE.
+Die gemeinsame Projektion wird für Portalobjekt, Suchtreffer, Textdownload und Ereignisobjekt verwendet. Eine Sammelsuche verwendet für alle Einträge denselben verifizierten Kundenkontext; abweichende Eintragskontexte können keine fremden Treffer freigeben. Suche untersucht nur sichtbaren Titel und Zusammenfassung. Dateinamen enthalten ausschließlich UUID und Version; Downloads sind Klartext. Ereignisobjekte enthalten nur dieselbe Kundenprojektion. Dies ist eine getestete Vertragsgrundlage, noch kein Nachweis laufender HTTP-Downloads oder SSE.
 
 Die anfängliche Textprojektion ersetzt keine adaptiven Analysebausteine aus R2. Inhaltsbausteine werden dort ergänzt, ohne die Vertrauens- und Sichtbarkeitsregeln aufzuheben.
