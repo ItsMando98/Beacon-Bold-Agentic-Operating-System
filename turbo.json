@@ -39,9 +39,18 @@
         "SENTRY_*",
         "LANGFUSE_*",
         "OPENAI_API_KEY",
-        "XAI_API_KEY"
+        "XAI_API_KEY",
+        "PORTAL_AUTH0_CLIENT_ID",
+        "PORTAL_AUTH0_CLIENT_SECRET",
+        "PORTAL_AUTH0_SECRET",
+        "PORTAL_BASE_URL"
       ]
     }
   },
-  "globalPassThroughEnv": ["MAILPIT_URL", "CI", "PLAYWRIGHT_BROWSERS_PATH"]
+  "globalPassThroughEnv": [
+    "MAILPIT_URL",
+    "CI",
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "PORTAL_CHECK_URL"
+  ]
 }

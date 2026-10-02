@@ -6,7 +6,7 @@ Stand: 1. Oktober 2026. Grundlage: [Umsetzungsplan](roaswell-umsetzungsplan.md).
 
 Eine Aufgabe = ein Branch = ein PR. Alle genannten Abhängigkeiten müssen regulär gemergt sein, bevor die Aufgabe beginnt. Zod-Verträge kommen vor Datenmodell, Adapter und Oberfläche. Schema- und Datenmodellarbeit hat jeweils genau einen Bearbeiter.
 
-**R0-01 bis R1-02 sind regulär gemergt (PR #16–#18); Main-CI und VPS-Staging bestanden. R1-03 ist implementiert und lokal abgenommen; sein regulärer Merge bleibt Voraussetzung für R1-04.** Alle übrigen Aufgaben sind offen. [Abnahme R0-01](roaswell-r0.md), [Abnahme R1-01](roaswell-r1-01.md), [Abnahme R1-02](roaswell-r1-02.md), [Abnahme R1-03](roaswell-r1-03.md). Kein offener Eintrag ist ein Feature-Nachweis. Bereits gemergte P1-Funktionen werden erweitert und nicht dupliziert.
+**R0-01 bis R1-03 sind regulär gemergt (PR #16–#19); Main-CI und VPS-Staging bestanden. R1-04 ist implementiert, die echte Auth0-Sandbox-Abnahme bleibt offen.** [Abnahme R1-04](roaswell-r1-04.md). Alle weiteren Aufgaben bleiben offen.
 
 Für jeden PR gelten Lint, Typecheck, Unit, Build, fachliche Abnahme und bei betroffenen Abläufen Integration/Browser. Tests nutzen erfundene Daten und Sandbox. Fehlende externe Zugänge bleiben offene Abnahmen. Deploy auf Produktion ist keine automatische Folge eines PRs.
 

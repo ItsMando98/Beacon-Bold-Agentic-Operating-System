@@ -1,9 +1,10 @@
 import {
   auth0ApiEnvironmentSchema,
   auth0AppEnvironmentSchema,
+  auth0PortalEnvironmentSchema,
 } from "@roaswell/schemas/auth";
 import { z } from "zod";
-export type Service = "web" | "app" | "api" | "worker";
+export type Service = "web" | "app" | "portal" | "api" | "worker";
 export const baseEnvironment = z.object({
   APP_ENV: z.enum(["development", "staging", "production"]),
   SERVICE_MODE: z.enum(["mock", "live"]),
@@ -27,6 +28,7 @@ const serviceEnvironment = {
   app: z.object({
     PUBLIC_API_URL: z.url(),
   }),
+  portal: z.object({ PUBLIC_API_URL: z.url() }),
   api: z.object({
     DATABASE_URL: postgresUrl,
     REDIS_URL: redisUrl,
@@ -64,27 +66,40 @@ export function loadEnvironment(
   }
   if (
     base.AUTH_ENABLED === "true" &&
-    (service === "app" || service === "api")
+    (service === "app" || service === "portal" || service === "api")
   ) {
     if (base.SERVICE_MODE !== "live")
       throw new Error(`${service}: authentication requires live mode`);
     parseConfig(
       service,
-      service === "api" ? auth0ApiEnvironmentSchema : auth0AppEnvironmentSchema,
+      service === "api"
+        ? auth0ApiEnvironmentSchema
+        : service === "portal"
+          ? auth0PortalEnvironmentSchema
+          : auth0AppEnvironmentSchema,
       input,
     );
+    if (base.APP_ENV !== "development" && service === "portal")
+      parseConfig(service, z.object({ PORTAL_BASE_URL: httpsUrl }), input);
     if (base.APP_ENV !== "development" && service === "app")
       parseConfig(service, z.object({ APP_BASE_URL: httpsUrl }), input);
   }
   if (
     base.APP_ENV === "production" &&
-    ["app", "api"].includes(service) &&
+    ["app", "portal", "api"].includes(service) &&
     base.AUTH_ENABLED !== "true"
   )
     throw new Error(`${service}: authentication required in production`);
   return {
     ...base,
     port:
-      base.PORT ?? (service === "api" ? 3002 : service === "web" ? 3001 : 3000),
+      base.PORT ??
+      (service === "api"
+        ? 3002
+        : service === "web"
+          ? 3001
+          : service === "portal"
+            ? 3003
+            : 3000),
   };
 }

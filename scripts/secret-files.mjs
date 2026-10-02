@@ -6,6 +6,8 @@ export async function hydrateSecrets(env, read = readFile) {
     "REDIS_URL",
     "AUTH0_CLIENT_SECRET",
     "AUTH0_SECRET",
+    "PORTAL_AUTH0_CLIENT_SECRET",
+    "PORTAL_AUTH0_SECRET",
     "AUTH0_AUTH_BINDINGS",
     "PGPASSWORD",
     "DB_APP_PASSWORD",

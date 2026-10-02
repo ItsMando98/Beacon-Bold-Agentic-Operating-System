@@ -44,3 +44,15 @@ COPY --from=build --chown=node:node /workspace/migration-dist ./dist
 COPY --from=build --chown=node:node /workspace/packages/db/migrations ./packages/db/migrations
 USER node
 CMD ["node", "dist/migrate.cjs"]
+
+# Separately deployable customer portal; not added to the current staging receiver.
+FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS portal
+WORKDIR /runtime
+ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3003
+COPY --from=build --chown=node:node /workspace/apps/portal/.next/standalone ./
+COPY --from=build --chown=node:node /workspace/apps/portal/.next/static ./apps/portal/.next/static
+COPY --from=build --chown=node:node /workspace/licenses ./licenses
+COPY --chown=node:node scripts/runtime-secrets.mjs scripts/secret-files.mjs ./
+USER node
+EXPOSE 3003
+CMD ["node", "runtime-secrets.mjs", "apps/portal/server.js"]

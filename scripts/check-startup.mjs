@@ -5,6 +5,7 @@ for (const [service, entry] of [
   ["api", "apps/api/dist/server.js"],
   ["worker", "apps/worker/dist/index.js"],
   ["app", "apps/app/.next/standalone/apps/app/server.js"],
+  ["portal", "apps/portal/.next/standalone/apps/portal/server.js"],
   ["web", "apps/web/.next/standalone/apps/web/server.js"],
 ]) {
   const result = spawnSync(process.execPath, [entry], {
