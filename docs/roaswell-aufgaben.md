@@ -1,12 +1,12 @@
 # ROASWELL – abhängige Einzelaufgaben
 
-Stand: 1. Oktober 2026. Grundlage: [Umsetzungsplan](roaswell-umsetzungsplan.md).
+Stand: 2. Oktober 2026. Grundlage: [Umsetzungsplan](roaswell-umsetzungsplan.md).
 
 ## Arbeitsweise und Status
 
 Eine Aufgabe = ein Branch = ein PR. Alle genannten Abhängigkeiten müssen regulär gemergt sein, bevor die Aufgabe beginnt. Zod-Verträge kommen vor Datenmodell, Adapter und Oberfläche. Schema- und Datenmodellarbeit hat jeweils genau einen Bearbeiter.
 
-**R0-01 bis R1-03 sind regulär gemergt (PR #16–#19); Main-CI und VPS-Staging bestanden. R1-04 ist implementiert, die echte Auth0-Sandbox-Abnahme bleibt offen.** [Abnahme R1-04](roaswell-r1-04.md). Alle weiteren Aufgaben bleiben offen.
+**R0-01 bis R1-04 sind regulär gemergt (PR #16–#20); Main-CI und bestehendes VPS-Staging bestanden. R1-05-01 ist implementiert; R1-05 insgesamt bleibt offen.** [Abnahme R1-05-01](roaswell-r1-05-01.md). Echter Portal-Login und separater Portal-Rollout bleiben offene externe Abnahmen.
 
 Für jeden PR gelten Lint, Typecheck, Unit, Build, fachliche Abnahme und bei betroffenen Abläufen Integration/Browser. Tests nutzen erfundene Daten und Sandbox. Fehlende externe Zugänge bleiben offene Abnahmen. Deploy auf Produktion ist keine automatische Folge eines PRs.
 
@@ -20,6 +20,11 @@ Für jeden PR gelten Lint, Typecheck, Unit, Build, fachliche Abnahme und bei bet
 | R1-03 | R1-02 | Persistierte Rechteprüfung, Audit und Widerruf für Menschen/Agenten statt ausschließlich statischer Auth0-Allowlist | Fehlende/entzogene Mitgliedschaft verweigert Zugriff; Audit enthält Akteur, Organisation und Aktion |
 | R1-04 | R1-03 | Separates apps/portal mit Auth0, Konfiguration, Container und lokalen/CI-Starts | Portalstart, Login-Sandbox, Isolation von Gründeransicht; ohne Live-Konfiguration geschlossen |
 | R1-05 | R1-04 | Gemeinsame Sichtbarkeits- und versionsgebundene Freigabedienste | Interne Felder fehlen in Portal, Suche, Download und Event; Änderung entwertet Freigabe |
+| R1-05-01 | R1-04 | Zod-Verträge und reine gemeinsame Projektions-/Freigaberegeln | Private Felder fehlen in allen Projektionsformaten; fremde, alte, abgelaufene oder widerrufene Nachweise verweigert |
+| R1-05-02 | R1-05-01 | Unveränderliche aktuelle Versionen, vertrauenswürdige Rollenbelege und transaktionale Entscheidungen/Widerruf mit Audit | PostgreSQL: parallele Änderung/Entscheidung, Idempotenz, Mandantentrennung und neue Version entwertet alte Freigabe |
+| R1-05-03 | R1-05-02 | Autorisierte Dienste und Ausgabewege mit gespeicherten Versionen verbinden | Echte Antworten enthalten keine privaten Felder; keine veraltete Version in Suche, Download oder Eventprojektion |
+
+R1-05 ist eine Sammelaufgabe und gilt erst nach Merge und Abnahme von R1-05-03 als erledigt. Abhängigkeiten auf R1-05 dürfen nicht durch den ersten Policy-PR als erfüllt gelten.
 
 ## Wissen, Dateien und sichere Kostenbasis
 

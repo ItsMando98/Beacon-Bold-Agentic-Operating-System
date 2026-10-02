@@ -1,6 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "allowJs": true, "noEmit": true },
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true
+  },
   "include": [
     "src",
     "../../tests/unit/data-model.test.ts",
@@ -8,6 +11,7 @@
     "../../tests/unit/access-model.test.ts",
     "../../tests/integration/access-model.test.ts",
     "../../tests/unit/authorization.test.ts",
-    "../../tests/integration/authorization.test.ts"
+    "../../tests/integration/authorization.test.ts",
+    "../../tests/unit/publication-policy.test.ts"
   ]
 }
