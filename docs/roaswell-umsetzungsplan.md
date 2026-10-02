@@ -1,7 +1,7 @@
 # ROASWELL – Umsetzungsplan und Tech-Stack
 
-**Stand:** 1. Oktober 2026
-**Status:** R0 bis R1-03 regulär gemergt und nach VPS-Staging deployt. R1-04 (separates Kundenportal) implementiert; [Abnahme und offene Sandbox](roaswell-r1-04.md). Der übrige Umfang bleibt offen.
+**Stand:** 2. Oktober 2026
+**Status:** R0 bis R1-04 regulär gemergt; bestehendes VPS-Staging geprüft. R1-05-01 (gemeinsame Freigaberegeln) implementiert; [Abnahme und verbleibende Schritte](roaswell-r1-05-01.md). R1-05, echter Portal-Login, Portal-Rollout und der übrige Umfang bleiben offen.
 **Aufgaben:** [Abhängige Einzelaufgaben](roaswell-aufgaben.md)
 **Entscheidungen:** [Architektur](adr/0010-roaswell-operating-system.md), [Budgets](adr/0011-approved-budget-envelopes.md), [Sichtbarkeit](adr/0012-customer-visibility-and-publication.md).
 

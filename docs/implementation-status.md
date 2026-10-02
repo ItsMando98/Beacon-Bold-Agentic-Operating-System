@@ -4,6 +4,8 @@ Stand: 1. Oktober 2026. Code, lokale Abnahme und externe Abnahme werden getrennt
 
 ## Aktueller Produktplan: ROASWELL
 
+R1-05-01 implementiert die gemeinsamen, rein geprüften Sichtbarkeits- und Freigaberegeln; [Abnahme und offene Speicherung/Live-Anbindung](roaswell-r1-05-01.md), [ADR 0017](adr/0017-version-bound-publication-policy.md). R1-04 ist als PR #20 regulär gemergt; Main-CI und bestehendes VPS-Staging bestanden. R1-05 als Gesamtaufgabe bleibt offen.
+
 R1-04 implementiert das separate Kundenportal mit eigener Auth0-Konfiguration und Container. R1-03 ist als PR #19 regulär gemergt; Main-CI und VPS-Staging bestanden. [Abnahme, Betrieb und offene Auth0-Sandbox](roaswell-r1-04.md), [ADR 0016](adr/0016-separate-customer-portal.md).
 
 R1-02 ist als PR #18 auf 3fccbb925b14e2153967e3bb5367c80d7aa16f5e gemergt; [Main-CI und VPS-Staging](https://github.com/ItsMando98/Beacon-Bold-Agentic-Operating-System/actions/runs/36915041492) bestanden. R1-03 ergänzt die persistierte Autorisierung für POST /customers und GET /v1/organization, transaktionales Audit und den internen Widerrufsdienst; [Abnahme und Grenzen](roaswell-r1-03.md), [ADR 0015](adr/0015-persisted-request-authorization.md). Das Kundenportal bleibt R1-04, übrige R1-Ressourcen bleiben unregistriert. Die folgenden Absätze sind Nachweise der vorherigen Aufgabenstände.
