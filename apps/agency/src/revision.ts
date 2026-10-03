@@ -1,17 +1,28 @@
 import { CatalogShellError } from "./errors.js";
-import { isSeedSnapshot, SEED_V1_REVISION_ID } from "./seed.js";
-import { type CatalogSnapshot, canonicalSnapshot } from "./snapshot.js";
+import type { CatalogOffer, CatalogPackage } from "./snapshot.js";
 
-/** A draft Anvil (or the temporary adapter) has already stored. */
+/**
+ * A draft Anvil has already stored.
+ * Wire shape: { revision, pricingNote, offers, packages }.
+ * `revision` is the 64-character hex from the save response.
+ */
 export type SavedDraftRevision = {
   kind: "saved-draft";
-  revisionId: string;
-  snapshot: CatalogSnapshot;
+  revision: string;
+  pricingNote: string;
+  offers: CatalogOffer[];
+  packages: CatalogPackage[];
 };
 
 export type PublishedRevision = {
-  revisionId: string;
-  snapshot: CatalogSnapshot;
+  revision: string;
+  snapshot: {
+    version: number;
+    publishedAt: string;
+    pricingNote: string;
+    offers: CatalogOffer[];
+    packages: CatalogPackage[];
+  };
 };
 
 export function assertSavedDraft(value: unknown): SavedDraftRevision {
@@ -26,33 +37,24 @@ export function assertSavedDraft(value: unknown): SavedDraftRevision {
       "Publish blocked: a dirty buffer is not a saved draft revision",
     );
   }
-  if (record.revisionId === SEED_V1_REVISION_ID) {
-    throw new CatalogShellError("Refusing to publish over seed v1");
+  if (typeof record.revision !== "string" || record.revision.trim() === "") {
+    throw new CatalogShellError("Refusing to publish without a saved revision");
   }
-  if (
-    typeof record.revisionId !== "string" ||
-    record.revisionId.trim() === ""
-  ) {
+  if (typeof record.pricingNote !== "string" || !Array.isArray(record.offers)) {
     throw new CatalogShellError(
       "Publish blocked: a dirty buffer is not a saved draft revision",
     );
   }
-  if (!record.snapshot || typeof record.snapshot !== "object") {
+  if (!Array.isArray(record.packages)) {
     throw new CatalogShellError(
       "Publish blocked: a dirty buffer is not a saved draft revision",
     );
   }
   return {
     kind: "saved-draft",
-    revisionId: record.revisionId,
-    snapshot: canonicalSnapshot(record.snapshot),
+    revision: record.revision,
+    pricingNote: record.pricingNote,
+    offers: record.offers,
+    packages: record.packages,
   };
-}
-
-export function assertPublishableRevision(value: unknown): SavedDraftRevision {
-  const revision = assertSavedDraft(value);
-  if (isSeedSnapshot(revision.snapshot)) {
-    throw new CatalogShellError("Refusing to publish over seed v1");
-  }
-  return revision;
 }

@@ -53,9 +53,8 @@ export function withBuffer(
 }
 
 /**
- * Pick who stores drafts.
- * Anvil is used only on the agency origin, and only after its routes exist.
- * Every other origin stays on the temporary seed adapter and does not call the API.
+ * The agency origin calls Anvil. Passing `routes: null`, or any other origin,
+ * keeps the temporary in-memory adapter and does not call the API.
  */
 export function createShellCatalogClient(options: {
   origin: string;
@@ -74,47 +73,58 @@ export function createShellCatalogClient(options: {
   return createTemporarySeedAdapter();
 }
 
-export async function saveTab(
-  tab: CatalogTab,
-  client: CatalogClient,
-): Promise<CatalogTab> {
-  if (!tab.dirty && tab.saved === null) {
-    throw new CatalogShellError(
-      "Seed v1 is adopted. Edit the catalog before saving a draft.",
-    );
-  }
-  if (!tab.dirty && tab.saved) return tab;
-  const revision = await client.saveDraft(structuredClone(tab.buffer));
-  const snapshot = canonicalSnapshot(revision.snapshot);
+function tabFromDraft(
+  previous: CatalogSnapshot,
+  draft: SavedDraftRevision,
+): CatalogTab {
+  const snapshot = canonicalSnapshot({
+    version: previous.version,
+    publishedAt: previous.publishedAt,
+    pricingNote: draft.pricingNote,
+    offers: draft.offers,
+    packages: draft.packages,
+  });
   return {
     buffer: structuredClone(snapshot),
     clean: structuredClone(snapshot),
     saved: {
       kind: "saved-draft",
-      revisionId: revision.revisionId,
-      snapshot: structuredClone(snapshot),
+      revision: draft.revision,
+      pricingNote: snapshot.pricingNote,
+      offers: structuredClone(snapshot.offers),
+      packages: structuredClone(snapshot.packages),
     },
     dirty: false,
   };
 }
 
+export async function saveTab(
+  tab: CatalogTab,
+  client: CatalogClient,
+): Promise<CatalogTab> {
+  if (!tab.dirty && tab.saved) return tab;
+  const draft = await client.saveDraft(structuredClone(tab.buffer));
+  return tabFromDraft(tab.buffer, draft);
+}
+
 /**
  * Publish sends a saved draft revision, never the unsaved buffer.
- * A dirty tab is saved first. Publish then receives the revision that save returned.
+ * A dirty tab is saved first. Publish then sends { revision } for the revision save returned.
+ * A tab with no saved revision is refused. Matching seed v1 is not a reason to refuse.
  */
 export async function publishTab(
   tab: CatalogTab,
   client: CatalogClient,
 ): Promise<PublishOutcome> {
   if (!tab.dirty && tab.saved === null) {
-    throw new CatalogShellError("Refusing to publish over seed v1");
+    throw new CatalogShellError("Refusing to publish without a saved revision");
   }
-  const revision = tab.dirty
+  const draft = tab.dirty
     ? await client.saveDraft(structuredClone(tab.buffer))
     : tab.saved;
-  if (!revision)
-    throw new CatalogShellError("Refusing to publish over seed v1");
-  const published = await client.publishRevision(revision);
+  if (!draft)
+    throw new CatalogShellError("Refusing to publish without a saved revision");
+  const published = await client.publishRevision(draft);
   const snapshot = canonicalSnapshot(published.snapshot);
   return {
     tab: {
@@ -122,13 +132,15 @@ export async function publishTab(
       clean: structuredClone(snapshot),
       saved: {
         kind: "saved-draft",
-        revisionId: published.revisionId,
-        snapshot: structuredClone(snapshot),
+        revision: published.revision,
+        pricingNote: snapshot.pricingNote,
+        offers: structuredClone(snapshot.offers),
+        packages: structuredClone(snapshot.packages),
       },
       dirty: false,
     },
     published: {
-      revisionId: published.revisionId,
+      revision: published.revision,
       snapshot: structuredClone(snapshot),
     },
   };
