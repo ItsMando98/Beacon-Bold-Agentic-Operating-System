@@ -32,4 +32,4 @@ Der Katalogserver wird nicht gestartet. Die Vorschau liest und schreibt keine Pr
 - Ein Kundendashboard und `clients.beaconandbold.com`.
 - Produktion, Abrechnung und ein neues VPS-Deploy. Das bestehende Staging bleibt der eingeschränkte Receiver für die vorhandenen Images.
 
-Details der Entscheidung: [ADR 0017](adr/0017-agency-shell-preview.md).
+Details der Entscheidung: [ADR 0019](adr/0019-agency-shell-preview.md). ADR 0017 ist der Katalogserver. ADR 0018 ist die Katalogshell. Beide bleiben unverändert.

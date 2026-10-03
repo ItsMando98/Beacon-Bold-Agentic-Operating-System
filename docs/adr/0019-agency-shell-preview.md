@@ -1,6 +1,8 @@
-# ADR 0017: Vorschau nur für die Agentur-Hülle
+# ADR 0019: Vorschau nur für die Agentur-Hülle
 
 Status: Pipeline entschieden. Keine öffentliche URL, kein DNS und kein Produktionsdeploy.
+
+Die Nummer 0017 gehört dem Katalogserver (`docs/adr/0017-catalog-server.md`). Die Nummer 0018 gehört der Katalogshell. Diese Vorschauentscheidung ersetzt keines der beiden ADRs.
 
 ## Entscheidung
 

@@ -349,7 +349,14 @@ export async function waitForPreview(url, child, fetchImpl, timeoutMs = 90000) {
       assertPreviewLocation(response.status, response.headers.get("location"));
       if (response.status < 500) {
         assertPreviewResponse(response.headers);
-        return response.status;
+        return {
+          status: response.status,
+          headers: {
+            "x-beacon-preview": response.headers.get("x-beacon-preview"),
+            "x-beacon-production": response.headers.get("x-beacon-production"),
+            "x-beacon-data": response.headers.get("x-beacon-data"),
+          },
+        };
       }
       lastError = `Preview status ${response.status}`;
     } catch (error) {
@@ -431,8 +438,15 @@ export async function serveAgencyPreview({
     });
     proxy = createPreviewProxy(commands.port);
     const url = await proxy.listen();
-    const status = await waitForPreview(url, child, fetchImpl);
-    return { ...plan, url, status, production: false };
+    const checked = await waitForPreview(url, child, fetchImpl);
+    return {
+      ...plan,
+      url,
+      status: checked.status,
+      headers: checked.headers,
+      production: false,
+      catalogServerStarted: false,
+    };
   } finally {
     if (proxy) await proxy.close();
     if (child) await stopChild(child);
@@ -492,9 +506,12 @@ export async function main(argv = process.argv.slice(2), root = process.cwd()) {
     }
     console.log(JSON.stringify(result));
     console.log(`production: ${result.production}`);
+    console.log(`catalogServerStarted: ${result.catalogServerStarted}`);
+    console.log(`x-beacon-preview: ${result.headers["x-beacon-preview"]}`);
     console.log(
-      `preview header: x-beacon-preview=${PREVIEW_HEADERS["x-beacon-preview"]}`,
+      `x-beacon-production: ${result.headers["x-beacon-production"]}`,
     );
+    console.log(`x-beacon-data: ${result.headers["x-beacon-data"]}`);
     return;
   }
   throw new Error("Use --guard, --plan, --serve, or no argument");
