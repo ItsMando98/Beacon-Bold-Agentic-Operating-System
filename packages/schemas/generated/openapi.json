@@ -209,6 +209,262 @@
         "security": [{ "bearerAuth": [] }]
       }
     },
+    "/catalog": {
+      "get": {
+        "operationId": "getCatalog",
+        "summary": "Read published catalog",
+        "description": "Read the current immutable catalog snapshot. Array order is display order.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/getCatalogOutput" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient scope",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "x-beacon-scopes": [],
+        "security": []
+      }
+    },
+    "/catalog/draft": {
+      "get": {
+        "operationId": "getOfferDraft",
+        "summary": "Read offer draft",
+        "description": "Read the mutable offer draft. Agency authentication is required.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/getOfferDraftOutput" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient scope",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "x-beacon-scopes": ["catalog:read"],
+        "security": [{ "bearerAuth": [] }]
+      },
+      "post": {
+        "operationId": "saveOfferDraft",
+        "summary": "Save offer draft",
+        "description": "Save the mutable offer draft and return its revision. The same content keeps the same revision.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/saveOfferDraftInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/saveOfferDraftOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient scope",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "x-beacon-scopes": ["catalog:write"],
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/catalog/publish": {
+      "post": {
+        "operationId": "publishCatalog",
+        "summary": "Publish catalog",
+        "description": "Publish one saved draft revision. The same revision returns the same immutable snapshot.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/publishCatalogInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/publishCatalogOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient scope",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "x-beacon-scopes": ["catalog:write"],
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
     "/openapi.json": {
       "get": {
         "operationId": "getOpenApi",
@@ -1075,6 +1331,573 @@
           "isAgencyCustomer": { "type": "boolean" }
         },
         "required": ["id", "name", "createdAt", "phase", "isAgencyCustomer"],
+        "additionalProperties": false
+      },
+      "getCatalogInput": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "getCatalogOutput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "pricingNote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "offers": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                }
+              },
+              "required": ["id", "title", "summary", "points"],
+              "additionalProperties": false
+            }
+          },
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "version",
+          "publishedAt",
+          "pricingNote",
+          "offers",
+          "packages"
+        ],
+        "additionalProperties": false
+      },
+      "getOfferDraftInput": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "getOfferDraftOutput": {
+        "type": "object",
+        "properties": {
+          "revision": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "pricingNote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "offers": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                }
+              },
+              "required": ["id", "title", "summary", "points"],
+              "additionalProperties": false
+            }
+          },
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["revision", "pricingNote", "offers", "packages"],
+        "additionalProperties": false
+      },
+      "saveOfferDraftInput": {
+        "type": "object",
+        "properties": {
+          "pricingNote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "offers": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                }
+              },
+              "required": ["id", "title", "summary", "points"],
+              "additionalProperties": false
+            }
+          },
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["pricingNote", "offers", "packages"],
+        "additionalProperties": false
+      },
+      "saveOfferDraftOutput": {
+        "type": "object",
+        "properties": {
+          "revision": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "pricingNote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "offers": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                }
+              },
+              "required": ["id", "title", "summary", "points"],
+              "additionalProperties": false
+            }
+          },
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["revision", "pricingNote", "offers", "packages"],
+        "additionalProperties": false
+      },
+      "publishCatalogInput": {
+        "type": "object",
+        "properties": {
+          "revision": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["revision"],
+        "additionalProperties": false
+      },
+      "publishCatalogOutput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "pricingNote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "offers": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                }
+              },
+              "required": ["id", "title", "summary", "points"],
+              "additionalProperties": false
+            }
+          },
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "version",
+          "publishedAt",
+          "pricingNote",
+          "offers",
+          "packages"
+        ],
         "additionalProperties": false
       },
       "getOpenApiOutput": {

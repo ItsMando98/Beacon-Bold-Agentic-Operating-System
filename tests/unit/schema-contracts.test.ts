@@ -34,6 +34,9 @@ it("generates valid OpenAPI 3.1 with all entity components and resolvable refere
     "/health",
     "/customers",
     "/v1/organization",
+    "/catalog",
+    "/catalog/draft",
+    "/catalog/publish",
     "/openapi.json",
     "/docs",
     "/docs/scalar.js",
@@ -103,6 +106,10 @@ it("validates MCP input/output schemas and forbids caller-assigned tenant identi
     "get_health",
     "create_customer",
     "get_organization",
+    "get_catalog",
+    "get_offer_draft",
+    "save_offer_draft",
+    "publish_catalog",
   ]);
   for (const tool of tools) {
     expect(tool.inputSchema.type).toBe("object");

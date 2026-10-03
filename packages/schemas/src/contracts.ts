@@ -35,6 +35,7 @@ export const contractMetadataSchema = z
     successStatus: z.union([z.literal(200), z.literal(201)]),
     scopes: z.array(z.string().regex(/^[a-z][a-z0-9]*:[a-z][a-z0-9]*$/)),
     readOnly: z.boolean(),
+    requiresIdempotencyKey: z.boolean().optional(),
   })
   .strict();
 

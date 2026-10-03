@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "publishedAt": "2026-10-04T00:29:00+02:00",
+  "pricingNote": "Placeholder ranges for planning. Final pricing depends on volume, markets, and complexity — we confirm before kickoff.",
+  "offers": [
+    {
+      "id": "seo-content",
+      "title": "SEO & content retainers",
+      "summary": "Editorial calendars, keyword-led briefs, and publish-ready articles or landing pages — built for search intent and brand voice. We handle research, writing, and revision cycles so your pipeline stays full without sacrificing quality.",
+      "points": [
+        "Keyword & topic strategy",
+        "Briefs, drafts, and edits",
+        "On-page recommendations",
+        "Monthly performance notes"
+      ]
+    },
+    {
+      "id": "meta-ads",
+      "title": "Meta Ads setup & optimization",
+      "summary": "Account structure, creative testing, and ongoing optimization for Facebook and Instagram. We set up clean campaigns, measure what matters, and iterate until spend works harder — without chasing every new feature.",
+      "points": [
+        "Account audit & rebuild",
+        "Campaign & audience setup",
+        "Creative testing cadence",
+        "Weekly optimization & reporting"
+      ]
+    },
+    {
+      "id": "google-lead-gen",
+      "title": "Google Lead-Gen setup & optimization",
+      "summary": "Account structure, search/performance campaigns, and landing-page alignment so paid search brings qualified inquiries — measured and iterated without chasing every new feature.",
+      "points": [
+        "Account audit & rebuild",
+        "Campaign & keyword setup",
+        "Landing-page & offer alignment",
+        "Weekly optimization & reporting"
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "id": "content-retainer",
+      "title": "Content retainer",
+      "summary": "Ongoing SEO content production with strategy and editorial QC.",
+      "points": [
+        "4–8 pieces / month (typical)",
+        "Keyword & brief support",
+        "Two revision rounds",
+        "Monthly content report"
+      ],
+      "priceMin": 180000,
+      "priceMax": 350000,
+      "currency": "EUR",
+      "interval": "month",
+      "adSpend": null
+    },
+    {
+      "id": "meta-ads-management",
+      "title": "Meta Ads management",
+      "summary": "Setup or takeover, then continuous optimization and reporting.",
+      "points": [
+        "Account structure & tracking check",
+        "Ongoing campaign management",
+        "Creative test backlog",
+        "Weekly performance notes"
+      ],
+      "priceMin": 120000,
+      "priceMax": 280000,
+      "currency": "EUR",
+      "interval": "month",
+      "adSpend": "meta"
+    },
+    {
+      "id": "google-lead-gen-management",
+      "title": "Google Lead-Gen management",
+      "summary": "Setup or takeover for Google Ads lead campaigns, then continuous optimization and reporting.",
+      "points": [
+        "Search campaign structure",
+        "Conversion tracking check",
+        "Offer & LP alignment",
+        "Weekly performance notes"
+      ],
+      "priceMin": 120000,
+      "priceMax": 280000,
+      "currency": "EUR",
+      "interval": "month",
+      "adSpend": "google"
+    },
+    {
+      "id": "content-ads-lead-gen",
+      "title": "Content + Ads + Lead-Gen",
+      "summary": "Shared strategy across organic, Meta, and Google.",
+      "points": [
+        "Shared strategy across organic, Meta, and Google",
+        "Single point of contact",
+        "Unified monthly review"
+      ],
+      "priceMin": 350000,
+      "priceMax": 700000,
+      "currency": "EUR",
+      "interval": "month",
+      "adSpend": null
+    }
+  ]
+}

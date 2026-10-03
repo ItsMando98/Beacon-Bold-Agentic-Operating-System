@@ -336,7 +336,7 @@ describe("R1-01 organisation and access contracts", () => {
       ),
     ).toEqual(tools);
     expect(Object.keys(generateOpenApi().paths)).toContain("/v1/organization");
-    expect(generateToolDefinitions()).toHaveLength(3);
+    expect(generateToolDefinitions()).toHaveLength(7);
     expect(JSON.stringify(document)).not.toContain('"storage"');
   });
 });
