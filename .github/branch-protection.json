@@ -10,7 +10,8 @@
       "integration",
       "browser",
       "terraform",
-      "containers"
+      "containers",
+      "preview-guard"
     ]
   },
   "enforce_admins": true,

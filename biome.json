@@ -41,7 +41,8 @@
         "scripts/migrate.mjs",
         "scripts/runtime-secrets.mjs",
         "scripts/vps-secrets.mjs",
-        "scripts/vps-acceptance.mjs"
+        "scripts/vps-acceptance.mjs",
+        "scripts/agency-preview.mjs"
       ],
       "linter": {
         "rules": { "suspicious": { "noUndeclaredEnvVars": "off" } }
