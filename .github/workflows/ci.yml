@@ -81,9 +81,17 @@ jobs:
       - run: terraform -chdir=infra/staging/bootstrap init -backend=false -lockfile=readonly
       - run: terraform -chdir=infra/staging/bootstrap validate
       - run: terraform -chdir=infra/staging/bootstrap test
+  preview-guard:
+    name: preview-guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail closed on apex deploy or forbidden DNS
+        run: node scripts/agency-preview.mjs --guard
   vps-staging:
     name: vps-staging-deploy
-    needs: [quality, secret-scan, integration, browser, terraform, containers]
+    needs: [quality, secret-scan, integration, browser, terraform, containers, preview-guard]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_READY == 'true' && vars.STAGING_TARGET == 'vps'
     runs-on: ubuntu-latest
     timeout-minutes: 20

@@ -1,0 +1,34 @@
+name: Agency shell preview
+on:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: agency-preview-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preview:
+    name: agency-shell-preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject apex deploy and forbidden DNS
+        run: node scripts/agency-preview.mjs --guard
+      - name: Decide whether the agency shell is in this checkout
+        id: plan
+        run: node scripts/agency-preview.mjs --plan
+      - uses: pnpm/action-setup@v4
+        if: steps.plan.outputs.ready == 'true'
+        with:
+          version: 10.29.1
+      - uses: actions/setup-node@v4
+        if: steps.plan.outputs.ready == 'true'
+        with:
+          node-version: 22.21.1
+          cache: pnpm
+      - if: steps.plan.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.plan.outputs.ready == 'true'
+        name: Run the agency shell on loopback
+        run: node scripts/agency-preview.mjs --serve

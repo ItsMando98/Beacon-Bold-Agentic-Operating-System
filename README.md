@@ -29,7 +29,10 @@ pnpm test:integration
 pnpm browser:install
 pnpm test:e2e
 pnpm build:storybook
+node scripts/agency-preview.mjs
 ```
+
+`node scripts/agency-preview.mjs` prüft, dass kein Deploy die öffentliche Apex-Website oder die DNS-Namen der Agentur- und Kundenhosts anlegt. Liegt `apps/agency` im Checkout, startet derselbe Befehl nur diese Hülle auf `127.0.0.1`. Ohne diese App wartet der Befehl und startet keinen Ersatz. Das ist keine Produktion und nicht die öffentliche Website. Siehe [Vorschau](docs/agency-preview.md).
 
 Tests verwenden synthetische Daten. `pnpm dev:infra:stop` stoppt Dienste ohne Datenlöschung. Die lokale Datenbank hat getrennte Owner- und Laufzeitrollen. Das ist Vorbereitung; Geschäftsmodelle und RLS-Policies folgen in P1-1.
 

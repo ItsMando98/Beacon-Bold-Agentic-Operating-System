@@ -15,3 +15,7 @@ Der absichtlich fehlschlagende PR #4 zeigte einen roten `test`-Check; die übrig
 ## Aktueller VPS-Betrieb (1. Oktober 2026)
 
 Alle neun Checks sind erzwungen; der Branch-Schutz und der VPS-Deploy sind nachgewiesen (siehe implementation-status.md). AWS ist stillgelegt: kein AWS-Deploy-Job, keine OIDC-Anmeldung und kein ECR-Push. terraform bleibt als bestehender Pflichtcheck für die archivierten lokalen Mock-Vorlagen bestehen; er verwendet keine AWS-Zugänge. Deployments gehen ausschließlich über den eingeschränkten VPS-Receiver und benötigen weiterhin die dokumentierte Gründerfreigabe.
+
+## Agentur-Hülle, Vorschau
+
+`preview-guard` prüft Deploy-Manifeste und bricht ab, bevor ein Workflow die öffentliche Apex-Website deployen oder die DNS-Namen `agency.beaconandbold.com` und `clients.beaconandbold.com` anlegen würde. Der Pull-Request-Workflow `agency-shell-preview` startet nur `apps/agency` auf dem Loopback, und nur wenn diese App im Checkout liegt. Der Check ist in `.github/branch-protection.json` eingetragen. Ihn in GitHub als Pflichtprüfung zu speichern bleibt ein manueller Administrator-Schritt; dieser Stand führt ihn nicht aus. Details: [agency-preview.md](agency-preview.md).
