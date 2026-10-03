@@ -1,11 +1,11 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { expect, it } from "vitest";
-import type {
-  AnvilCatalogRoutes,
-  CatalogClient,
+import {
+  anvilCatalogRoutes,
+  type CatalogClient,
+  createAnvilCatalogClient,
 } from "../../apps/agency/src/anvil-client.js";
-import { createAnvilCatalogClient } from "../../apps/agency/src/anvil-client.js";
 import { agencyShellHeaders } from "../../apps/agency/src/headers.js";
 import {
   AGENCY_ORIGIN,
@@ -16,11 +16,7 @@ import { previewCatalog } from "../../apps/agency/src/preview.js";
 import { renderCatalog } from "../../apps/agency/src/render-catalog.mjs";
 import { renderAgencyShellMarkup } from "../../apps/agency/src/render-static.js";
 import type { SavedDraftRevision } from "../../apps/agency/src/revision.js";
-import {
-  isSeedSnapshot,
-  readCatalogSeed,
-  SEED_V1_REVISION_ID,
-} from "../../apps/agency/src/seed.js";
+import { isSeedSnapshot, readCatalogSeed } from "../../apps/agency/src/seed.js";
 import {
   createShellCatalogClient,
   openSeedTab,
@@ -135,28 +131,32 @@ it("previews package cards and the pricing note with render-catalog", () => {
 
 it("blocks publish of a dirty buffer and publishes the saved revision", async () => {
   const adapter = createTemporarySeedAdapter();
-  await expect(publishTab(openSeedTab(), adapter)).rejects.toThrow(/seed v1/);
+  await expect(publishTab(openSeedTab(), adapter)).rejects.toThrow(
+    /without a saved revision/,
+  );
   await expect(
     adapter.publishRevision({
       kind: "dirty-buffer",
-      snapshot: editedSeed("unsaved"),
+      pricingNote: "unsaved",
     } as never),
   ).rejects.toThrow(/dirty buffer/);
-  await expect(
-    adapter.publishRevision({
-      kind: "saved-draft",
-      revisionId: SEED_V1_REVISION_ID,
-      snapshot: editedSeed("nope"),
-    }),
-  ).rejects.toThrow(/seed v1/);
 
   const before = readFileSync(seedPath, "utf8");
+  const adopted = await saveTab(openSeedTab(), adapter);
+  expect(adopted.saved?.revision).toBe("local-draft-1");
+  const adoptedPublish = await publishTab(adopted, adapter);
+  expect(adoptedPublish.published.snapshot.version).toBe(2);
+  expect(isSeedSnapshot(adoptedPublish.published.snapshot)).toBe(false);
+  expect(readFileSync(seedPath, "utf8")).toBe(before);
+
   const note = "Edited planning range for this draft only.";
   const dirty = withBuffer(openSeedTab(), editedSeed(note));
   expect(dirty.dirty).toBe(true);
   let publishedRevision: SavedDraftRevision | null = null;
   const seeing: CatalogClient = {
     label: adapter.label,
+    getCatalog: () => adapter.getCatalog(),
+    getDraft: () => adapter.getDraft(),
     saveDraft: (buffer) => adapter.saveDraft(buffer),
     async publishRevision(revision) {
       publishedRevision = revision;
@@ -166,31 +166,23 @@ it("blocks publish of a dirty buffer and publishes the saved revision", async ()
   const outcome = await publishTab(dirty, seeing);
   expect(publishedRevision).not.toBeNull();
   expect(publishedRevision?.kind).toBe("saved-draft");
-  expect(publishedRevision?.revisionId).toBe("local-draft-1");
-  expect(publishedRevision?.snapshot.pricingNote).toBe(note);
-  expect(publishedRevision).not.toBe(dirty.buffer);
-  expect(outcome.published.revisionId).toBe("local-draft-1");
+  expect(publishedRevision?.revision).toBe("local-draft-2");
+  expect(publishedRevision?.pricingNote).toBe(note);
+  expect(outcome.published.revision).toBe("local-draft-2");
   expect(outcome.published.snapshot.pricingNote).toBe(note);
   expect(outcome.tab.dirty).toBe(false);
   expect(readFileSync(seedPath, "utf8")).toBe(before);
   expect(isSeedSnapshot(readCatalogSeed())).toBe(true);
-  expect(outcome.published.revisionId).not.toBe(SEED_V1_REVISION_ID);
 
   const saved = await adapter.saveDraft(editedSeed("second draft"));
-  saved.snapshot.pricingNote = "mutated after save";
+  saved.pricingNote = "mutated after save";
   const published = await adapter.publishRevision(saved);
   expect(published.snapshot.pricingNote).toBe("second draft");
 });
 
 it("saves a dirty tab before publish and sends only that revision to Anvil", async () => {
-  const routes: AnvilCatalogRoutes = {
-    saveDraft: { method: "POST", path: "/v1/catalog/drafts" },
-    publishRevision: {
-      method: "POST",
-      path: "/v1/catalog/drafts/{revisionId}/publish",
-    },
-  };
-  const calls: { url: string; body: unknown }[] = [];
+  const revision = "a".repeat(64);
+  const calls: { url: string; method: string; body: unknown }[] = [];
   const note = "Saved on Anvil, not the open buffer.";
   let release: () => void = () => {};
   const gate = new Promise<void>((resolve) => {
@@ -198,65 +190,117 @@ it("saves a dirty tab before publish and sends only that revision to Anvil", asy
   });
   const fetchImpl: typeof fetch = async (input, init) => {
     const url = String(input);
-    const body = JSON.parse(String(init?.body));
-    calls.push({ url, body });
-    if (url.endsWith("/drafts")) {
+    const method = init?.method ?? "GET";
+    const body =
+      typeof init?.body === "string" ? JSON.parse(init.body) : undefined;
+    calls.push({ url, method, body });
+    if (method === "POST" && url.endsWith("/catalog/draft")) {
       await gate;
       return Response.json({
-        revisionId: "rev-from-save",
-        snapshot: { ...body, publishedAt: "2026-11-01T00:00:00+02:00" },
+        revision,
+        pricingNote: body.pricingNote,
+        offers: body.offers,
+        packages: body.packages,
+      });
+    }
+    if (method === "POST" && url.endsWith("/catalog/publish")) {
+      return Response.json({
+        ...readCatalogSeed(),
+        pricingNote: note,
+        version: 2,
+        publishedAt: "2026-11-01T00:00:00+02:00",
+      });
+    }
+    if (method === "GET" && url.endsWith("/catalog/draft")) {
+      return Response.json({
+        revision,
+        pricingNote: note,
+        offers: readCatalogSeed().offers,
+        packages: readCatalogSeed().packages,
       });
     }
     return Response.json({
-      revisionId: "rev-from-save",
-      snapshot: body.snapshot ?? {
-        ...readCatalogSeed(),
-        pricingNote: note,
-        publishedAt: "2026-11-01T00:00:00+02:00",
-      },
+      ...readCatalogSeed(),
+      version: 2,
+      publishedAt: "2026-11-01T00:00:00+02:00",
     });
   };
-  const client = createAnvilCatalogClient({
+  expect(anvilCatalogRoutes).toEqual({
+    getCatalog: { method: "GET", path: "/catalog" },
+    getDraft: { method: "GET", path: "/catalog/draft" },
+    saveDraft: { method: "POST", path: "/catalog/draft" },
+    publish: { method: "POST", path: "/catalog/publish" },
+  });
+  const client = createShellCatalogClient({
     origin: AGENCY_ORIGIN,
-    routes,
     fetchImpl,
   });
+  expect(client.label).toBe("anvil");
   const dirty = withBuffer(openSeedTab(), editedSeed(note));
   const pending = publishTab(dirty, client);
   dirty.buffer.pricingNote = "edited after publish started";
   release();
   const outcome = await pending;
-  expect(calls).toHaveLength(2);
+  expect(calls[0]?.method).toBe("POST");
+  expect(calls[0]?.url).toBe(`${AGENCY_ORIGIN}/catalog/draft`);
+  expect(Object.keys(calls[0]?.body ?? {}).sort()).toEqual([
+    "offers",
+    "packages",
+    "pricingNote",
+  ]);
+  expect(calls[0]?.body).not.toHaveProperty("version");
+  expect(calls[0]?.body).not.toHaveProperty("publishedAt");
   expect(calls[0]?.body.pricingNote).toBe(note);
-  expect(calls[1]?.url).toBe(
-    `${AGENCY_ORIGIN}/v1/catalog/drafts/rev-from-save/publish`,
-  );
-  expect(calls[1]?.body).toEqual({ revisionId: "rev-from-save" });
-  expect(outcome.published.revisionId).toBe("rev-from-save");
+  expect(calls[1]?.method).toBe("POST");
+  expect(calls[1]?.url).toBe(`${AGENCY_ORIGIN}/catalog/publish`);
+  expect(calls[1]?.body).toEqual({ revision });
+  expect(JSON.stringify(calls[1]?.body)).not.toContain("revisionId");
+  expect(outcome.published.revision).toBe(revision);
+  expect(outcome.tab.buffer.version).toBe(2);
   expect(outcome.tab.buffer.publishedAt).toBe("2026-11-01T00:00:00+02:00");
   expect(outcome.tab.buffer.pricingNote).toBe(note);
 
+  const seedNote = readCatalogSeed().pricingNote;
+  const sameAsSeed = await client.saveDraft(readCatalogSeed());
+  expect(calls.at(-1)?.body.pricingNote).toBe(seedNote);
+  expect(calls.at(-1)?.body).not.toHaveProperty("version");
+  const publishedSeed = await client.publishRevision(sameAsSeed);
+  expect(calls.at(-1)?.body).toEqual({ revision });
+  expect(publishedSeed.snapshot.version).toBe(2);
+
+  expect(await client.getCatalog()).toMatchObject({ version: 2 });
+  expect(calls.at(-1)?.method).toBe("GET");
+  expect(calls.at(-1)?.url).toBe(`${AGENCY_ORIGIN}/catalog`);
+  expect((await client.getDraft()).revision).toBe(revision);
+  expect(calls.at(-1)?.url).toBe(`${AGENCY_ORIGIN}/catalog/draft`);
+
   const denied = createShellCatalogClient({
     origin: "http://localhost:3004",
-    routes,
     fetchImpl,
   });
   expect(denied.label).toBe("temporary-local-seed-adapter");
+  expect(
+    createShellCatalogClient({
+      origin: AGENCY_ORIGIN,
+      routes: null,
+      fetchImpl,
+    }).label,
+  ).toBe("temporary-local-seed-adapter");
   expect(() =>
     createAnvilCatalogClient({
       origin: "https://app.beaconandbold.com",
-      routes,
       fetchImpl,
     }),
   ).toThrow(/agency.beaconandbold.com/);
-  expect(calls).toHaveLength(2);
   expect(() =>
     resolveAgencyUrl(AGENCY_ORIGIN, "https://api.beaconandbold.com/drafts"),
   ).toThrow(/another origin/);
+  expect(readFileSync("apps/agency/src/anvil-client.ts", "utf8")).not.toContain(
+    "revisionId",
+  );
 
   const cookieClient = createAnvilCatalogClient({
     origin: AGENCY_ORIGIN,
-    routes,
     fetchImpl: async () =>
       new Response(null, {
         status: 200,
@@ -314,10 +358,12 @@ it("keeps a clean saved draft on publish without sending the buffer again", asyn
     adapter,
   );
   expect(saved.dirty).toBe(false);
-  expect(saved.saved?.revisionId).toBe("local-draft-1");
+  expect(saved.saved?.revision).toBe("local-draft-1");
   let sawBuffer = false;
   const client: CatalogClient = {
     label: "temporary-local-seed-adapter",
+    getCatalog: () => adapter.getCatalog(),
+    getDraft: () => adapter.getDraft(),
     async saveDraft() {
       sawBuffer = true;
       throw new Error("clean publish must not save again");
@@ -326,6 +372,6 @@ it("keeps a clean saved draft on publish without sending the buffer again", asyn
   };
   const outcome = await publishTab(saved, client);
   expect(sawBuffer).toBe(false);
-  expect(outcome.published.revisionId).toBe("local-draft-1");
+  expect(outcome.published.revision).toBe("local-draft-1");
   expect(outcome.published.snapshot.pricingNote).toBe("kept");
 });

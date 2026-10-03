@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { anvilCatalogRoutes } from "../src/anvil-client";
+import { useEffect, useRef, useState } from "react";
 import { previewCatalog } from "../src/preview";
 import {
   type CatalogTab,
@@ -51,16 +50,19 @@ function cents(value: string): number | null {
  * Package cards are not drawn in JSX. Their HTML comes from render-catalog.
  */
 export function AgencyCatalogShell() {
-  const [client] = useState(() =>
-    createShellCatalogClient({
-      origin:
-        typeof window === "undefined"
-          ? "server-render"
-          : window.location.origin,
-      routes: anvilCatalogRoutes,
-      fetchImpl: typeof fetch === "function" ? fetch : undefined,
-    }),
+  const [client, setClient] = useState(() =>
+    createShellCatalogClient({ origin: "server-render" }),
   );
+  const clientRef = useRef(client);
+  clientRef.current = client;
+  useEffect(() => {
+    setClient(
+      createShellCatalogClient({
+        origin: window.location.origin,
+        fetchImpl: window.fetch.bind(window),
+      }),
+    );
+  }, []);
   const [tab, setTab] = useState<CatalogTab>(() => openSeedTab());
   const tabRef = useRef(tab);
   tabRef.current = tab;
@@ -98,10 +100,10 @@ export function AgencyCatalogShell() {
   async function onSave() {
     setPending(true);
     try {
-      const next = await saveTab(tabRef.current, client);
+      const next = await saveTab(tabRef.current, clientRef.current);
       setTab(next);
       setNotice(
-        next.saved ? `Draft ${next.saved.revisionId} saved.` : "Draft saved.",
+        next.saved ? `Draft ${next.saved.revision} saved.` : "Draft saved.",
       );
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Save failed");
@@ -113,9 +115,9 @@ export function AgencyCatalogShell() {
   async function onPublish() {
     setPending(true);
     try {
-      const result = await publishTab(tabRef.current, client);
+      const result = await publishTab(tabRef.current, clientRef.current);
       setTab(result.tab);
-      setNotice(`Published revision ${result.published.revisionId}.`);
+      setNotice(`Published revision ${result.published.revision}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Publish failed");
     } finally {
@@ -148,7 +150,7 @@ export function AgencyCatalogShell() {
 
       <p className="notice" data-adapter={client.label}>
         {client.label === "temporary-local-seed-adapter"
-          ? "Temporary local seed adapter. Anvil owns draft and publish. Those routes are not in this tree yet, so this tab keeps drafts in memory. Seed v1 is adopted, not published over."
+          ? "Temporary local seed adapter. On https://agency.beaconandbold.com the shell calls Anvil: POST /catalog/draft and POST /catalog/publish. This tab keeps drafts in memory until then."
           : "Draft and publish use Anvil on https://agency.beaconandbold.com."}
       </p>
       {tab.dirty ? <p className="dirty">Unsaved changes</p> : null}

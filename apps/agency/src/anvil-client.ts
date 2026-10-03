@@ -6,86 +6,110 @@ import {
   resolveAgencyUrl,
 } from "./origin.js";
 import { renderCatalog } from "./render-catalog.mjs";
+import { assertSavedDraft, type SavedDraftRevision } from "./revision.js";
 import {
-  assertPublishableRevision,
-  type PublishedRevision,
-  type SavedDraftRevision,
-} from "./revision.js";
-import { isSeedSnapshot, SEED_V1_REVISION_ID } from "./seed.js";
-import { type CatalogSnapshot, canonicalSnapshot } from "./snapshot.js";
+  type CatalogOffer,
+  type CatalogPackage,
+  type CatalogSnapshot,
+  canonicalSnapshot,
+} from "./snapshot.js";
 
 /**
- * Paths Anvil owns. They are not in this repo yet, so the shell leaves this null.
- * Setting it is the only switch that makes the shell call Anvil.
- * This module does not implement those routes.
+ * Anvil's catalog routes, from packages/schemas/src/catalog.ts on the
+ * catalog-server branch. This module does not implement those routes.
  */
 export type AnvilCatalogRoutes = {
-  saveDraft: { method: "POST"; path: string };
-  publishRevision: { method: "POST"; path: string };
+  getCatalog: { method: "GET"; path: "/catalog" };
+  getDraft: { method: "GET"; path: "/catalog/draft" };
+  saveDraft: { method: "POST"; path: "/catalog/draft" };
+  publish: { method: "POST"; path: "/catalog/publish" };
 };
 
-export const anvilCatalogRoutes: AnvilCatalogRoutes | null = null;
+export const anvilCatalogRoutes: AnvilCatalogRoutes = {
+  getCatalog: { method: "GET", path: "/catalog" },
+  getDraft: { method: "GET", path: "/catalog/draft" },
+  saveDraft: { method: "POST", path: "/catalog/draft" },
+  publish: { method: "POST", path: "/catalog/publish" },
+};
 
 export type CatalogClient = {
   readonly label: "temporary-local-seed-adapter" | "anvil";
+  getCatalog(): Promise<CatalogSnapshot>;
+  getDraft(): Promise<SavedDraftRevision>;
   saveDraft(buffer: CatalogSnapshot): Promise<SavedDraftRevision>;
-  publishRevision(revision: SavedDraftRevision): Promise<PublishedRevision>;
+  publishRevision(revision: SavedDraftRevision): Promise<{
+    revision: string;
+    snapshot: CatalogSnapshot;
+  }>;
 };
 
-function parseSnapshot(value: unknown): CatalogSnapshot {
+const revisionPattern = /^[a-f0-9]{64}$/;
+
+/** POST /catalog/draft accepts only these three fields. */
+export function catalogDraftBody(snapshot: CatalogSnapshot): {
+  pricingNote: string;
+  offers: CatalogOffer[];
+  packages: CatalogPackage[];
+} {
+  const canonical = canonicalSnapshot(snapshot);
+  return {
+    pricingNote: canonical.pricingNote,
+    offers: canonical.offers,
+    packages: canonical.packages,
+  };
+}
+
+function requireRecord(
+  value: unknown,
+  message: string,
+): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new CatalogShellError(message);
+  }
+  return value as Record<string, unknown>;
+}
+
+function parseRevision(value: unknown): string {
+  if (typeof value !== "string" || !revisionPattern.test(value)) {
+    throw new CatalogShellError("Anvil save returned no revision");
+  }
+  return value;
+}
+
+export function parseOfferDraft(value: unknown): SavedDraftRevision {
+  const record = requireRecord(value, "Anvil save returned no revision");
+  const revision = parseRevision(record.revision);
+  if (typeof record.pricingNote !== "string" || !Array.isArray(record.offers)) {
+    throw new CatalogShellError("Anvil save returned no revision");
+  }
+  if (!Array.isArray(record.packages)) {
+    throw new CatalogShellError("Anvil save returned no revision");
+  }
+  const body = catalogDraftBody({
+    version: 1,
+    publishedAt: "1970-01-01T00:00:00Z",
+    pricingNote: record.pricingNote,
+    offers: record.offers as CatalogOffer[],
+    packages: record.packages as CatalogPackage[],
+  });
+  return {
+    kind: "saved-draft",
+    revision,
+    pricingNote: body.pricingNote,
+    offers: body.offers,
+    packages: body.packages,
+  };
+}
+
+export function parseCatalogSnapshot(value: unknown): CatalogSnapshot {
   renderCatalog(value);
   return canonicalSnapshot(value as CatalogSnapshot);
 }
 
-function parseSavedRevision(value: unknown): SavedDraftRevision {
-  if (!value || typeof value !== "object") {
-    throw new CatalogShellError("Anvil save returned no revision");
-  }
-  const record = value as { revisionId?: unknown; snapshot?: unknown };
-  if (record.revisionId === SEED_V1_REVISION_ID) {
-    throw new CatalogShellError("Refusing to publish over seed v1");
-  }
-  if (
-    typeof record.revisionId !== "string" ||
-    record.revisionId.trim() === ""
-  ) {
-    throw new CatalogShellError("Anvil save returned no revision");
-  }
-  const snapshot = parseSnapshot(record.snapshot);
-  if (isSeedSnapshot(snapshot)) {
-    throw new CatalogShellError("Refusing to publish over seed v1");
-  }
-  return { kind: "saved-draft", revisionId: record.revisionId, snapshot };
-}
-
-function publishPath(path: string, revisionId: string): string {
-  if (!/^[A-Za-z0-9._:-]+$/.test(revisionId)) {
-    throw new CatalogShellError("Invalid draft revision");
-  }
-  return path.replaceAll("{revisionId}", encodeURIComponent(revisionId));
-}
-
-async function postJson(
-  origin: string,
-  path: string,
-  body: unknown,
-  fetchImpl: typeof fetch,
-): Promise<unknown> {
-  const url = resolveAgencyUrl(origin, path);
-  const response = await fetchImpl(url, {
-    method: "POST",
-    credentials: "same-origin",
-    cache: "no-store",
-    redirect: "error",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+async function readResponse(response: Response): Promise<unknown> {
   for (const cookie of readSetCookies(response))
     assertNoParentBeaconCookie(cookie);
-  if (!response.ok) {
+  if (response.status !== 200) {
     throw new CatalogShellError(
       `Anvil catalog route failed (${response.status})`,
     );
@@ -93,10 +117,32 @@ async function postJson(
   return response.json() as Promise<unknown>;
 }
 
-/** Typed client for Anvil's draft and publish routes. Not a server. */
+async function request(
+  origin: string,
+  method: "GET" | "POST",
+  path: string,
+  fetchImpl: typeof fetch,
+  body?: unknown,
+): Promise<unknown> {
+  const url = resolveAgencyUrl(origin, path);
+  const response = await fetchImpl(url, {
+    method,
+    credentials: "same-origin",
+    cache: "no-store",
+    redirect: "error",
+    headers: {
+      accept: "application/json",
+      ...(body === undefined ? {} : { "content-type": "application/json" }),
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  return readResponse(response);
+}
+
+/** Typed client for Anvil's catalog routes. Not a server. */
 export function createAnvilCatalogClient(options: {
   origin: string;
-  routes: AnvilCatalogRoutes;
+  routes?: AnvilCatalogRoutes;
   fetchImpl: typeof fetch;
 }): CatalogClient {
   if (options.origin !== AGENCY_ORIGIN) {
@@ -104,34 +150,50 @@ export function createAnvilCatalogClient(options: {
       "Catalog API is only called from https://agency.beaconandbold.com",
     );
   }
+  const routes = options.routes ?? anvilCatalogRoutes;
   return {
     label: "anvil",
-    async saveDraft(buffer) {
-      const snapshot = canonicalSnapshot(structuredClone(buffer));
-      renderCatalog(snapshot);
-      const payload = await postJson(
-        options.origin,
-        options.routes.saveDraft.path,
-        snapshot,
-        options.fetchImpl,
+    async getCatalog() {
+      return parseCatalogSnapshot(
+        await request(
+          options.origin,
+          "GET",
+          routes.getCatalog.path,
+          options.fetchImpl,
+        ),
       );
-      return parseSavedRevision(payload);
+    },
+    async getDraft() {
+      return parseOfferDraft(
+        await request(
+          options.origin,
+          "GET",
+          routes.getDraft.path,
+          options.fetchImpl,
+        ),
+      );
+    },
+    async saveDraft(buffer) {
+      const payload = await request(
+        options.origin,
+        "POST",
+        routes.saveDraft.path,
+        options.fetchImpl,
+        catalogDraftBody(buffer),
+      );
+      return parseOfferDraft(payload);
     },
     async publishRevision(value) {
-      const revision = assertPublishableRevision(value);
-      // The body is the saved revision id only. The unsaved buffer is not sent.
-      const payload = { revisionId: revision.revisionId };
-      const body = await postJson(
+      const saved = assertSavedDraft(value);
+      const revision = parseRevision(saved.revision);
+      const payload = await request(
         options.origin,
-        publishPath(options.routes.publishRevision.path, revision.revisionId),
-        payload,
+        "POST",
+        routes.publish.path,
         options.fetchImpl,
+        { revision },
       );
-      const saved = parseSavedRevision(body);
-      if (saved.revisionId !== revision.revisionId) {
-        throw new CatalogShellError("Anvil published a different revision");
-      }
-      return { revisionId: saved.revisionId, snapshot: saved.snapshot };
+      return { revision, snapshot: parseCatalogSnapshot(payload) };
     },
   };
 }
