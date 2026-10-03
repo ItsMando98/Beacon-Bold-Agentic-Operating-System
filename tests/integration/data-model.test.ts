@@ -148,14 +148,48 @@ it("migrates all 13 real models and isolates every read, write and relationship"
     const flags = await migrationClient.query(
       "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class JOIN pg_namespace n ON n.oid=relnamespace WHERE n.nspname='beacon' AND relkind='r' ORDER BY relname",
     );
-    expect(flags.rows).toHaveLength(19);
+    expect(flags.rows.map((row) => row.relname)).toEqual([
+      "agency_memberships",
+      "agent_grants",
+      "agent_runs",
+      "agents",
+      "approvals",
+      "assets",
+      "audit_logs",
+      "catalog_draft_revisions",
+      "catalog_drafts",
+      "catalog_snapshots",
+      "contacts",
+      "customers",
+      "deals",
+      "idempotency",
+      "invoices",
+      "memberships",
+      "organizations",
+      "projects",
+      "tasks",
+      "tenants",
+      "users",
+      "version_approvals",
+    ]);
     expect(
       flags.rows.every((row) => row.relrowsecurity && row.relforcerowsecurity),
     ).toBe(true);
     const keys = await migrationClient.query(
       "SELECT count(*)::int AS count FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='beacon' AND c.contype='f'",
     );
-    expect(keys.rows[0].count).toBe(13 + tenantReferences.length + 11);
+    const catalogForeignKeys = ["catalog_drafts_revision_fk"];
+    expect(keys.rows[0].count).toBe(
+      13 + tenantReferences.length + 11 + catalogForeignKeys.length,
+    );
+    expect(
+      (
+        await migrationClient.query(
+          "SELECT conname FROM pg_constraint c JOIN pg_namespace n ON n.oid = c.connamespace WHERE n.nspname = 'beacon' AND c.contype = 'f' AND c.conname = ANY($1) ORDER BY conname",
+          [catalogForeignKeys],
+        )
+      ).rows.map((row) => row.conname),
+    ).toEqual(catalogForeignKeys);
     for (const name of names) {
       entitySchemas[name].parse(a[name]);
       entitySchemas[name].parse(b[name]);
