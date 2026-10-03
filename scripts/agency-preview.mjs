@@ -229,10 +229,24 @@ export function previewCommands(pkg) {
     throw new Error("Agency shell package needs a start or dev script");
   }
   const port = portFromScript(pkg.scripts[scriptName]) ?? 3010;
+  const script = pkg.scripts[scriptName];
+  const nextCommand = scriptName === "start" ? "start" : "dev";
   return {
     port,
     build: pkg.scripts?.build ? ["pnpm", "--filter", pkg.name, "build"] : null,
-    run: ["pnpm", "--filter", pkg.name, scriptName],
+    run: [
+      "pnpm",
+      "--filter",
+      pkg.name,
+      "exec",
+      "next",
+      nextCommand,
+      ...(script.includes("--webpack") ? ["--webpack"] : []),
+      "--port",
+      String(port),
+      "--hostname",
+      "127.0.0.1",
+    ],
   };
 }
 

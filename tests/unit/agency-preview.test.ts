@@ -21,6 +21,7 @@ import {
   planAgencyPreview,
   previewCommands,
   previewEnvironment,
+  readAgencyPackage,
   serveAgencyPreview,
 } from "../../scripts/agency-preview.mjs";
 
@@ -160,22 +161,58 @@ it("refuses production, staging, and remote data before a preview starts", () =>
 });
 
 it("waits for apps/agency and does not invent a shell", async () => {
-  expect(planAgencyPreview(root)).toMatchObject({
-    ready: false,
+  const directory = mkdtempSync(join(tmpdir(), "agency-preview-empty-"));
+  try {
+    expect(planAgencyPreview(directory)).toMatchObject({
+      ready: false,
+      surface: "agency-shell",
+      production: false,
+      apexDeploy: false,
+      dnsChanges: false,
+      clientsDashboard: false,
+      packageDir: "apps/agency",
+      packageName: null,
+    });
+    const spawnImpl = () => {
+      throw new Error("spawned");
+    };
+    await expect(
+      serveAgencyPreview({ root: directory, spawnImpl }),
+    ).resolves.toMatchObject({
+      ready: false,
+    });
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+it("plans only the agency shell that is in this checkout", () => {
+  const plan = planAgencyPreview(root);
+  expect(plan).toMatchObject({
+    ready: true,
     surface: "agency-shell",
     production: false,
-    apexDeploy: false,
-    dnsChanges: false,
-    clientsDashboard: false,
-    packageDir: "apps/agency",
-    packageName: null,
+    packageName: "@roaswell/agency",
   });
-  const spawnImpl = () => {
-    throw new Error("spawned");
-  };
-  await expect(serveAgencyPreview({ root, spawnImpl })).resolves.toMatchObject({
-    ready: false,
+  const commands = previewCommands(readAgencyPackage(root));
+  expect(commands).toEqual({
+    port: 3004,
+    build: ["pnpm", "--filter", "@roaswell/agency", "build"],
+    run: [
+      "pnpm",
+      "--filter",
+      "@roaswell/agency",
+      "exec",
+      "next",
+      "start",
+      "--port",
+      "3004",
+      "--hostname",
+      "127.0.0.1",
+    ],
   });
+  expect(commands.build?.join(" ")).not.toContain("@roaswell/api");
+  expect(commands.run.join(" ")).not.toContain("@roaswell/api");
 });
 
 it("builds and starts only the agency package", async () => {
@@ -215,7 +252,18 @@ it("builds and starts only the agency package", async () => {
     ).toMatchObject({
       port: 3010,
       build: null,
-      run: ["pnpm", "--filter", "@example/agency", "dev"],
+      run: [
+        "pnpm",
+        "--filter",
+        "@example/agency",
+        "exec",
+        "next",
+        "dev",
+        "--port",
+        "3010",
+        "--hostname",
+        "127.0.0.1",
+      ],
     });
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -275,6 +323,7 @@ it("keeps the preview workflow on pull requests and the guard command green", as
     console.log = original;
   }
   expect(logs).toContain("preview-guard: ok");
-  expect(logs.some((line) => line.includes('"ready":false'))).toBe(true);
-  expect(logs.join("\n")).toContain("armed and waiting");
+  expect(logs.some((line) => line.includes('"ready":true'))).toBe(true);
+  expect(logs.join("\n")).toContain("will run apps/agency on loopback");
+  expect(logs.join("\n")).toContain("production: false");
 });
