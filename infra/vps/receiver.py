@@ -136,7 +136,12 @@ def deploy(archive, release, verify_main=True):
     except Exception:
         if previous:
             # Older releases have no agency image. Starting it would fail the restore.
-            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', *runtime_for(previous['release']))
+            # The failed release may already have started that container; remove it
+            # before restoring the previous apps so it cannot keep running.
+            services = runtime_for(previous['release'])
+            if 'agency' not in services:
+                compose(release, 'rm', '--stop', '--force', 'agency')
+            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', *services)
         else:
             compose(release, 'stop', *RUNTIME)
         raise RuntimeError('Deployment failed; previous application state restored')

@@ -63,6 +63,16 @@ class ReceiverTest(unittest.TestCase):
             calls = self.deploy_until_https_fails(directory, compose, agency_image=True)
             self.assertEqual(calls[-1][0], 'b' * 40)
 
+    def test_rollback_without_agency_image_removes_failed_agency_container_before_restore(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(receiver, 'ROOT', pathlib.Path(directory)), patch.object(receiver, 'validate_archive'), patch.object(receiver, 'run'), patch.object(receiver, 'encrypted_backup'), patch.object(receiver, 'compose') as compose, patch.object(receiver, 'accept_https', side_effect=RuntimeError('HTTPS failed')), patch.object(receiver.time, 'sleep'):
+            calls = self.deploy_until_https_fails(directory, compose, agency_image=False)
+            removal = (RELEASE, 'rm', '--stop', '--force', 'agency')
+            restore = calls[-1]
+            self.assertIn(removal, calls)
+            self.assertEqual(restore[0], 'b' * 40)
+            self.assertEqual(restore[-3:], ('api', 'app', 'web'))
+            self.assertLess(calls.index(removal), calls.index(restore))
+
     def test_rollback_without_agency_image_starts_only_api_app_web(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(receiver, 'ROOT', pathlib.Path(directory)), patch.object(receiver, 'validate_archive'), patch.object(receiver, 'run'), patch.object(receiver, 'encrypted_backup'), patch.object(receiver, 'compose') as compose, patch.object(receiver, 'accept_https', side_effect=RuntimeError('HTTPS failed')), patch.object(receiver.time, 'sleep'):
             calls = self.deploy_until_https_fails(directory, compose, agency_image=False)
