@@ -30,6 +30,26 @@ def environment(release):
 def compose(release, *args):
     return run(['docker', 'compose', '-p', 'beacon-bold-staging', '-f', str(ROOT / 'compose.yaml'), *args], environment(release))
 
+def image_exists(service, release):
+    """True when this release tag is already loaded. A missing tag is not an error."""
+    if service != 'agency' or not re.fullmatch('[a-f0-9]{40}', release or ''):
+        return False
+    try:
+        result = subprocess.run(
+            ['docker', 'image', 'inspect', f'beacon-bold-agency:{release}'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+def runtime_for(release):
+    if image_exists('agency', release):
+        return RUNTIME
+    return ('api', 'app', 'web')
+
 def validate_archive(archive, release):
     expected = {f'beacon-bold-{service}:{release}' for service in SERVICES}
     with tarfile.open(archive, 'r:gz') as bundle:
@@ -115,7 +135,8 @@ def deploy(archive, release, verify_main=True):
         (ROOT / 'current.json').write_text(json.dumps({'release': release, 'https': True}))
     except Exception:
         if previous:
-            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', *RUNTIME)
+            # Older releases have no agency image. Starting it would fail the restore.
+            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', *runtime_for(previous['release']))
         else:
             compose(release, 'stop', *RUNTIME)
         raise RuntimeError('Deployment failed; previous application state restored')
