@@ -1,10 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { requestHostname } from "../../packages/integrations/src/host-session.js";
 import { bindAgencyHost } from "./src/agency-host";
 
 /**
  * Host gate for the catalog shell.
  * A real Auth0 login on the public agency host is not accepted, so the
- * default request has no login subject. The other public host is still refused.
+ * default request has no login subject. Every other host is still refused.
  * When a subject is present, the response carries the host-only agency cookie.
  */
 export function agencyCatalogProxy(
@@ -39,7 +40,12 @@ export function agencyCatalogProxy(
 }
 
 export default function proxy(request: NextRequest) {
-  return agencyCatalogProxy(request);
+  // Next sets nextUrl.hostname from HOSTNAME, which is the bind address.
+  // The agency host is the request Host header, never 0.0.0.0 or 127.0.0.1.
+  return agencyCatalogProxy({
+    nextUrl: { hostname: requestHostname(request.headers.get("host")) },
+    headers: request.headers,
+  });
 }
 
 export const config = {

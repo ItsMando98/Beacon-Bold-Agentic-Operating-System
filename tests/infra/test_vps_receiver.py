@@ -57,7 +57,7 @@ class ReceiverTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 receiver.deploy('images', RELEASE, verify_main=False)
             self.assertEqual(compose.call_args.args[0], 'b' * 40)
-            self.assertEqual(compose.call_args.args[-3:], ('api', 'app', 'web'))
+            self.assertEqual(compose.call_args.args[-4:], ('api', 'app', 'web', 'agency'))
 
 if __name__ == '__main__':
     unittest.main()

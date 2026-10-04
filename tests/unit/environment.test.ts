@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { loadEnvironment, type Service } from "../../packages/config/src/env";
 
-const services: Service[] = ["web", "app", "portal", "api", "worker"];
+const services: Service[] = ["web", "app", "portal", "api", "worker", "agency"];
 describe("runtime configuration", () => {
   it.each(services)("%s refuses absent required configuration", (service) =>
     expect(() => loadEnvironment(service, {})).toThrow(
@@ -24,6 +24,15 @@ describe("runtime configuration", () => {
       loadEnvironment(service, { APP_ENV: "staging", SERVICE_MODE: "live" }),
     ).toThrow(`Invalid ${service} configuration`),
   );
+  it("starts the agency shell on port 3004 without an Auth0 subject", () => {
+    const env = loadEnvironment("agency", {
+      APP_ENV: "staging",
+      SERVICE_MODE: "live",
+      PUBLIC_API_URL: "https://staging.example.invalid",
+    });
+    expect(env.port).toBe(3004);
+    expect(env.AUTH_ENABLED).toBe("false");
+  });
   it("accepts valid live API config", () =>
     expect(
       loadEnvironment("api", {

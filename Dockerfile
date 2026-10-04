@@ -38,6 +38,17 @@ USER node
 EXPOSE 3000
 CMD ["node", "runtime-secrets.mjs", "apps/web/server.js"]
 
+FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS agency
+WORKDIR /runtime
+ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3004
+COPY --from=build --chown=node:node /workspace/apps/agency/.next/standalone ./
+COPY --from=build --chown=node:node /workspace/apps/agency/.next/static ./apps/agency/.next/static
+COPY --from=build --chown=node:node /workspace/licenses ./licenses
+COPY --chown=node:node scripts/runtime-secrets.mjs scripts/secret-files.mjs ./
+USER node
+EXPOSE 3004
+CMD ["node", "runtime-secrets.mjs", "apps/agency/server.js"]
+
 FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS migrate
 WORKDIR /runtime
 COPY --from=build --chown=node:node /workspace/migration-dist ./dist

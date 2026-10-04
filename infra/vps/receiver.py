@@ -11,7 +11,8 @@ import time
 import urllib.request
 
 ROOT = pathlib.Path('/opt/beacon-bold-staging')
-SERVICES = ('api', 'app', 'web', 'migrate')
+SERVICES = ('api', 'app', 'web', 'migrate', 'agency')
+RUNTIME = ('api', 'app', 'web', 'agency')
 REPO = 'ItsMando98/Beacon-Bold-Agentic-Operating-System'
 
 def run(args, env=None, capture=True):
@@ -52,7 +53,7 @@ def validate_archive(archive, release):
                 raise RuntimeError('Unexpected image platform')
             if config.get('config', {}).get('Labels', {}).get('org.opencontainers.image.revision') != release:
                 raise RuntimeError('Image revision mismatch')
-        if len(manifest) != 4 or len(tags) != 4 or set(tags) != expected:
+        if len(manifest) != len(SERVICES) or len(tags) != len(SERVICES) or set(tags) != expected:
             raise RuntimeError('Only fixed staging image names are accepted')
 
 def accept_https():
@@ -101,7 +102,7 @@ def deploy(archive, release, verify_main=True):
     compose(release, 'run', '--rm', '--no-deps', 'migrate')
     compose(release, 'run', '--rm', '--no-deps', 'acceptance')
     try:
-        compose(release, 'up', '-d', '--wait', '--wait-timeout', '180', 'api', 'app', 'web')
+        compose(release, 'up', '-d', '--wait', '--wait-timeout', '180', *RUNTIME)
         # Traefik requests a new certificate asynchronously; never accept invalid TLS.
         for attempt in range(18):
             try:
@@ -114,9 +115,9 @@ def deploy(archive, release, verify_main=True):
         (ROOT / 'current.json').write_text(json.dumps({'release': release, 'https': True}))
     except Exception:
         if previous:
-            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', 'api', 'app', 'web')
+            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', *RUNTIME)
         else:
-            compose(release, 'stop', 'api', 'app', 'web')
+            compose(release, 'stop', *RUNTIME)
         raise RuntimeError('Deployment failed; previous application state restored')
 
 def main():

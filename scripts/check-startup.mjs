@@ -7,6 +7,7 @@ for (const [service, entry] of [
   ["app", "apps/app/.next/standalone/apps/app/server.js"],
   ["portal", "apps/portal/.next/standalone/apps/portal/server.js"],
   ["web", "apps/web/.next/standalone/apps/web/server.js"],
+  ["agency", "apps/agency/.next/standalone/apps/agency/server.js"],
 ]) {
   const result = spawnSync(process.execPath, [entry], {
     encoding: "utf8",
