@@ -1,6 +1,7 @@
 export {
   assertAgencyCatalogActor,
   assertAgencyCatalogOrigin,
+  assertCustomerCatalogReader,
   CatalogError,
   type CatalogStore,
   createMemoryCatalogStore,

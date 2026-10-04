@@ -158,6 +158,7 @@ it("migrates all 13 real models and isolates every read, write and relationship"
       "audit_logs",
       "catalog_draft_revisions",
       "catalog_drafts",
+      "catalog_package_assignments",
       "catalog_snapshots",
       "contacts",
       "customers",

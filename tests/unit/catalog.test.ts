@@ -15,6 +15,9 @@ import type {
 } from "../../packages/schemas/src/index.js";
 
 const origin = "https://agency.beaconandbold.com";
+const clientsOrigin = "https://clients.beaconandbold.com";
+const tenantA = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+const tenantB = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 const agency: AuthIdentity = {
   kind: "human",
   tenantId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
@@ -25,6 +28,19 @@ const agency: AuthIdentity = {
   scopes: ["catalog:read", "catalog:write"],
   expiresAt: Math.floor(Date.now() / 1000) + 600,
 };
+function customer(tenantId: string): AuthIdentity {
+  return {
+    ...agency,
+    tenantId,
+    actorId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    subject: `auth0|customer-${tenantId}`,
+    clientId: "customer-app",
+    surface: "customer",
+    scopes: ["organizations:read"],
+  };
+}
+const customerA = customer(tenantA);
+const customerB = customer(tenantB);
 function seedBody(): CatalogDraftBody {
   return {
     pricingNote: catalogSeedSnapshot.pricingNote,
@@ -46,6 +62,8 @@ function apiFor(
         if (token === "Bearer agency") return agency;
         if (token === "Bearer customer")
           return { ...agency, surface: "customer", clientId: "customer-app" };
+        if (token === "Bearer customer-a") return customerA;
+        if (token === "Bearer customer-b") return customerB;
         if (token === "Bearer agent")
           return {
             ...agency,
@@ -373,14 +391,21 @@ test("draft reads and writes require agency auth and the exact agency origin", a
   expect(saved.status).toBe(200);
   const savedDraft = await saved.json();
   const draft = await api.request("/catalog/draft", {
-    headers: { authorization: "Bearer agency" },
+    headers: { authorization: "Bearer agency", origin },
   });
   expect(draft.status).toBe(200);
   expect((await draft.json()).pricingNote).toBe("Agency edit.");
   const agent = await api.request("/catalog/draft", {
-    headers: { authorization: "Bearer agent" },
+    headers: { authorization: "Bearer agent", origin },
   });
   expect(agent.status).toBe(200);
+  const draftWithoutOrigin = await api.request("/catalog/draft", {
+    headers: { authorization: "Bearer agency" },
+  });
+  expect(draftWithoutOrigin.status).toBe(403);
+  expect((await draftWithoutOrigin.json()).error.message).toBe(
+    "Origin is not allowed",
+  );
   for (const foreign of [
     "https://clients.beaconandbold.com",
     "https://agency.beaconandbold.com/",
@@ -431,4 +456,107 @@ test("agency session cookies stay host-only", () => {
   expect("domain" in options.transactionCookie).toBe(false);
   expect(options.session.cookie.path).toBe("/");
   expect(options.authorizationParameters.scope).toContain("catalog:write");
+});
+
+test("a customer reads only assigned published packages", async () => {
+  const { store, api } = apiFor();
+  const assigned = await store.assignPackages(agency, origin, tenantA, [
+    "meta-ads-management",
+    "content-retainer",
+  ]);
+  expect(assigned.packages.map((item) => item.id)).toEqual([
+    "content-retainer",
+    "meta-ads-management",
+  ]);
+  expect(await store.listSnapshots()).toEqual([catalogSeedSnapshot]);
+  const customerRead = await api.request("/catalog/assignment", {
+    headers: { authorization: "Bearer customer-a", origin: clientsOrigin },
+  });
+  expect(customerRead.status).toBe(200);
+  const body = await customerRead.json();
+  expect(Object.keys(body)).toEqual(["packages"]);
+  expect(body.packages).toEqual(assigned.packages);
+  expect(body.packages).toEqual(
+    catalogSeedSnapshot.packages.filter((item) =>
+      ["content-retainer", "meta-ads-management"].includes(item.id),
+    ),
+  );
+  const other = await api.request("/catalog/assignment", {
+    headers: { authorization: "Bearer customer-b" },
+  });
+  expect(other.status).toBe(200);
+  expect(await other.json()).toEqual({ packages: [] });
+  const unassigned = customer("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee");
+  expect(await store.readAssignment(unassigned)).toEqual({ packages: [] });
+  expect(catalogSeedSnapshot.packages.length).toBeGreaterThan(0);
+  const draftTitle = "Draft title the customer must not see";
+  const edited = seedBody();
+  edited.packages[0] = { ...edited.packages[0], title: draftTitle };
+  edited.packages.push({
+    ...edited.packages[0],
+    id: "draft-only-package",
+    title: "Draft only package",
+  });
+  const saved = await api.request("/catalog/draft", post(edited));
+  expect(saved.status).toBe(200);
+  const afterDraft = await (
+    await api.request("/catalog/assignment", {
+      headers: { authorization: "Bearer customer-a" },
+    })
+  ).json();
+  expect(JSON.stringify(afterDraft)).not.toContain(draftTitle);
+  expect(JSON.stringify(afterDraft)).not.toContain("draft-only-package");
+  const draftRead = await api.request("/catalog/draft", {
+    headers: { authorization: "Bearer customer-a", origin },
+  });
+  expect(draftRead.status).toBe(403);
+  const clientsWrite = await api.request("/catalog/assignment", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer agency",
+      origin: clientsOrigin,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      tenantId: tenantA,
+      packageIds: ["content-retainer"],
+    }),
+  });
+  expect(clientsWrite.status).toBe(403);
+  expect((await clientsWrite.json()).error.message).toBe(
+    "Origin is not allowed",
+  );
+  expect(
+    (await store.readAssignment(customerA)).packages.map((item) => item.id),
+  ).toEqual(["content-retainer", "meta-ads-management"]);
+  const customerWrite = await api.request("/catalog/assignment", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer customer-a",
+      origin,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      tenantId: tenantB,
+      packageIds: ["content-retainer"],
+    }),
+  });
+  expect(customerWrite.status).toBe(403);
+  const clientsDraft = await api.request("/catalog/draft", {
+    headers: { authorization: "Bearer agency", origin: clientsOrigin },
+  });
+  expect(clientsDraft.status).toBe(403);
+  expect((await clientsDraft.json()).error.message).toBe(
+    "Origin is not allowed",
+  );
+  await expect(
+    store.assignPackages(agency, clientsOrigin, tenantB, ["content-retainer"]),
+  ).rejects.toThrow("Origin is not allowed");
+  await expect(store.readDraft(customerA, origin)).rejects.toThrow(
+    "Access denied",
+  );
+  await expect(
+    store.assignPackages(agency, origin, tenantA, ["draft-only-package"]),
+  ).rejects.toThrow("Unknown package");
+  expect(await store.listSnapshots()).toEqual([catalogSeedSnapshot]);
 });

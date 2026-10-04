@@ -1,6 +1,11 @@
 import { humanBinding } from "@roaswell/integrations/auth";
 import { getAuth0 } from "@roaswell/integrations/auth0";
+import {
+  agencySessionOnRequest,
+  requestHostname,
+} from "@roaswell/integrations/session";
 import { auth0AppEnvironmentSchema } from "@roaswell/schemas";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 export default async function Operations() {
@@ -12,7 +17,9 @@ export default async function Operations() {
     );
   const config = auth0AppEnvironmentSchema.parse(process.env);
   const session = await getAuth0().getSession();
-  if (!session) redirect("/auth/login?returnTo=/operations");
+  const requestHost = requestHostname((await headers()).get("host"));
+  if (!session || !agencySessionOnRequest(session, requestHost))
+    redirect("/auth/login?returnTo=/operations");
   const binding = humanBinding(
     config.AUTH0_AUTH_BINDINGS,
     session.user.sub,

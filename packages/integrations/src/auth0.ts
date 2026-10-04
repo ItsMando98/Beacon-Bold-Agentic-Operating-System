@@ -1,8 +1,14 @@
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
+import type { SessionData } from "@auth0/nextjs-auth0/types";
 import {
   auth0AppEnvironmentSchema,
   liveOperationContracts,
 } from "@roaswell/schemas";
+import {
+  assertOmittedCookieDomain,
+  hostOnlyAuthCookie,
+  stampHostSession,
+} from "./host-session.js";
 
 type AgencyAuthEnv = {
   AUTH0_DOMAIN: string;
@@ -15,6 +21,12 @@ type AgencyAuthEnv = {
 
 /** Host-only cookies: Domain is omitted. SameSite is not the boundary between agency and client hosts. */
 export function agencyAuth0Options(env: AgencyAuthEnv) {
+  const transactionCookie = {
+    prefix: "beacon_agency_tx_",
+    path: "/",
+    sameSite: "lax" as const,
+  };
+  assertOmittedCookieDomain(transactionCookie);
   return {
     domain: env.AUTH0_DOMAIN,
     clientId: env.AUTH0_CLIENT_ID,
@@ -33,15 +45,11 @@ export function agencyAuth0Options(env: AgencyAuthEnv) {
       ].join(" "),
     },
     session: {
-      cookie: {
-        path: "/",
-        sameSite: "lax" as const,
-      },
+      cookie: hostOnlyAuthCookie("beacon_agency_auth"),
     },
-    transactionCookie: {
-      path: "/",
-      sameSite: "lax" as const,
-    },
+    transactionCookie,
+    beforeSessionSaved: async (session: SessionData) =>
+      stampHostSession(session, "agency"),
     enableAccessTokenEndpoint: false,
   };
 }

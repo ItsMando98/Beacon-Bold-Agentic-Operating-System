@@ -627,5 +627,171 @@
     },
     "annotations": { "readOnlyHint": false },
     "_meta": { "beacon/scopes": ["catalog:write"] }
+  },
+  {
+    "name": "get_catalog_assignment",
+    "title": "Read assigned packages",
+    "description": "Read the published packages assigned to the signed-in customer from the current catalog snapshot. An empty assignment is an empty list.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "packages": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 80,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "title": { "type": "string", "maxLength": 200 },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "points": {
+                "maxItems": 40,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+              },
+              "priceMin": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              },
+              "priceMax": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              },
+              "currency": { "type": "string", "const": "EUR" },
+              "interval": { "type": "string", "const": "month" },
+              "adSpend": {
+                "anyOf": [
+                  { "type": "null" },
+                  { "type": "string", "const": "meta" },
+                  { "type": "string", "const": "google" }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "summary",
+              "points",
+              "priceMin",
+              "priceMax",
+              "currency",
+              "interval",
+              "adSpend"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["packages"],
+      "additionalProperties": false
+    },
+    "annotations": { "readOnlyHint": true },
+    "_meta": { "beacon/scopes": ["organizations:read"] }
+  },
+  {
+    "name": "assign_catalog_packages",
+    "title": "Assign catalog packages",
+    "description": "Replace the published package ids assigned to one customer. The clients origin cannot call this.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "packageIds": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
+      },
+      "required": ["tenantId", "packageIds"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "packages": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 80,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "title": { "type": "string", "maxLength": 200 },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "points": {
+                "maxItems": 40,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+              },
+              "priceMin": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              },
+              "priceMax": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              },
+              "currency": { "type": "string", "const": "EUR" },
+              "interval": { "type": "string", "const": "month" },
+              "adSpend": {
+                "anyOf": [
+                  { "type": "null" },
+                  { "type": "string", "const": "meta" },
+                  { "type": "string", "const": "google" }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "summary",
+              "points",
+              "priceMin",
+              "priceMax",
+              "currency",
+              "interval",
+              "adSpend"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["packages"],
+      "additionalProperties": false
+    },
+    "annotations": { "readOnlyHint": false },
+    "_meta": { "beacon/scopes": ["catalog:write"] }
   }
 ]

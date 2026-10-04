@@ -107,3 +107,116 @@ test("seed adoption on PostgreSQL stays version 1 until a real publish", async (
     await admin.end();
   }
 });
+
+test("customer reads stay on the assigned snapshot and the clients origin cannot write", async () => {
+  const databaseName = `beacon_catalog_${randomUUID().replaceAll("-", "")}`;
+  const ownerUrl =
+    "postgresql://beacon_owner:local-owner-only@127.0.0.1:15432/";
+  const admin = new Client({ connectionString: `${ownerUrl}beacon` });
+  const owner = new Client({ connectionString: ownerUrl + databaseName });
+  const appUrl = `postgresql://beacon_app:local-development-only@127.0.0.1:15432/${databaseName}`;
+  const store = createPostgresCatalogStore(appUrl);
+  const tenantA = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+  const tenantB = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+  const customerA: AuthIdentity = {
+    ...agency,
+    tenantId: tenantA,
+    subject: "auth0|customer-a",
+    clientId: "customer-app",
+    surface: "customer",
+    scopes: ["organizations:read"],
+  };
+  const customerB: AuthIdentity = {
+    ...customerA,
+    tenantId: tenantB,
+    subject: "auth0|customer-b",
+  };
+  const clientsOrigin = "https://clients.beaconandbold.com";
+  await admin.connect();
+  try {
+    await admin.query(`CREATE DATABASE "${databaseName}"`);
+    await owner.connect();
+    await migrate(owner, "packages/db/migrations");
+    const assigned = await store.assignPackages(agency, origin, tenantA, [
+      "google-lead-gen-management",
+      "content-retainer",
+    ]);
+    expect(assigned.packages.map((item) => item.id)).toEqual([
+      "content-retainer",
+      "google-lead-gen-management",
+    ]);
+    expect(await store.readAssignment(customerA)).toEqual(assigned);
+    expect(await store.readAssignment(customerB)).toEqual({ packages: [] });
+    expect((await store.listSnapshots())[0]).toEqual(catalogSeedSnapshot);
+    await expect(
+      store.saveDraft(agency, clientsOrigin, {
+        pricingNote: "Clients origin must not save.",
+        offers: catalogSeedSnapshot.offers,
+        packages: catalogSeedSnapshot.packages,
+      }),
+    ).rejects.toThrow("Origin is not allowed");
+    await expect(store.readDraft(agency, clientsOrigin)).rejects.toThrow(
+      "Origin is not allowed",
+    );
+    await expect(
+      store.publish(agency, clientsOrigin, "a".repeat(64)),
+    ).rejects.toThrow("Origin is not allowed");
+    await expect(
+      store.assignPackages(agency, clientsOrigin, tenantB, [
+        "content-retainer",
+      ]),
+    ).rejects.toThrow("Origin is not allowed");
+    await expect(store.readDraft(customerA, origin)).rejects.toThrow(
+      "Access denied",
+    );
+    const edited = {
+      pricingNote: "Draft the customer must not see.",
+      offers: structuredClone(catalogSeedSnapshot.offers),
+      packages: structuredClone(catalogSeedSnapshot.packages).map((item) =>
+        item.id === "content-retainer"
+          ? { ...item, title: "Draft title hidden from the customer" }
+          : item,
+      ),
+    };
+    await store.saveDraft(agency, origin, edited);
+    expect(JSON.stringify(await store.readAssignment(customerA))).not.toContain(
+      "Draft title hidden from the customer",
+    );
+    const app = new Client({ connectionString: appUrl });
+    await app.connect();
+    expect(
+      (
+        await app.query(
+          "SELECT package_id FROM beacon.catalog_package_assignments",
+        )
+      ).rows,
+    ).toEqual([]);
+    await app.query("BEGIN");
+    await app.query("SELECT set_config('app.tenant_id', $1, true)", [tenantB]);
+    expect(
+      (
+        await app.query(
+          "SELECT package_id FROM beacon.catalog_package_assignments",
+        )
+      ).rows,
+    ).toEqual([]);
+    await app.query("ROLLBACK");
+    await app.query("BEGIN");
+    await app.query("SELECT set_config('app.tenant_id', $1, true)", [tenantA]);
+    expect(
+      (
+        await app.query(
+          "SELECT package_id FROM beacon.catalog_package_assignments ORDER BY package_id",
+        )
+      ).rows.map((row) => row.package_id),
+    ).toEqual(["content-retainer", "google-lead-gen-management"]);
+    await app.query("ROLLBACK");
+    await app.end();
+    expect(await store.readSnapshot()).toEqual(catalogSeedSnapshot);
+  } finally {
+    await store.close();
+    await owner.end().catch(() => undefined);
+    await admin.query(`DROP DATABASE IF EXISTS "${databaseName}"`);
+    await admin.end();
+  }
+});

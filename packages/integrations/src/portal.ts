@@ -1,11 +1,22 @@
 import { Auth0Client } from "@auth0/nextjs-auth0/server";
+import type { SessionData } from "@auth0/nextjs-auth0/types";
 import {
   accessOperationContracts,
   auth0PortalEnvironmentSchema,
   wireOrganizationSchema,
 } from "@roaswell/schemas";
+import {
+  assertOmittedCookieDomain,
+  hostOnlyAuthCookie,
+  stampHostSession,
+} from "./host-session.js";
 export function portalAuth0Options(input: Record<string, string | undefined>) {
   const env = auth0PortalEnvironmentSchema.parse(input);
+  const transactionCookie = {
+    prefix: "roaswell_portal_tx_",
+    sameSite: "lax" as const,
+  };
+  assertOmittedCookieDomain(transactionCookie);
   return {
     domain: env.AUTH0_DOMAIN,
     clientId: env.PORTAL_AUTH0_CLIENT_ID,
@@ -22,16 +33,11 @@ export function portalAuth0Options(input: Record<string, string | undefined>) {
       ].join(" "),
     },
     session: {
-      cookie: {
-        name: "roaswell_portal_session",
-        sameSite: "lax" as const,
-        httpOnly: true,
-      },
+      cookie: hostOnlyAuthCookie("roaswell_portal_session"),
     },
-    transactionCookie: {
-      prefix: "roaswell_portal_tx_",
-      sameSite: "lax" as const,
-    },
+    transactionCookie,
+    beforeSessionSaved: async (session: SessionData) =>
+      stampHostSession(session, "customer"),
     signInReturnToPath: "/workspace",
     enableAccessTokenEndpoint: false,
   };
