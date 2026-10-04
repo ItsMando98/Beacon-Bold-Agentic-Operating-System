@@ -20,4 +20,9 @@ infra/**/*.tfstate*
 infra/**/*.tfplan
 infra/**/*.tfvars
 !infra/**/*.tfvars.example
+.cursor/skills/
+.cursor/agents/
+.cursor/hooks.json
+.cursor/hooks/
+.grok/
 
