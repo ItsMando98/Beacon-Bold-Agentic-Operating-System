@@ -91,6 +91,34 @@ jobs:
       group: vps-staging-deploy
       cancel-in-progress: false
     steps:
+      - name: Require commit-bound approval
+        shell: bash
+        env:
+          APPROVAL_REFERENCE: ${{ vars.STAGING_APPROVAL_REFERENCE }}
+        run: |
+          set -euo pipefail
+          sha="${GITHUB_SHA:-}"
+          reference="${APPROVAL_REFERENCE:-}"
+          reference="${reference#"${reference%%[![:space:]]*}"}"
+          reference="${reference%"${reference##*[![:space:]]}"}"
+          refuse() {
+            printf '%s\n' "$1" >&2
+            exit 1
+          }
+          if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            refuse "VPS deploy refused before SSH: GITHUB_SHA is not a 40-character lowercase commit id. No SSH connection was opened."
+          fi
+          case "$reference" in
+            "$sha" | "$sha"[!0-9a-f]* | *[!0-9a-f]"$sha" | *[!0-9a-f]"$sha"[!0-9a-f]*) ;;
+            *)
+              october=""
+              if [ "$reference" = "founder-request-2026-10-01-existing-vps-no-new-paid-services" ]; then
+                october=" Reference founder-request-2026-10-01-existing-vps-no-new-paid-services approves using the existing VPS and not buying new paid services. It does not name this commit."
+              fi
+              refuse "VPS deploy refused before SSH: approval does not name commit ${sha}. A non-empty approval string is not authorization for this SHA.${october} No SSH connection was opened."
+              ;;
+          esac
+          printf '%s\n' "VPS deploy allowed: approval names commit ${sha}."
       - uses: actions/download-artifact@v4
         with:
           name: vps-images-${{ github.sha }}
@@ -100,10 +128,8 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
-          APPROVAL_REFERENCE: ${{ vars.STAGING_APPROVAL_REFERENCE }}
         run: |
           set -euo pipefail
-          test -n "$APPROVAL_REFERENCE"
           umask 077
           mkdir -p ~/.ssh
           printf '%s\n' "$VPS_DEPLOY_KEY" > ~/.ssh/beacon_deploy

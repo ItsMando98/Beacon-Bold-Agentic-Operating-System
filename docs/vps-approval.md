@@ -18,3 +18,5 @@ Der Gründer hat zusätzliches Staging auf dem vorhandenen VPS unter Erhalt best
 Der Gründer hat ausdrücklich zugestimmt: „Ja, den begrenzten CI-Zugang einrichten“. Ein eigener, ausschließlich auf Deploy/Backup beschränkter SSH-Schlüssel ist eingerichtet und als GitHub-Actions-Secret gespeichert. Die echte SSH-Abnahme verweigert allgemeine Shell-Befehle. VPS-Adresse und gepinnter Hostschlüssel sind ebenfalls hinterlegt. Private Clerk-Schlüssel und der ursprüngliche administrative Root-Schlüssel werden nicht nach GitHub übertragen. Der private Backup-Wiederherstellungsschlüssel bleibt ausschließlich lokal.
 
 Gate 0 bleibt unabhängig von dieser Autorisierung offen bis zum echten Merge-Deploy mit Migration, Mandantentrennung, HTTPS und externem Backup-/Restore-Nachweis. Der Branch-Schutz ist inzwischen aktiviert und ein fehlerhafter Merge wurde tatsächlich verweigert.
+
+Diese Freigabe nennt keinen Commit. Sie erlaubt die Nutzung des vorhandenen VPS ohne neue bezahlte Dienste. Sie ist keine Deploy-Freigabe für einen späteren SHA. Ein VPS-Deploy darf nur laufen, wenn `STAGING_APPROVAL_REFERENCE` genau den deployten Commit als eigenes Token nennt.
