@@ -4,7 +4,7 @@ import {
   auth0PortalEnvironmentSchema,
 } from "@roaswell/schemas/auth";
 import { z } from "zod";
-export type Service = "web" | "app" | "portal" | "api" | "worker";
+export type Service = "web" | "app" | "portal" | "api" | "worker" | "agency";
 export const baseEnvironment = z.object({
   APP_ENV: z.enum(["development", "staging", "production"]),
   SERVICE_MODE: z.enum(["mock", "live"]),
@@ -25,6 +25,7 @@ const httpsUrl = z
   );
 const serviceEnvironment = {
   web: z.object({ PUBLIC_API_URL: z.url() }),
+  agency: z.object({ PUBLIC_API_URL: z.url() }),
   app: z.object({
     PUBLIC_API_URL: z.url(),
   }),
@@ -100,6 +101,8 @@ export function loadEnvironment(
           ? 3001
           : service === "portal"
             ? 3003
-            : 3000),
+            : service === "agency"
+              ? 3004
+              : 3000),
   };
 }

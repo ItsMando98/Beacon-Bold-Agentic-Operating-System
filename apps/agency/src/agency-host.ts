@@ -1,7 +1,6 @@
 import {
   agencyHost,
   agencySessionOnRequest,
-  clientsHost,
   planHostSession,
   type SessionSameSite,
   stampHostSession,
@@ -25,8 +24,10 @@ export function agencyShellAllowsSession(
 
 /**
  * Decide the catalog shell's host gate.
- * The clients host is refused. On the agency host, a known subject receives
- * a host-only session cookie. No catalog route is implemented here.
+ * Only agency.beaconandbold.com may continue. Every other host is refused,
+ * including a staging name, an IP, localhost, workers.dev, and pages.dev.
+ * On the agency host, a known subject receives a host-only session cookie.
+ * No catalog route is implemented here.
  */
 export function bindAgencyHost(input: {
   requestHost: string;
@@ -36,10 +37,8 @@ export function bindAgencyHost(input: {
   now?: number;
   sameSite?: SessionSameSite;
 }): { action: "reject" } | { action: "continue"; setCookie?: string } {
-  if (input.requestHost === clientsHost) return { action: "reject" };
-  if (input.requestHost !== agencyHost || !input.secret) {
-    return { action: "continue" };
-  }
+  if (input.requestHost !== agencyHost) return { action: "reject" };
+  if (!input.secret) return { action: "continue" };
   return planHostSession({
     app: "agency",
     requestHost: input.requestHost,

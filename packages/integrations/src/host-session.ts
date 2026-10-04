@@ -218,13 +218,9 @@ export function agencySessionOnRequest(
     stamped.beaconHost === clientsHost
   )
     return false;
-  if (requestHost === agencyHost) {
-    return (
-      stamped.beaconSurface === "agency" && stamped.beaconHost === agencyHost
-    );
-  }
+  if (requestHost !== agencyHost) return false;
   return (
-    stamped.beaconSurface === "agency" || stamped.beaconSurface === undefined
+    stamped.beaconSurface === "agency" && stamped.beaconHost === agencyHost
   );
 }
 

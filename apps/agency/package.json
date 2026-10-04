@@ -10,6 +10,7 @@
     "start": "next start --port 3004"
   },
   "dependencies": {
+    "@roaswell/config": "workspace:*",
     "@roaswell/ui": "workspace:*",
     "next": "16.3.7",
     "react": "19.3.0",

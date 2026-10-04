@@ -11,7 +11,8 @@ import time
 import urllib.request
 
 ROOT = pathlib.Path('/opt/beacon-bold-staging')
-SERVICES = ('api', 'app', 'web', 'migrate')
+SERVICES = ('api', 'app', 'web', 'migrate', 'agency')
+RUNTIME = ('api', 'app', 'web', 'agency')
 REPO = 'ItsMando98/Beacon-Bold-Agentic-Operating-System'
 
 def run(args, env=None, capture=True):
@@ -28,6 +29,26 @@ def environment(release):
 
 def compose(release, *args):
     return run(['docker', 'compose', '-p', 'beacon-bold-staging', '-f', str(ROOT / 'compose.yaml'), *args], environment(release))
+
+def image_exists(service, release):
+    """True when this release tag is already loaded. A missing tag is not an error."""
+    if service != 'agency' or not re.fullmatch('[a-f0-9]{40}', release or ''):
+        return False
+    try:
+        result = subprocess.run(
+            ['docker', 'image', 'inspect', f'beacon-bold-agency:{release}'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+def runtime_for(release):
+    if image_exists('agency', release):
+        return RUNTIME
+    return ('api', 'app', 'web')
 
 def validate_archive(archive, release):
     expected = {f'beacon-bold-{service}:{release}' for service in SERVICES}
@@ -52,7 +73,7 @@ def validate_archive(archive, release):
                 raise RuntimeError('Unexpected image platform')
             if config.get('config', {}).get('Labels', {}).get('org.opencontainers.image.revision') != release:
                 raise RuntimeError('Image revision mismatch')
-        if len(manifest) != 4 or len(tags) != 4 or set(tags) != expected:
+        if len(manifest) != len(SERVICES) or len(tags) != len(SERVICES) or set(tags) != expected:
             raise RuntimeError('Only fixed staging image names are accepted')
 
 def accept_https():
@@ -101,7 +122,7 @@ def deploy(archive, release, verify_main=True):
     compose(release, 'run', '--rm', '--no-deps', 'migrate')
     compose(release, 'run', '--rm', '--no-deps', 'acceptance')
     try:
-        compose(release, 'up', '-d', '--wait', '--wait-timeout', '180', 'api', 'app', 'web')
+        compose(release, 'up', '-d', '--wait', '--wait-timeout', '180', *RUNTIME)
         # Traefik requests a new certificate asynchronously; never accept invalid TLS.
         for attempt in range(18):
             try:
@@ -114,9 +135,15 @@ def deploy(archive, release, verify_main=True):
         (ROOT / 'current.json').write_text(json.dumps({'release': release, 'https': True}))
     except Exception:
         if previous:
-            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', 'api', 'app', 'web')
+            # Older releases have no agency image. Starting it would fail the restore.
+            # The failed release may already have started that container; remove it
+            # before restoring the previous apps so it cannot keep running.
+            services = runtime_for(previous['release'])
+            if 'agency' not in services:
+                compose(release, 'rm', '--stop', '--force', 'agency')
+            compose(previous['release'], 'up', '-d', '--wait', '--wait-timeout', '180', *services)
         else:
-            compose(release, 'stop', 'api', 'app', 'web')
+            compose(release, 'stop', *RUNTIME)
         raise RuntimeError('Deployment failed; previous application state restored')
 
 def main():

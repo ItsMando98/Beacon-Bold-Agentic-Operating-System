@@ -160,6 +160,22 @@ services:
       traefik.http.routers.beacon-bold-staging-web.entrypoints: https
       traefik.http.routers.beacon-bold-staging-web.tls.certresolver: cloudflare
       traefik.http.services.beacon-bold-staging-web.loadbalancer.server.port: "3000"
+  agency:
+    <<: *app
+    image: beacon-bold-agency:${BEACON_RELEASE:?}
+    mem_limit: 512m
+    cpus: 0.375
+    networks: [proxy]
+    environment:
+      APP_ENV: staging
+      SERVICE_MODE: live
+      PUBLIC_API_URL: https://staging.beaconandbold.com
+    tmpfs: ["/tmp:size=64m,mode=1777", "/runtime/apps/agency/.next/cache:size=32m,uid=1000,gid=1000"]
+    healthcheck:
+      test: [CMD, node, "-e", "const http=require('node:http');const req=http.request({host:'127.0.0.1',port:3004,path:'/',setHost:false,headers:{host:'agency.beaconandbold.com'}},res=>{res.resume();process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.end()"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 networks:
   proxy: {external: true, name: coolify}
   data: {internal: true}

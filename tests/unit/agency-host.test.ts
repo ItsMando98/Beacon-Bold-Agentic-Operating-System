@@ -71,6 +71,40 @@ test("the catalog shell binds the agency host and refuses the clients host", () 
   ).toBe(false);
 });
 
+test("staging start does not accept another name as the agency host", () => {
+  const refusedHosts = [
+    "agency.staging.beaconandbold.com",
+    "staging.beaconandbold.com",
+    "127.0.0.1",
+    "localhost",
+    "0.0.0.0",
+    "agency.example.workers.dev",
+    "beaconandbold.pages.dev",
+  ];
+  const stamped = stampAgencyHostSession({ user: { sub: "auth0|agency" } });
+  for (const requestHost of refusedHosts) {
+    const decision = bindAgencyHost({
+      requestHost,
+      cookieHeader: null,
+      secret,
+      subject: "auth0|agency",
+      now,
+    });
+    expect(decision).toEqual({ action: "reject" });
+    expect(agencyShellAllowsSession(stamped, requestHost)).toBe(false);
+    expect(agencyShellAllowsSession(stamped, agencyHost)).toBe(true);
+    const sealed = sealHostSession({
+      surface: "agency",
+      subject: "auth0|agency",
+      secret,
+      now,
+    });
+    expect(sealed.setCookie.toLowerCase()).not.toContain("domain=");
+    expect(sealed.session.host).toBe(agencyHost);
+    expect(sealed.session.host).not.toBe(requestHost);
+  }
+});
+
 test("the agency host binding lives on the catalog shell, not the operations app", () => {
   const proxy = readFileSync("apps/agency/proxy.ts", "utf8");
   const shell = readFileSync("apps/agency/src/agency-host.ts", "utf8");
@@ -80,6 +114,9 @@ test("the agency host binding lives on the catalog shell, not the operations app
     "utf8",
   );
   expect(proxy).toContain("bindAgencyHost");
+  expect(proxy).toContain(
+    'hostname: requestHostname(request.headers.get("host"))',
+  );
   expect(proxy).not.toContain("/catalog");
   expect(shell).not.toContain("/catalog");
   expect(operationsProxy).not.toContain("bindAgencyHost");
