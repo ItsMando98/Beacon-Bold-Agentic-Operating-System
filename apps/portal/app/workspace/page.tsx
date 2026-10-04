@@ -2,6 +2,11 @@ import {
   getPortalAuth0,
   readPortalOrganization,
 } from "@roaswell/integrations/portal";
+import {
+  clientSessionOnRequest,
+  requestHostname,
+} from "@roaswell/integrations/session";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 export default async function Workspace() {
@@ -9,7 +14,9 @@ export default async function Workspace() {
     return <h1>Anmeldung noch nicht eingerichtet</h1>;
   const auth = getPortalAuth0();
   const session = await auth.getSession();
-  if (!session) redirect("/auth/login?returnTo=/workspace");
+  const requestHost = requestHostname((await headers()).get("host"));
+  if (!session || !clientSessionOnRequest(session, requestHost))
+    redirect("/auth/login?returnTo=/workspace");
   let organization: Awaited<ReturnType<typeof readPortalOrganization>>;
   try {
     const { token } = await auth.getAccessToken();

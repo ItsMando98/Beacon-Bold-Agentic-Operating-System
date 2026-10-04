@@ -12,6 +12,7 @@ import {
 import {
   assertAgencyCatalogActor,
   assertAgencyCatalogOrigin,
+  assertCustomerCatalogReader,
   CatalogError,
   type CatalogStore,
 } from "@roaswell/integrations/catalog";
@@ -104,7 +105,13 @@ export type ApiDependencies = {
   resolveTenant?: (request: Request) => Promise<string | undefined>;
   catalog?: Pick<
     CatalogStore,
-    "readSnapshot" | "readDraft" | "saveDraft" | "publish" | "close"
+    | "readSnapshot"
+    | "readDraft"
+    | "readAssignment"
+    | "assignPackages"
+    | "saveDraft"
+    | "publish"
+    | "close"
   >;
 };
 export function createApp(dependencies: ApiDependencies = {}) {
@@ -165,7 +172,6 @@ export function createApp(dependencies: ApiDependencies = {}) {
     context: ApiContext,
     next: () => Promise<void>,
     scope: (typeof catalogScopes)[keyof typeof catalogScopes],
-    write: boolean,
   ) => {
     if (!dependencies.authenticate) {
       context.header("WWW-Authenticate", "Bearer");
@@ -179,27 +185,45 @@ export function createApp(dependencies: ApiDependencies = {}) {
     const identity = await dependencies.authenticate(context.req.raw);
     assertAgencyCatalogActor(identity, scope);
     context.set("identity", identity);
-    if (write) assertAgencyCatalogOrigin(context.req.header("origin") ?? null);
+    assertAgencyCatalogOrigin(context.req.header("origin") ?? null);
     await next();
   };
-  const [readCatalog, readDraft, saveDraft, publishCatalog] =
-    catalogOperationContracts;
+  const [
+    readCatalog,
+    readDraft,
+    saveDraft,
+    publishCatalog,
+    readAssignment,
+    assignPackages,
+  ] = catalogOperationContracts;
   app.use(readDraft.path, (context, next) =>
     catalogGuard(
       context,
       next,
       context.req.method === "POST" ? catalogScopes.write : catalogScopes.read,
-      context.req.method === "POST",
     ),
   );
   app.use(publishCatalog.path, (context, next) =>
-    catalogGuard(
-      context,
-      next,
-      catalogScopes.write,
-      context.req.method === "POST",
-    ),
+    catalogGuard(context, next, catalogScopes.write),
   );
+  app.use(assignPackages.path, async (context, next) => {
+    if (!dependencies.authenticate) {
+      context.header("WWW-Authenticate", "Bearer");
+      return errorResponse(
+        context,
+        "UNAUTHORIZED",
+        "Authentication required",
+        401,
+      );
+    }
+    const identity = await dependencies.authenticate(context.req.raw);
+    context.set("identity", identity);
+    if (context.req.method === "POST") {
+      assertAgencyCatalogActor(identity, catalogScopes.write);
+      assertAgencyCatalogOrigin(context.req.header("origin") ?? null);
+    } else assertCustomerCatalogReader(identity);
+    await next();
+  });
   const requireCatalog = () => {
     if (!dependencies.catalog) throw new Error("Catalog store unavailable");
     return dependencies.catalog;
@@ -244,7 +268,10 @@ export function createApp(dependencies: ApiDependencies = {}) {
     async (context) =>
       context.json(
         readDraft.output.parse(
-          await requireCatalog().readDraft(requireIdentity(context)),
+          await requireCatalog().readDraft(
+            requireIdentity(context),
+            context.req.header("origin") ?? null,
+          ),
         ),
         200,
       ),
@@ -310,6 +337,61 @@ export function createApp(dependencies: ApiDependencies = {}) {
         ),
         200,
       ),
+  );
+  app.openapi(
+    createRoute({
+      method: readAssignment.method,
+      path: readAssignment.path,
+      operationId: readAssignment.operationId,
+      responses: {
+        200: {
+          description: readAssignment.description,
+          content: { "application/json": { schema: readAssignment.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) =>
+      context.json(
+        readAssignment.output.parse(
+          await requireCatalog().readAssignment(requireIdentity(context)),
+        ),
+        200,
+      ),
+  );
+  app.openapi(
+    createRoute({
+      method: assignPackages.method,
+      path: assignPackages.path,
+      operationId: assignPackages.operationId,
+      request: {
+        body: {
+          required: true,
+          content: { "application/json": { schema: assignPackages.input } },
+        },
+      },
+      responses: {
+        200: {
+          description: assignPackages.description,
+          content: { "application/json": { schema: assignPackages.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) => {
+      const body = context.req.valid("json");
+      return context.json(
+        assignPackages.output.parse(
+          await requireCatalog().assignPackages(
+            requireIdentity(context),
+            context.req.header("origin") ?? null,
+            body.tenantId,
+            body.packageIds,
+          ),
+        ),
+        200,
+      );
+    },
   );
   const organization = accessOperationContracts[0];
   app.openapi(

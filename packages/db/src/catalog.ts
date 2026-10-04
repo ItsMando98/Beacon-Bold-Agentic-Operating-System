@@ -2,13 +2,16 @@ import { createHash } from "node:crypto";
 import {
   type AuthIdentity,
   agencyCatalogOrigin,
+  type CatalogAssignment,
   type CatalogDraftBody,
   type CatalogSnapshot,
+  catalogAssignmentSchema,
   catalogDraftBodySchema,
   catalogScopes,
   catalogSnapshotSchema,
   type OfferDraft,
   offerDraftSchema,
+  tenantContextSchema,
 } from "@roaswell/schemas";
 import { Pool, type PoolClient } from "pg";
 import rawSeed from "./catalog-snapshot.v1.json";
@@ -65,6 +68,55 @@ export function assertAgencyCatalogActor(
 export function assertAgencyCatalogOrigin(origin: string | null) {
   if (origin !== agencyCatalogOrigin)
     throw new CatalogError("Origin is not allowed", 403);
+}
+
+export function assertCustomerCatalogReader(identity: AuthIdentity) {
+  if (
+    identity.kind !== "human" ||
+    identity.surface !== "customer" ||
+    !identity.scopes.includes("organizations:read")
+  )
+    throw new CatalogError("Access denied", 403);
+}
+
+function parseAssignmentTenant(tenantId: string) {
+  const parsed = tenantContextSchema.safeParse({ tenantId });
+  if (!parsed.success) throw new CatalogError("Invalid request", 400);
+  return parsed.data.tenantId;
+}
+
+function parsePackageIds(packageIds: readonly string[]) {
+  if (packageIds.length > 100) throw new CatalogError("Invalid request", 400);
+  const seen = new Set<string>();
+  for (const id of packageIds) {
+    if (
+      !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) ||
+      id.length > 80 ||
+      seen.has(id)
+    )
+      throw new CatalogError("Invalid request", 400);
+    seen.add(id);
+  }
+  return [...seen];
+}
+
+function packagesFor(
+  snapshot: CatalogSnapshot,
+  packageIds: ReadonlySet<string>,
+): CatalogAssignment {
+  return catalogAssignmentSchema.parse({
+    packages: snapshot.packages.filter((item) => packageIds.has(item.id)),
+  });
+}
+
+function assertKnownPackages(
+  snapshot: CatalogSnapshot,
+  packageIds: readonly string[],
+) {
+  const known = new Set(snapshot.packages.map((item) => item.id));
+  for (const id of packageIds) {
+    if (!known.has(id)) throw new CatalogError("Unknown package", 400);
+  }
 }
 
 export function assertCatalogPublishable(body: CatalogDraftBody) {
@@ -131,7 +183,14 @@ function toDraft(revision: string, body: CatalogDraftBody): OfferDraft {
 
 export interface CatalogStore {
   readSnapshot(): Promise<CatalogSnapshot>;
-  readDraft(identity: AuthIdentity): Promise<OfferDraft>;
+  readDraft(identity: AuthIdentity, origin: string | null): Promise<OfferDraft>;
+  readAssignment(identity: AuthIdentity): Promise<CatalogAssignment>;
+  assignPackages(
+    identity: AuthIdentity,
+    origin: string | null,
+    tenantId: string,
+    packageIds: readonly string[],
+  ): Promise<CatalogAssignment>;
   saveDraft(
     identity: AuthIdentity,
     origin: string | null,
@@ -153,6 +212,7 @@ export function createMemoryCatalogStore(options?: {
   const now = options?.now ?? (() => new Date().toISOString());
   const snapshots: StoredSnapshot[] = [];
   const revisions = new Map<string, CatalogDraftBody>();
+  const assignments = new Map<string, Set<string>>();
   let currentRevision: string | null = null;
   let chain: Promise<unknown> = Promise.resolve();
   const exclusive = <T>(operation: () => T) => {
@@ -191,14 +251,35 @@ export function createMemoryCatalogStore(options?: {
           .map(toSnapshot),
       ),
     adoptSeed: () => exclusive(() => adopt()),
-    readDraft: (identity) =>
+    readDraft: (identity, origin) =>
       exclusive(() => {
         assertAgencyCatalogActor(identity, catalogScopes.read);
+        assertAgencyCatalogOrigin(origin);
         if (!currentRevision)
           throw new CatalogError("Offer draft not found", 404);
         const body = revisions.get(currentRevision);
         if (!body) throw new CatalogError("Offer draft not found", 404);
         return toDraft(currentRevision, body);
+      }),
+    readAssignment: (identity) =>
+      exclusive(() => {
+        assertCustomerCatalogReader(identity);
+        return packagesFor(
+          current(),
+          assignments.get(identity.tenantId) ?? new Set(),
+        );
+      }),
+    assignPackages: (identity, origin, tenantId, packageIds) =>
+      exclusive(() => {
+        assertAgencyCatalogActor(identity, catalogScopes.write);
+        assertAgencyCatalogOrigin(origin);
+        const tenant = parseAssignmentTenant(tenantId);
+        const ids = parsePackageIds(packageIds);
+        const snapshot = current();
+        assertKnownPackages(snapshot, ids);
+        const allowed = new Set(ids);
+        assignments.set(tenant, allowed);
+        return packagesFor(snapshot, allowed);
       }),
     saveDraft: (identity, origin, body) =>
       exclusive(() => {
@@ -314,8 +395,9 @@ export function createPostgresCatalogStore(
       );
       return result.rows.map(snapshotFromRow);
     },
-    readDraft: async (identity) => {
+    readDraft: async (identity, origin) => {
       assertAgencyCatalogActor(identity, catalogScopes.read);
+      assertAgencyCatalogOrigin(origin);
       const result = await pool.query<{
         revision: string;
         pricing_note: string;
@@ -338,7 +420,60 @@ export function createPostgresCatalogStore(
         }),
       );
     },
-    saveDraft: (identity, origin, body) => {
+    readAssignment: async (identity) => {
+      assertCustomerCatalogReader(identity);
+      return withClient(pool, async (client) => {
+        await client.query("SELECT set_config('app.tenant_id', $1, true)", [
+          identity.tenantId,
+        ]);
+        const snapshot = await client.query<SnapshotRow>(
+          `SELECT version, published_at, pricing_note, offers, packages
+           FROM beacon.catalog_snapshots
+           ORDER BY version DESC
+           LIMIT 1`,
+        );
+        const row = snapshot.rows[0];
+        if (!row) throw new CatalogError("Catalog snapshot missing", 500);
+        const assigned = await client.query<{ package_id: string }>(
+          "SELECT package_id FROM beacon.catalog_package_assignments",
+        );
+        return packagesFor(
+          snapshotFromRow(row),
+          new Set(assigned.rows.map((item) => item.package_id)),
+        );
+      });
+    },
+    assignPackages: async (identity, origin, tenantId, packageIds) => {
+      assertAgencyCatalogActor(identity, catalogScopes.write);
+      assertAgencyCatalogOrigin(origin);
+      const tenant = parseAssignmentTenant(tenantId);
+      const ids = parsePackageIds(packageIds);
+      return withClient(pool, async (client) => {
+        const snapshot = await client.query<SnapshotRow>(
+          `SELECT version, published_at, pricing_note, offers, packages
+           FROM beacon.catalog_snapshots
+           ORDER BY version DESC
+           LIMIT 1`,
+        );
+        const row = snapshot.rows[0];
+        if (!row) throw new CatalogError("Catalog snapshot missing", 500);
+        const current = snapshotFromRow(row);
+        assertKnownPackages(current, ids);
+        await client.query("SELECT set_config('app.tenant_id', $1, true)", [
+          tenant,
+        ]);
+        await client.query("DELETE FROM beacon.catalog_package_assignments");
+        for (const id of ids) {
+          await client.query(
+            `INSERT INTO beacon.catalog_package_assignments (tenant_id, package_id)
+             VALUES ($1, $2)`,
+            [tenant, id],
+          );
+        }
+        return packagesFor(current, new Set(ids));
+      });
+    },
+    saveDraft: async (identity, origin, body) => {
       assertAgencyCatalogActor(identity, catalogScopes.write);
       assertAgencyCatalogOrigin(origin);
       const parsed = parseDraft(body);
@@ -364,7 +499,7 @@ export function createPostgresCatalogStore(
         return toDraft(revision, parsed);
       });
     },
-    publish: (identity, origin, revision) => {
+    publish: async (identity, origin, revision) => {
       assertAgencyCatalogActor(identity, catalogScopes.write);
       assertAgencyCatalogOrigin(origin);
       if (!/^[a-f0-9]{64}$/.test(revision))

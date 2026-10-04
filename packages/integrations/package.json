@@ -9,7 +9,8 @@
     "./catalog": "./src/catalog.ts",
     "./auth": "./src/auth.ts",
     "./auth0": "./src/auth0.ts",
-    "./portal": "./src/portal.ts"
+    "./portal": "./src/portal.ts",
+    "./session": "./src/host-session.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

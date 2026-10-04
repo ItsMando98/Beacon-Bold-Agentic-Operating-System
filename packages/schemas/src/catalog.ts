@@ -90,6 +90,23 @@ export const publishCatalogInputSchema = z
   })
   .strict();
 
+export const catalogAssignmentSchema = z
+  .object({
+    packages: packagesSchema,
+  })
+  .strict();
+
+export const assignCatalogPackagesInputSchema = z
+  .object({
+    tenantId: z.uuid(),
+    packageIds: z.array(catalogIdSchema).max(100),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (new Set(value.packageIds).size !== value.packageIds.length)
+      ctx.addIssue({ code: "custom", message: "Duplicate package id" });
+  });
+
 const emptyInput = z.object({}).strict();
 
 export const catalogOperationContracts = [
@@ -151,6 +168,35 @@ export const catalogOperationContracts = [
     input: publishCatalogInputSchema,
     output: catalogSnapshotSchema,
   }),
+  defineContract({
+    operationId: "getCatalogAssignment",
+    toolName: "get_catalog_assignment",
+    method: "get",
+    path: "/catalog/assignment",
+    title: "Read assigned packages",
+    description:
+      "Read the published packages assigned to the signed-in customer from the current catalog snapshot. An empty assignment is an empty list.",
+    successStatus: 200,
+    scopes: ["organizations:read"],
+    readOnly: true,
+    input: emptyInput,
+    output: catalogAssignmentSchema,
+  }),
+  defineContract({
+    operationId: "assignCatalogPackages",
+    toolName: "assign_catalog_packages",
+    method: "post",
+    path: "/catalog/assignment",
+    title: "Assign catalog packages",
+    description:
+      "Replace the published package ids assigned to one customer. The clients origin cannot call this.",
+    successStatus: 200,
+    scopes: [catalogScopes.write],
+    readOnly: false,
+    requiresIdempotencyKey: false,
+    input: assignCatalogPackagesInputSchema,
+    output: catalogAssignmentSchema,
+  }),
 ] as const;
 
 export type CatalogOffer = z.output<typeof catalogOfferSchema>;
@@ -158,3 +204,4 @@ export type CatalogPackage = z.output<typeof catalogPackageSchema>;
 export type CatalogDraftBody = z.output<typeof catalogDraftBodySchema>;
 export type OfferDraft = z.output<typeof offerDraftSchema>;
 export type CatalogSnapshot = z.output<typeof catalogSnapshotSchema>;
+export type CatalogAssignment = z.output<typeof catalogAssignmentSchema>;

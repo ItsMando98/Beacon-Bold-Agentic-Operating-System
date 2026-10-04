@@ -465,6 +465,137 @@
         "security": [{ "bearerAuth": [] }]
       }
     },
+    "/catalog/assignment": {
+      "get": {
+        "operationId": "getCatalogAssignment",
+        "summary": "Read assigned packages",
+        "description": "Read the published packages assigned to the signed-in customer from the current catalog snapshot. An empty assignment is an empty list.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/getCatalogAssignmentOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient scope",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "x-beacon-scopes": ["organizations:read"],
+        "security": [{ "bearerAuth": [] }]
+      },
+      "post": {
+        "operationId": "assignCatalogPackages",
+        "summary": "Assign catalog packages",
+        "description": "Replace the published package ids assigned to one customer. The clients origin cannot call this.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/assignCatalogPackagesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/assignCatalogPackagesOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient scope",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "x-beacon-scopes": ["catalog:write"],
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
     "/openapi.json": {
       "get": {
         "operationId": "getOpenApi",
@@ -1898,6 +2029,166 @@
           "offers",
           "packages"
         ],
+        "additionalProperties": false
+      },
+      "getCatalogAssignmentInput": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "getCatalogAssignmentOutput": {
+        "type": "object",
+        "properties": {
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["packages"],
+        "additionalProperties": false
+      },
+      "assignCatalogPackagesInput": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "packageIds": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 80,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        },
+        "required": ["tenantId", "packageIds"],
+        "additionalProperties": false
+      },
+      "assignCatalogPackagesOutput": {
+        "type": "object",
+        "properties": {
+          "packages": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "title": { "type": "string", "maxLength": 200 },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "points": {
+                  "maxItems": 40,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "priceMin": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "priceMax": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "currency": { "type": "string", "const": "EUR" },
+                "interval": { "type": "string", "const": "month" },
+                "adSpend": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "type": "string", "const": "meta" },
+                    { "type": "string", "const": "google" }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "summary",
+                "points",
+                "priceMin",
+                "priceMax",
+                "currency",
+                "interval",
+                "adSpend"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["packages"],
         "additionalProperties": false
       },
       "getOpenApiOutput": {
