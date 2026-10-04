@@ -1,4 +1,4 @@
-# ADR 0018: VPS-Deploy nur mit commit-gebundener Freigabe
+# ADR 0020: VPS-Deploy nur mit commit-gebundener Freigabe
 
 Status: entschieden für den CI-Job `vps-staging-deploy`.
 
