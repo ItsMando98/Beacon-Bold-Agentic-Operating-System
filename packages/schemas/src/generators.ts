@@ -155,14 +155,18 @@ export function generateOpenApi(
               required: true,
               content: { "application/json": { schema: input } },
             },
-            parameters: [
-              {
-                name: "Idempotency-Key",
-                in: "header",
-                required: true,
-                schema: generateJsonSchema(idempotencyKeySchema, "input"),
-              },
-            ],
+            ...(contract.requiresIdempotencyKey === false
+              ? {}
+              : {
+                  parameters: [
+                    {
+                      name: "Idempotency-Key",
+                      in: "header",
+                      required: true,
+                      schema: generateJsonSchema(idempotencyKeySchema, "input"),
+                    },
+                  ],
+                }),
           }
         : { parameters }),
       responses,

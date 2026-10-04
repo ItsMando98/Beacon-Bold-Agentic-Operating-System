@@ -36,5 +36,6 @@ export const migrationEnvironmentSchema = z
   });
 export * from "./auth.js";
 export * from "./authorization.js";
+export * from "./catalog.js";
 export * from "./live-contracts.js";
 export * from "./workflow.js";

@@ -5,6 +5,10 @@ import {
   createPostgresCustomerStore,
 } from "@roaswell/integrations/api";
 import { createAuth0Authenticator } from "@roaswell/integrations/auth";
+import {
+  createMemoryCatalogStore,
+  createPostgresCatalogStore,
+} from "@roaswell/integrations/catalog";
 import { auth0ApiEnvironmentSchema } from "@roaswell/schemas";
 import { createApp } from "./app";
 
@@ -13,6 +17,9 @@ const mock = env.APP_ENV === "development" && env.SERVICE_MODE === "mock";
 const store = mock
   ? createMemoryCustomerStore()
   : createPostgresCustomerStore(process.env.DATABASE_URL ?? "");
+const catalog = mock
+  ? createMemoryCatalogStore()
+  : createPostgresCatalogStore(process.env.DATABASE_URL ?? "");
 const config =
   env.AUTH_ENABLED === "true"
     ? auth0ApiEnvironmentSchema.parse(process.env)
@@ -29,6 +36,7 @@ const authenticate = config
 const server = serve({
   fetch: createApp({
     store,
+    catalog,
     authenticate,
     ...(mock
       ? { resolveTenant: async () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" }
@@ -40,7 +48,7 @@ const server = serve({
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.on(signal, () =>
     server.close(() => {
-      void store.close().then(
+      void Promise.all([store.close(), catalog.close()]).then(
         () => process.exit(0),
         () => process.exit(1),
       );

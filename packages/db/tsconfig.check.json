@@ -8,6 +8,7 @@
     "../../tests/unit/access-model.test.ts",
     "../../tests/integration/access-model.test.ts",
     "../../tests/unit/authorization.test.ts",
-    "../../tests/integration/authorization.test.ts"
+    "../../tests/integration/authorization.test.ts",
+    "../../tests/integration/catalog.test.ts"
   ]
 }

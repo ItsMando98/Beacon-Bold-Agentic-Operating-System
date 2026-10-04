@@ -35,6 +35,8 @@ it("requires independent portal credentials and HTTPS in production", () => {
   expect(options.enableAccessTokenEndpoint).toBe(false);
   expect(options.session.cookie.name).toBe("roaswell_portal_session");
   expect(options.transactionCookie.prefix).toBe("roaswell_portal_tx_");
+  expect("domain" in options.session.cookie).toBe(false);
+  expect("domain" in options.transactionCookie).toBe(false);
 });
 it("reads only the customer resource, prevents caching and refuses redirects or invalid results", async () => {
   const organization = {

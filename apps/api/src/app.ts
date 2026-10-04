@@ -10,10 +10,18 @@ import {
   type Authenticator,
 } from "@roaswell/integrations/auth";
 import {
+  assertAgencyCatalogActor,
+  assertAgencyCatalogOrigin,
+  CatalogError,
+  type CatalogStore,
+} from "@roaswell/integrations/catalog";
+import {
   type AuthIdentity,
   accessOperationContracts,
   apiErrorSchema,
   apiSupportRoutes,
+  catalogOperationContracts,
+  catalogScopes,
   generateOpenApi,
   mutationHeadersSchema,
   operationContracts,
@@ -94,6 +102,10 @@ export type ApiDependencies = {
   authenticate?: Authenticator;
   /** Internal trusted boundary, implemented by P1-4. Never read tenant IDs from public headers. */
   resolveTenant?: (request: Request) => Promise<string | undefined>;
+  catalog?: Pick<
+    CatalogStore,
+    "readSnapshot" | "readDraft" | "saveDraft" | "publish" | "close"
+  >;
 };
 export function createApp(dependencies: ApiDependencies = {}) {
   const app = new OpenAPIHono<{ Variables: Variables }>({
@@ -149,6 +161,156 @@ export function createApp(dependencies: ApiDependencies = {}) {
       : await dependencies.store.create(command);
     return context.json(customer.output.parse(response), 201);
   });
+  const catalogGuard = async (
+    context: ApiContext,
+    next: () => Promise<void>,
+    scope: (typeof catalogScopes)[keyof typeof catalogScopes],
+    write: boolean,
+  ) => {
+    if (!dependencies.authenticate) {
+      context.header("WWW-Authenticate", "Bearer");
+      return errorResponse(
+        context,
+        "UNAUTHORIZED",
+        "Authentication required",
+        401,
+      );
+    }
+    const identity = await dependencies.authenticate(context.req.raw);
+    assertAgencyCatalogActor(identity, scope);
+    context.set("identity", identity);
+    if (write) assertAgencyCatalogOrigin(context.req.header("origin") ?? null);
+    await next();
+  };
+  const [readCatalog, readDraft, saveDraft, publishCatalog] =
+    catalogOperationContracts;
+  app.use(readDraft.path, (context, next) =>
+    catalogGuard(
+      context,
+      next,
+      context.req.method === "POST" ? catalogScopes.write : catalogScopes.read,
+      context.req.method === "POST",
+    ),
+  );
+  app.use(publishCatalog.path, (context, next) =>
+    catalogGuard(
+      context,
+      next,
+      catalogScopes.write,
+      context.req.method === "POST",
+    ),
+  );
+  const requireCatalog = () => {
+    if (!dependencies.catalog) throw new Error("Catalog store unavailable");
+    return dependencies.catalog;
+  };
+  const requireIdentity = (context: ApiContext) => {
+    const identity = context.get("identity");
+    if (!identity) throw new CatalogError("Authentication required", 401);
+    return identity;
+  };
+  app.openapi(
+    createRoute({
+      method: readCatalog.method,
+      path: readCatalog.path,
+      operationId: readCatalog.operationId,
+      responses: {
+        200: {
+          description: readCatalog.description,
+          content: { "application/json": { schema: readCatalog.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) =>
+      context.json(
+        readCatalog.output.parse(await requireCatalog().readSnapshot()),
+        200,
+      ),
+  );
+  app.openapi(
+    createRoute({
+      method: readDraft.method,
+      path: readDraft.path,
+      operationId: readDraft.operationId,
+      responses: {
+        200: {
+          description: readDraft.description,
+          content: { "application/json": { schema: readDraft.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) =>
+      context.json(
+        readDraft.output.parse(
+          await requireCatalog().readDraft(requireIdentity(context)),
+        ),
+        200,
+      ),
+  );
+  app.openapi(
+    createRoute({
+      method: saveDraft.method,
+      path: saveDraft.path,
+      operationId: saveDraft.operationId,
+      request: {
+        body: {
+          required: true,
+          content: { "application/json": { schema: saveDraft.input } },
+        },
+      },
+      responses: {
+        200: {
+          description: saveDraft.description,
+          content: { "application/json": { schema: saveDraft.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) =>
+      context.json(
+        saveDraft.output.parse(
+          await requireCatalog().saveDraft(
+            requireIdentity(context),
+            context.req.header("origin") ?? null,
+            context.req.valid("json"),
+          ),
+        ),
+        200,
+      ),
+  );
+  app.openapi(
+    createRoute({
+      method: publishCatalog.method,
+      path: publishCatalog.path,
+      operationId: publishCatalog.operationId,
+      request: {
+        body: {
+          required: true,
+          content: { "application/json": { schema: publishCatalog.input } },
+        },
+      },
+      responses: {
+        200: {
+          description: publishCatalog.description,
+          content: { "application/json": { schema: publishCatalog.output } },
+        },
+        ...errors,
+      },
+    }),
+    async (context) =>
+      context.json(
+        publishCatalog.output.parse(
+          await requireCatalog().publish(
+            requireIdentity(context),
+            context.req.header("origin") ?? null,
+            context.req.valid("json").revision,
+          ),
+        ),
+        200,
+      ),
+  );
   const organization = accessOperationContracts[0];
   app.openapi(
     createRoute({
@@ -210,6 +372,20 @@ export function createApp(dependencies: ApiDependencies = {}) {
     }
     if (error instanceof IdempotencyConflict)
       return errorResponse(context, "CONFLICT", error.message, 409);
+    if (error instanceof CatalogError) {
+      if (error.status === 401) context.header("WWW-Authenticate", "Bearer");
+      const code =
+        error.status === 400
+          ? "VALIDATION_ERROR"
+          : error.status === 401
+            ? "UNAUTHORIZED"
+            : error.status === 404
+              ? "NOT_FOUND"
+              : error.status === 500
+                ? "INTERNAL_ERROR"
+                : "FORBIDDEN";
+      return errorResponse(context, code, error.message, error.status);
+    }
     if (error instanceof HTTPException && error.status === 400)
       return errorResponse(context, "VALIDATION_ERROR", "Invalid request", 400);
     return errorResponse(
