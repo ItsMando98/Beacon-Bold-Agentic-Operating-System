@@ -337,6 +337,16 @@ it("rejects a parent-domain cookie and does not set one from the shell", () => {
   expect(css).toContain("JetBrains Mono");
   expect(css).toContain("--radius: 0");
   expect(css).toContain("border-radius: 0");
+  expect(css).toContain("min-height: 44px");
+  expect(css).not.toContain("opacity:");
+  expect(css.toLowerCase()).not.toContain("cream");
+  expect(css).toContain("button.primary:hover");
+  expect(css).toMatch(
+    /button\.primary,\s*button\.primary:hover[\s\S]*?background:\s*var\(--signal\);\s*color:\s*var\(--ink\);/,
+  );
+  expect(css).toMatch(
+    /:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--ink\)/,
+  );
   const layout = readFileSync("apps/agency/app/layout.tsx", "utf8");
   expect(layout).not.toContain("styles.css");
   for (const file of walk("apps/agency")) {

@@ -23,5 +23,6 @@ test-results
 .agents
 .claude
 .cursor
+.grok
 **/.cache
 **/.turbo

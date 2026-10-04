@@ -126,7 +126,7 @@ export function AgencyCatalogShell() {
   }
 
   return (
-    <main className="shell">
+    <main className="shell" aria-busy={pending}>
       <header className="topbar">
         <div>
           <p className="meta">Agency catalog</p>
@@ -135,7 +135,7 @@ export function AgencyCatalogShell() {
         </div>
         <div className="actions">
           <button type="button" onClick={onSave} disabled={pending}>
-            Save draft
+            {pending ? "Saving..." : "Save draft"}
           </button>
           <button
             type="button"
@@ -143,7 +143,7 @@ export function AgencyCatalogShell() {
             onClick={onPublish}
             disabled={pending}
           >
-            Publish
+            {pending ? "Publishing..." : "Publish"}
           </button>
         </div>
       </header>
@@ -153,7 +153,11 @@ export function AgencyCatalogShell() {
           ? "Temporary local seed adapter. On https://agency.beaconandbold.com the shell calls Anvil: POST /catalog/draft and POST /catalog/publish. This tab keeps drafts in memory until then."
           : "Draft and publish use Anvil on https://agency.beaconandbold.com."}
       </p>
-      {tab.dirty ? <p className="dirty">Unsaved changes</p> : null}
+      {tab.dirty ? (
+        <p className="dirty" role="status">
+          Unsaved changes
+        </p>
+      ) : null}
       {notice ? (
         <p className="revision" role="status">
           {notice}

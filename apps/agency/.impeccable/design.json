@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-03T23:58:00.000Z",
+  "title": "Design System: Beacon & Bold agency catalog",
+  "extensions": {
+    "colorMeta": {
+      "signal": {
+        "role": "primary",
+        "displayName": "Signal",
+        "canonical": "#FF5A1F",
+        "tonalRamp": [
+          "#FF5A1F",
+          "#FF5A1F",
+          "#FF5A1F",
+          "#FF5A1F",
+          "#FF5A1F",
+          "#FF5A1F",
+          "#FF5A1F",
+          "#FF5A1F"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0E0E0D",
+        "tonalRamp": [
+          "#0E0E0D",
+          "#0E0E0D",
+          "#0E0E0D",
+          "#0E0E0D",
+          "#0E0E0D",
+          "#0E0E0D",
+          "#0E0E0D",
+          "#0E0E0D"
+        ]
+      },
+      "bone": {
+        "role": "neutral",
+        "displayName": "Bone",
+        "canonical": "#F1EEE7",
+        "tonalRamp": [
+          "#F1EEE7",
+          "#F1EEE7",
+          "#F1EEE7",
+          "#F1EEE7",
+          "#F1EEE7",
+          "#F1EEE7",
+          "#F1EEE7",
+          "#F1EEE7"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The Beacon & Bold name."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles and the large price figure."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Offer and package titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Summaries and the pricing note."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field names, meta lines, and actions."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [{ "name": "sheet", "value": "860px" }]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Publish. Signal fill, ink text, including hover.",
+      "html": "<button class=\"ds-btn-primary\">Publish</button>",
+      "css": ".ds-btn-primary { background: #FF5A1F; color: #0E0E0D; border: 1px solid #FF5A1F; border-radius: 0; padding: 12px 16px; min-height: 44px; font-family: \"JetBrains Mono\", monospace; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; } .ds-btn-primary:hover { background: #FF5A1F; color: #0E0E0D; border-color: #FF5A1F; } .ds-btn-primary:focus-visible { outline: 2px solid #0E0E0D; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Save draft. Bone fill, ink text, signal border on hover.",
+      "html": "<button class=\"ds-btn-secondary\">Save draft</button>",
+      "css": ".ds-btn-secondary { background: #F1EEE7; color: #0E0E0D; border: 1px solid #0E0E0D; border-radius: 0; padding: 12px 16px; min-height: 44px; font-family: \"JetBrains Mono\", monospace; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; } .ds-btn-secondary:hover { background: #F1EEE7; color: #0E0E0D; border-color: #FF5A1F; } .ds-btn-secondary:focus-visible { outline: 2px solid #0E0E0D; outline-offset: 2px; }"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Catalog field. Bone fill, ink border, ink caret.",
+      "html": "<label class=\"ds-field\">Pricing note<input class=\"ds-input\" value=\"Placeholder ranges for planning\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: #0E0E0D; font-family: \"JetBrains Mono\", monospace; font-size: 13px; } .ds-input { background: #F1EEE7; color: #0E0E0D; border: 1px solid #0E0E0D; border-radius: 0; min-height: 44px; padding: 10px 12px; caret-color: #0E0E0D; } .ds-input:focus-visible { outline: 2px solid #0E0E0D; outline-offset: 2px; }"
+    },
+    {
+      "name": "Catalog card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Package card on the proof sheet. Featured cards keep the signal outline.",
+      "html": "<article class=\"ds-card\"><p class=\"ds-label\">Ads</p><h3 class=\"ds-title\">Meta ads</h3><p class=\"ds-price\">€1,800</p></article>",
+      "css": ".ds-card { background: #F1EEE7; color: #0E0E0D; border: 1px solid #0E0E0D; border-radius: 0; padding: 16px; } .ds-card.ds-featured { outline: 2px solid #FF5A1F; outline-offset: -2px; } .ds-label { font-family: \"JetBrains Mono\", monospace; font-size: 13px; letter-spacing: 0.02em; } .ds-title { margin: 0 0 12px; font-family: \"Bricolage Grotesque\", sans-serif; font-size: 22px; font-weight: 600; letter-spacing: -0.03em; } .ds-price { font-family: \"JetBrains Mono\", monospace; font-size: 28px; font-weight: 600; letter-spacing: -0.04em; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The proof sheet",
+    "overview": "This records the catalog shell that is already on screen. It is a flat proof sheet: bone paper, ink rules, and one signal mark. The sheet is a working surface for operators, not a marketing page. Density stays high enough to edit every offer and package without a second visual language. Corners are square. Depth comes from a 1px ink rule, not from shadow. Signal is the publish button, the featured package mark, the error rule, and the text selection. It is not a second theme.",
+    "keyCharacteristics": [
+      "Bone is the page color. The name stays bone.",
+      "Ink is the text and the hairline rule.",
+      "Signal sits on ink for the primary button, including hover.",
+      "Bricolage Grotesque carries the titles. JetBrains Mono carries labels, prices, and buttons.",
+      "Radius is 0 everywhere."
+    ],
+    "rules": [
+      {
+        "name": "The Signal on Ink Rule",
+        "body": "The primary button, at rest and on hover, is signal fill with ink text. It does not switch to an ink fill.",
+        "section": "colors"
+      },
+      {
+        "name": "The Bone Rule",
+        "body": "The ground is bone. A detector that calls it cream is still looking at bone. Do not recolor the page to satisfy that name.",
+        "section": "colors"
+      },
+      {
+        "name": "The Loaded Weight Rule",
+        "body": "Headings use 600. The app does not ask the browser to fake a heavier weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Sheet Rule",
+        "body": "Do not add a drop shadow, a glow, or a blurred panel. State is a color already in the sheet: signal for the mark, ink for the focus ring.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep primary hover as signal fill with ink text.",
+      "Do call the ground bone.",
+      "Do keep radius at 0.",
+      "Do use Bricolage Grotesque for titles and JetBrains Mono for labels, prices, and buttons.",
+      "Do keep text and controls at least 44px tall, and keep disabled buttons at full ink-on-signal or ink-on-bone contrast."
+    ],
+    "donts": [
+      "Don't invent a fourth color, a dark theme, or a cream rename for bone.",
+      "Don't turn the primary hover into ink on ink.",
+      "Don't round a corner or add a shadow to make the sheet look softer.",
+      "Don't publish from this document. It records the shell. It does not change the catalog."
+    ]
+  }
+}
