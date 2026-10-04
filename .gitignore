@@ -20,4 +20,6 @@ infra/**/*.tfstate*
 infra/**/*.tfplan
 infra/**/*.tfvars
 !infra/**/*.tfvars.example
+.cursor/
+.grok/
 

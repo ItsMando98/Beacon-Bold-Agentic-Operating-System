@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { expect, it } from "vitest";
+import { catalogActionLabels } from "../../apps/agency/app/catalog-shell.js";
 import {
   anvilCatalogRoutes,
   type CatalogClient,
@@ -38,6 +39,21 @@ const seedPath = new URL(
 function editedSeed(note: string): CatalogSnapshot {
   return { ...readCatalogSeed(), pricingNote: note };
 }
+
+it("labels only the action that is in flight", () => {
+  expect(catalogActionLabels({ save: false, publish: false })).toEqual({
+    save: "Save draft",
+    publish: "Publish",
+  });
+  expect(catalogActionLabels({ save: true, publish: false })).toEqual({
+    save: "Saving...",
+    publish: "Publish",
+  });
+  expect(catalogActionLabels({ save: false, publish: true })).toEqual({
+    save: "Save draft",
+    publish: "Publishing...",
+  });
+});
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

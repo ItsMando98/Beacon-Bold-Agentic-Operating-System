@@ -44,6 +44,17 @@ function cents(value: string): number | null {
   return Number(value);
 }
 
+/** Each action has its own in-flight flag. A save must not relabel Publish. */
+export function catalogActionLabels(pending: {
+  save: boolean;
+  publish: boolean;
+}): { save: string; publish: string } {
+  return {
+    save: pending.save ? "Saving..." : "Save draft",
+    publish: pending.publish ? "Publishing..." : "Publish",
+  };
+}
+
 /**
  * Frontend for the agency catalog.
  * The inputs are the dirty buffer. Save and Publish talk to the catalog client.
@@ -67,7 +78,13 @@ export function AgencyCatalogShell() {
   const tabRef = useRef(tab);
   tabRef.current = tab;
   const [notice, setNotice] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [savePending, setSavePending] = useState(false);
+  const [publishPending, setPublishPending] = useState(false);
+  const labels = catalogActionLabels({
+    save: savePending,
+    publish: publishPending,
+  });
+  const busy = savePending || publishPending;
 
   let preview: ReturnType<typeof previewCatalog> | null = null;
   let previewError: string | null = null;
@@ -98,7 +115,8 @@ export function AgencyCatalogShell() {
   }
 
   async function onSave() {
-    setPending(true);
+    if (savePending || publishPending) return;
+    setSavePending(true);
     try {
       const next = await saveTab(tabRef.current, clientRef.current);
       setTab(next);
@@ -108,12 +126,13 @@ export function AgencyCatalogShell() {
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Save failed");
     } finally {
-      setPending(false);
+      setSavePending(false);
     }
   }
 
   async function onPublish() {
-    setPending(true);
+    if (savePending || publishPending) return;
+    setPublishPending(true);
     try {
       const result = await publishTab(tabRef.current, clientRef.current);
       setTab(result.tab);
@@ -121,12 +140,12 @@ export function AgencyCatalogShell() {
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Publish failed");
     } finally {
-      setPending(false);
+      setPublishPending(false);
     }
   }
 
   return (
-    <main className="shell" aria-busy={pending}>
+    <main className="shell" aria-busy={busy}>
       <header className="topbar">
         <div>
           <p className="meta">Agency catalog</p>
@@ -134,16 +153,16 @@ export function AgencyCatalogShell() {
           <p className="origin">https://agency.beaconandbold.com</p>
         </div>
         <div className="actions">
-          <button type="button" onClick={onSave} disabled={pending}>
-            {pending ? "Saving..." : "Save draft"}
+          <button type="button" onClick={onSave} disabled={busy}>
+            {labels.save}
           </button>
           <button
             type="button"
             className="primary"
             onClick={onPublish}
-            disabled={pending}
+            disabled={busy}
           >
-            {pending ? "Publishing..." : "Publish"}
+            {labels.publish}
           </button>
         </div>
       </header>
