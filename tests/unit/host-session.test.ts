@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import { stampAgencyHostSession } from "../../apps/agency/src/agency-host.js";
 import { agencyAuth0Options } from "../../packages/integrations/src/auth0.js";
 import {
   agencyHost,
@@ -56,9 +57,9 @@ test("session cookies never set a parent domain", () => {
   expect("domain" in agency.transactionCookie).toBe(false);
   expect("domain" in portal.session.cookie).toBe(false);
   expect("domain" in portal.transactionCookie).toBe(false);
-  expect(agency.session.cookie.name).not.toBe(portal.session.cookie.name);
-  expect(agency.session.cookie.name).not.toBe(sessionCookieNames.customer);
+  expect(portal.session.cookie.name).toBe("roaswell_portal_session");
   expect(portal.session.cookie.name).not.toBe(sessionCookieNames.agency);
+  expect(sessionCookieNames.agency).not.toBe(sessionCookieNames.customer);
 });
 
 test("an agency session is valid only on the agency host", async () => {
@@ -147,16 +148,7 @@ test("an agency session is valid only on the agency host", async () => {
     { user: { sub: "auth0|customer" } },
     "customer",
   );
-  expect(
-    await agencyAuth0Options({
-      AUTH0_DOMAIN: "synthetic.auth0.com",
-      AUTH0_CLIENT_ID: "agency",
-      AUTH0_CLIENT_SECRET: "synthetic",
-      AUTH0_SECRET: secret,
-      APP_BASE_URL: "https://agency.beaconandbold.com",
-      AUTH0_AUDIENCE: "https://api.example.invalid",
-    }).beforeSessionSaved?.(stampedAgency, null),
-  ).toMatchObject({
+  expect(stampAgencyHostSession(stampedAgency)).toMatchObject({
     beaconHost: agencyHost,
     beaconSurface: "agency",
   });
